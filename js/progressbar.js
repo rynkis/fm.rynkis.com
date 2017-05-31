@@ -9,7 +9,7 @@
 	var progressFlag;
 	var bufInt;
 	var time;
-	var dit;
+	var dit = false;
 	var parentOffset;
 	var length;
 	var percent;
@@ -68,20 +68,22 @@
                         audio.currentTime = (percent - (2 / scroolBar.offsetWidth * 100)) / 100 * audio.duration;
                         progressFlag = setInterval(getProgress, 100);
 	}
-	$('#scroll_Thumb').bind('mousedown', function(e) {
-        	$('#scroll_Thumb').bind('mousemove', function(e) {
-			if (e.which == 1) {
+	
+	$('#scroll_Thumb').mousedown(function(){
+		dit = true;
+		return false;
+	});
+	$(document).mouseup(function(){
+		dit = false;
+		return false;
+	});
+	$('#scroll_Thumb').mousemove(function(e){
+		if(dit == false) return;
+		if(e.which==1){
 			enhanceAudioSeek(e);
-			}
-		});
-        });
-        $('#scroll_Thumb').bind('mouseup', function() {
-		$('#scroll_Thumb').unbind('mousemove');
-        });
-        $('#scroll_Thumb').bind('mouseout', function() {
-                $('#scroll_Thumb').unbind('mousemove');
-        });
-			
+		}
+		return false;
+	});
         scroolBar.addEventListener("click", function (e) {
 		enhanceAudioSeek(e);
 	}, false);
