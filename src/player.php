@@ -20,7 +20,7 @@ $play_info["cover"] = $cov_info{"url"};
 $play_info["music_name"] = $det_info[0]["name"];
 $play_info["mp3"] = $mp3_info{"url"};
 $play_info["mp3"] = str_replace('http://', 'https://', $play_info["mp3"]);
-$play_info["mp3"] = str_replace('https://m8', 'https://m7', $play_info["mp3"]);
+//$play_info["mp3"] = str_replace('https://m8', 'https://m7', $play_info["mp3"]);
 foreach ($det_info[0]["artist"] as $key) {
     if (!isset($play_info["artists"])) {
         $play_info["artists"] = $key;
