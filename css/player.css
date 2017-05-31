@@ -143,6 +143,7 @@ input[type="range"]::-webkit-slider-thumb {
     line-height: 1.5em;
     text-align: center;
     margin-top: 1rem;
+    word-wrap: break-word;
 }
 
 .info #artist {
