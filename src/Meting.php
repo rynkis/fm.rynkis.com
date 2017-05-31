@@ -50,9 +50,9 @@ class Meting
                 $API['url']=$API['url'].'?'.http_build_query($API['body']);
             }
         }
-	//$fakeip=210.45.208.89;
+	$ip="61.190.69.142";
         curl_setopt($curl, CURLOPT_HEADER, 0);
-	//curl_setopt($curl, CURLOPT_HTTPHEADER, array("X-Real-IP: $fakeip"));
+	curl_setopt($curl, CURLOPT_HTTPHEADER, array("X-Real-IP: $ip"));
         curl_setopt($curl, CURLOPT_TIMEOUT, 20);
         curl_setopt($curl, CURLOPT_ENCODING, 'gzip');
         curl_setopt($curl, CURLOPT_IPRESOLVE, 1);
