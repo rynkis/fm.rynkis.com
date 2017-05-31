@@ -53,7 +53,6 @@
 	}
 
 	function enhanceAudioSeek(e) {
-		if (e.button == 0) {
 			clearInterval(progressFlag);
 			var parentOffset = $('.player').offset();
 			var length = e.pageX - parentOffset.left - scroolBar.offsetLeft;
@@ -66,33 +65,24 @@
 			}
 			pastime.style.width = percent + "%";
 			thumb.style.left = percent - 3.9 + "%";
-			audio.currentTime = (percent - (2 / scroolBar.offsetWidth * 100)) / 100 * audio.duration;
-			progressFlag = setInterval(getProgress, 100);
-		}
+                        audio.currentTime = (percent - (2 / scroolBar.offsetWidth * 100)) / 100 * audio.duration;
+                        progressFlag = setInterval(getProgress, 100);
 	}
-	thumb.addEventListener("drag", function (e) {
-		if (e.button == 0) {
-			clearInterval(progressFlag);
-			var parentOffset = $('.player').offset();
-			var length = e.pageX - parentOffset.left - scroolBar.offsetLeft;
-			var percent = length / scroolBar.offsetWidth * 100;
-			if (percent >= 100) {
-				percent = 100;
+	$('#scroll_Thumb').bind('mousedown', function(e) {
+        	$('#scroll_Thumb').bind('mousemove', function(e) {
+			if (e.which == 1) {
+			enhanceAudioSeek(e);
 			}
-			if (percent <= 0) {
-				percent = 0;
-			}
-			pastime.style.width = percent + "%";
-			e.target.style.left = percent - 3.9 + "%";
-		}
-	}, false);
-	thumb.addEventListener("dragstart", function (e) {
-		thumb = e.target;
-	}, false);
-	thumb.addEventListener("dragend", function (e) {
-		enhanceAudioSeek(e);
-	}, false);
-	scroolBar.addEventListener("click", function (e) {
+		});
+        });
+        $('#scroll_Thumb').bind('mouseup', function() {
+		$('#scroll_Thumb').unbind('mousemove');
+        });
+        $('#scroll_Thumb').bind('mouseout', function() {
+                $('#scroll_Thumb').unbind('mousemove');
+        });
+			
+        scroolBar.addEventListener("click", function (e) {
 		enhanceAudioSeek(e);
 	}, false);
 }
