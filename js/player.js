@@ -53,7 +53,7 @@ $(document).ready(function () {
 		//播放模式//
 		plymde = function songPlayMode(direction, mode) {
 			if (mde.attr("class") === "fa fa-random fa-lg") {
-				var randomId = parseInt(songNum * Math.random());
+				var randomId = Math.round((songNum-1) * Math.random() + 1);
 				load_music(playList[randomId].id,randomId);
 				playingIndex = randomId;
 				$('ul').scrollTop(41 * playingIndex);
