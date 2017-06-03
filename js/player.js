@@ -16,7 +16,7 @@ cd = $("#cd");
 lrc_row = $("#lrc");
 tlrc_row = $("#tlrc");
 var plymde;
-var playingIndex;
+var playingIndex = 0;
 var songNum;
 var playList = new Array();
 $(document).ready(function () {
@@ -24,19 +24,16 @@ $(document).ready(function () {
 	$.get("src/playlist.php?_=" + (new Date()).getTime(), function (pdata) {
 		var playListInfo = eval(pdata),
 		playList = playListInfo; //.playlist.tracks,
-		songNum = playList.length,
-		playingIndex = 0;
+		songNum = playList.length;
 		for (var i = 0, pLen = songNum; i < pLen; i++) {
 			html += '<li data-index=' + i + '>' + playList[i].name + ' - ' + playList[i].artist[0] + '</li>';
 		}
 		$('#playList').append(html);
-
 		$('ul').mouseover(function () {
 			$('li').css("cursor", "pointer");
 		});
-
 		$('ul').on('click', 'li', function (e) {
-			pause();;
+			pause();
 			if ($('li').css("background-color", "#bfbfbf")) {
 				$('li').css(
 					{"background-color": "","font-weight": "","color": "#000"});
@@ -45,10 +42,10 @@ $(document).ready(function () {
 			}
 			playingIndex = $(this).data('index');
 			console.log("正在播放的歌曲序号：" + playingIndex);
-			if (e.button == 0) {
+			if (e.which == 1) {
 				load_music(playList[playingIndex].id,playingIndex);
 			}
-                        $('ul').scrollTop(41 * playingIndex);
+                $('ul').scrollTop(41 * playingIndex);
 		});
 		//播放模式//
 		plymde = function songPlayMode(direction, mode) {
