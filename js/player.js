@@ -21,8 +21,8 @@ var songNum;
 var playList = new Array();
 $(document).ready(function () {
 	//播放列表//
-	$.get("src/playlist.php?_=" + (new Date()).getTime(), function (pdata) {
-		var playListInfo = eval(pdata),
+	$.getJSON("src/playlist.php?_=" + (new Date()).getTime(), function (pdata) {
+		var playListInfo = pdata,
 		playList = playListInfo, //.playlist.tracks,
 		songNum = playList.length;
 		for (var i = 0, pLen = songNum; i < pLen; i++) {
@@ -90,9 +90,9 @@ $(document).ready(function () {
 		//播放列表//
 		//播放器//
 		cd_size();
-		$.get("src/player.php?id=" + playList[0].id + "&fxxk=" + (new Date()).getTime(), function (data) {
+		$.getJSON("src/player.php?id=" + playList[0].id + "&fxxk=" + (new Date()).getTime(), function (data) {
 			console.log("正在播放的歌曲序号：" + playingIndex);
-			mp3_info = eval(data);
+			mp3_info = data;
 			$("#player").attr("src", mp3_info.mp3);
 			$("li[data-index = '0']").css({"background-color": "#bfbfbf","font-weight": "bold","color": "#fff"});
 			album.css("background-image", "url('" + mp3_info.cover + "')");
@@ -167,8 +167,8 @@ function next_music() {
 }
 
 function load_music(id,ikite) {
-	$.get("src/player.php?id=" + id + "&fxxk=" + (new Date()).getTime(), function (data) {
-		mp3_info = eval(data);
+	$.getJSON("src/player.php?id=" + id + "&fxxk=" + (new Date()).getTime(), function (data) {
+		mp3_info = data;
 		$("#player").attr("src", mp3_info.mp3);
 		album.css("background-image", "url('" + mp3_info.cover + "')");
 		music_name.html(mp3_info.music_name);
