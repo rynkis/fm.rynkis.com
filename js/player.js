@@ -23,7 +23,7 @@ $(document).ready(function () {
 	//播放列表//
 	$.get("src/playlist.php?_=" + (new Date()).getTime(), function (pdata) {
 		var playListInfo = eval(pdata),
-		playList = playListInfo; //.playlist.tracks,
+		playList = playListInfo, //.playlist.tracks,
 		songNum = playList.length;
 		for (var i = 0, pLen = songNum; i < pLen; i++) {
 			html += '<li data-index=' + i + '>' + playList[i].name + ' - ' + playList[i].artist[0] + '</li>';
