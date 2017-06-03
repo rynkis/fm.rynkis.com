@@ -2,28 +2,27 @@
  * Created by Moon on 2014/12/4 0004.
  * Modified by D-Bood on 2017/05/25 1947.
  */
-html = '';
-oAudio = document.getElementById('player');
-btn = $("#m_play");
-volimg = $("#vol");
-mde = $("#mode");
-nxtmsc = $("#next_music");
-album = $("#album");
-inn = $("#in");
-music_name = $("#music_name");
-artist = $("#artist");
-cd = $("#cd");
-lrc_row = $("#lrc");
-tlrc_row = $("#tlrc");
-var plymde;
-var playingIndex = 0;
-var songNum;
-var playList = new Array();
+var html = '',
+oAudio = document.getElementById('player'),
+btn = $("#m_play"),
+volimg = $("#vol"),
+mde = $("#mode"),
+nxtmsc = $("#next_music"),
+album = $("#album"),
+inn = $("#in"),
+music_name = $("#music_name"),
+artist = $("#artist"),
+cd = $("#cd"),
+lrc_row = $("#lrc"),
+tlrc_row = $("#tlrc"),
+mp3_info,
+plymde,
+playingIndex = 0,
+songNum,
+playList;
 $(document).ready(function () {
 	//播放列表//
-	$.getJSON("src/playlist.php?_=" + (new Date()).getTime(), function (pdata) {
-		var playListInfo = pdata,
-		playList = playListInfo, //.playlist.tracks,
+	$.getJSON("src/playlist.php?_=" + (new Date()).getTime(), function (playList) {
 		songNum = playList.length;
 		for (var i = 0, pLen = songNum; i < pLen; i++) {
 			html += '<li data-index=' + i + '>' + playList[i].name + ' - ' + playList[i].artist[0] + '</li>';
@@ -90,9 +89,7 @@ $(document).ready(function () {
 		//播放列表//
 		//播放器//
 		cd_size();
-		$.getJSON("src/player.php?id=" + playList[0].id + "&fxxk=" + (new Date()).getTime(), function (data) {
-			console.log("正在播放的歌曲序号：" + playingIndex);
-			mp3_info = data;
+		$.getJSON("src/player.php?id=" + playList[0].id + "&肏你媽哦=" + (new Date()).getTime(), function (mp3_info) {
 			$("#player").attr("src", mp3_info.mp3);
 			$("li[data-index = '0']").css({"background-color": "#bfbfbf","font-weight": "bold","color": "#fff"});
 			album.css("background-image", "url('" + mp3_info.cover + "')");
@@ -167,8 +164,7 @@ function next_music() {
 }
 
 function load_music(id,ikite) {
-	$.getJSON("src/player.php?id=" + id + "&fxxk=" + (new Date()).getTime(), function (data) {
-		mp3_info = data;
+	$.getJSON("src/player.php?id=" + id + "&妳媽死了=" + (new Date()).getTime(), function (mp3_info) {
 		$("#player").attr("src", mp3_info.mp3);
 		album.css("background-image", "url('" + mp3_info.cover + "')");
 		music_name.html(mp3_info.music_name);
