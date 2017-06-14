@@ -4,7 +4,6 @@ $LOAD_PATH << File.dirname(__FILE__)
 require 'base'
 
 class Netease < Music_Base
-
   def initialize
     super
     @site = 'netease'
@@ -18,14 +17,14 @@ class Netease < Music_Base
   def search(keyword, page = 1, limit = 30)
     fetch({
       'method' => 'POST',
-      'url'  => 'http://music.163.com/api/linux/forward',
-      'body'   => {
+      'url' => 'http://music.163.com/api/linux/forward',
+      'body' => {
         'method' => 'POST',
         'params' => {
-          's'    => keyword,
-          'type'   => 1,
-          'limit'  => limit,
-          'total'  => 'true',
+          's' => keyword,
+          'type' => 1,
+          'limit' => limit,
+          'total' => 'true',
           'offset' => page - 1
         },
         'url' => 'http://music.163.com/api/cloudsearch/pc'
@@ -42,9 +41,9 @@ class Netease < Music_Base
       'body' => {
         'method' => 'POST',
         'params' => {
-          'c' => "[{\"id\":#{id}}]",
+          'c' => "[{\"id\":#{id}}]"
         },
-        'url' => 'http://music.163.com/api/v3/song/detail',
+        'url' => 'http://music.163.com/api/v3/song/detail'
       },
       'encode' => 'netease_AESECB',
       'format' => 'songs'
@@ -54,51 +53,49 @@ class Netease < Music_Base
   def album(id)
     fetch({
       'method' => 'POST',
-      'url'  => 'http://music.163.com/api/linux/forward',
-      'body'   => {
+      'url' => 'http://music.163.com/api/linux/forward',
+      'body' => {
         'method' => 'GET',
-        'params' => {
-          'id' => id,
-        },
-        'url' => 'http://music.163.com/api/v1/album/' + id,
+        'params' => { 'id' => id },
+        'url' => 'http://music.163.com/api/v1/album/' + id
       },
       'encode' => 'netease_AESECB',
-      'format' => 'songs',
+      'format' => 'songs'
     })
   end
 
   def artist(id, limit = 50)
     fetch({
       'method' => 'POST',
-      'url'  => 'http://music.163.com/api/linux/forward',
-      'body'   => {
+      'url' => 'http://music.163.com/api/linux/forward',
+      'body' => {
         'method' => 'GET',
         'params' => {
           'top' => limit,
-          "id"  => id,
-          "ext" => "true",
+          "id" => id,
+          "ext" => "true"
         },
-        'url' => 'http://music.163.com/api/v1/artist/' + id,
+        'url' => 'http://music.163.com/api/v1/artist/' + id
       },
       'encode' => 'netease_AESECB',
-      'format' => 'hotSongs',
+      'format' => 'hotSongs'
     })
   end
 
   def playlist(id)
     fetch({
       'method' => 'POST',
-      'url'  => 'http://music.163.com/api/linux/forward',
-      'body'   => {
+      'url' => 'http://music.163.com/api/linux/forward',
+      'body' => {
         'method' => 'POST',
         'params' => {
           'id' => id,
-          "n"  => 1000,
+          'n' => 1000
         },
         'url' => 'http://music.163.com/api/v3/playlist/detail',
       },
       'encode' => 'netease_AESECB',
-      'format' => 'playlist#tracks',
+      'format' => 'playlist#tracks'
     })
   end
 
@@ -106,37 +103,37 @@ class Netease < Music_Base
     @temp['br'] = br
     fetch({
       'method' => 'POST',
-      'url'  => 'http://music.163.com/api/linux/forward',
-      'body'   => {
+      'url' => 'http://music.163.com/api/linux/forward',
+      'body' => {
         'method' => 'POST',
         'params' => {
           'ids' => [id],
-          'br'  => br * 1000
+          'br' => br * 1000
         },
         'url' => 'http://music.163.com/api/song/enhance/player/url'
       },
       'encode' => 'netease_AESECB',
-      'decode' => 'netease_url',
+      'decode' => 'netease_url'
     })
   end
 
   def lyric(id)
     fetch({
       'method' => 'POST',
-      'url'  => 'http://music.163.com/api/linux/forward',
-      'body'   => {
+      'url' => 'http://music.163.com/api/linux/forward',
+      'body' => {
         'method' => 'POST',
         'params' => {
           'id' => id,
           'os' => 'linux',
           'lv' => -1,
           'kv' => -1,
-          'tv' => -1,
+          'tv' => -1
         },
         'url' => 'http://music.163.com/api/song/lyric',
       },
       'encode' => 'netease_AESECB',
-      'decode' => 'netease_lyric',
+      'decode' => 'netease_lyric'
     })
   end
 
@@ -150,17 +147,11 @@ class Netease < Music_Base
     body = api['body'].to_json
     cipher = OpenSSL::Cipher.new("aes-128-ecb")
     cipher.encrypt
-    cipher.key = key.scan(/../).map{|x| x.to_i(16).chr }.join
+    cipher.key = key.hex2bin
     encrypted = cipher.update(body) + cipher.final
     body = (encrypted.unpack 'H*').join.upcase
-    api['body'] = {
-      'eparams' => body
-    }
+    api['body'] = { eparams: body }
     api
-  end
-
-  def json_from(jsonp)
-    jsonp[/{.+}/]
   end
 
   def netease_pickey(id)
@@ -169,7 +160,7 @@ class Netease < Music_Base
     song_id.length.times do |i|
       song_id[i] = (song_id[i].ord ^ magic[i % magic.length].ord).chr
     end
-    result = Base64.encode64 (Digest::MD5.hexdigest song_id.join).scan(/../).map{|x| x.to_i(16).chr }.join
+    result = Base64.encode64 (Digest::MD5.hexdigest song_id.join).hex2bin
     result.rstrip.gsub('/', '_').gsub('+', '-')
   end
   #
@@ -227,9 +218,7 @@ class Netease < Music_Base
       match = data['al']['picUrl'].match /\/(\d+)\./
       result['pic_id'] = match[1]
     end
-    data['ar'].each do |value|
-      result['artist'] << value['name']
-    end
+    data['ar'].each {|value| result['artist'] << value['name']}
     result
   end
 end

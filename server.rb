@@ -108,74 +108,43 @@ get('/src/playlist.php') do
 end
 
 get('/src/player.php') do
-  id = params["id"]
-  detail = $api.with_format.song id
-  det_info = JSON.parse detail
-  cover = $api.with_format.pic det_info[0]["pic_id"]
-  cov_info = JSON.parse cover
-  mp3 = $api.with_format.url id
-  mp3_info = JSON.parse mp3
-  lyric111 = $api.with_format.lyric id
-  lrc_info = JSON.parse lyric111
-  # 处理音乐信息
+  id = params['id']
+  det_info = JSON.parse $api.with_format.song id
+  cov_info = JSON.parse $api.with_format.pic det_info[0]['pic_id']
+  mp3_info = JSON.parse $api.with_format.url id
+  lrc_info = JSON.parse $api.with_format.lyric id
+  
   play_info = {}
-  play_info["id"] = id
-  play_info["lrc"] = {}
-  play_info["tlrc"] = {}
-  play_info["cover"] = cov_info["url"]
-  play_info["music_name"] = det_info[0]["name"]
-  play_info["mp3"] = mp3_info["url"]
-  play_info["mp3"] = play_info["mp3"].gsub('http://', 'https://')
-  play_info["mp3"] = play_info["mp3"].gsub('https://m8', 'https://m7')
-  det_info[0]["artist"].each do |key|
-    unless play_info["artists"]
-      play_info["artists"] = key
-    else
-      play_info["artists"] += "," + key
-    end
-  end
-  if lrc_info["lyric"] != ""
-    lrc = lrc_info["lyric"].split "\n"
-    lrc.pop
-    lrc.each do |rows|
-      row = rows.split ']'
-      if row.length == 1
-        # play_info["lrc"][0] = "no"
-        next
-      else
-        col_text = row.pop
-        row.each do |key|
-          time1 = key[1, key.length - 1].split ":"
-          time1 = time1[0].to_i * 60 + time1[1].to_i;
-          play_info["lrc"][time1] = col_text;
-        end
-      end
-    end
-  else
-    time = "0"
-    play_info["lrc"][0] = "No Lyrics / 很抱歉，這首曲子暫無歌詞"
-  end
-  # 翻译的歌词
-  if lrc_info["tlyric"] != ""
-    tlrc = lrc_info["tlyric"].split "\n"
-    tlrc.pop
-    tlrc.each do |rows|
-      row = rows.split ']'
-      if row.length == 1
-        # play_info["tlrc"][0] = "no"
-        next
-      else
-        col_text = row.pop
-        row.each do |key|
-          time = key[1, key.length - 1].split ":"
+  play_info['id'] = id
+  play_info['lrc'] = {}
+  play_info['tlrc'] = {}
+  play_info['cover'] = cov_info['url']
+  play_info['music_name'] = det_info[0]['name']
+  play_info['mp3'] = mp3_info['url']
+  play_info['mp3'] = play_info['mp3'].gsub('http://', 'https://')
+                                     .gsub('https://m8', 'https://m7')
+  play_info['artists'] = det_info[0]['artist'].join ', '
+
+  { 'lyric' => ['lrc', 'No Lyrics / 很抱歉，這首曲子暫無歌詞'],
+    'tlyric' => ['tlrc', ''] }.each do |lyric, value|
+    if lrc_info[lyric] != ''
+      lrc = lrc_info[lyric].split "\n"
+      lrc.pop
+      lrc.each do |rows|
+        times = []
+        rows.scan(/\[[^\[\]]*\]/) { |match| times << match }
+        col_text = rows.gsub(/\[[^\[\]]*\]/, '')
+        times.each do |key|
+          time = key[1, key.length - 1].split ':'
           time = time[0].to_i * 60 + time[1].to_i
-          play_info["tlrc"][time] = col_text
+          play_info[value[0]][time] = col_text
         end
       end
+    else
+      play_info[value[0]][0] = value[1]
     end
-  else
-    play_info["tlrc"][0] = ""
   end
+
   headers 'Content-type' => 'application/json; charset=UTF-8'
   play_info.to_json
 end

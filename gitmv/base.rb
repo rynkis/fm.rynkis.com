@@ -7,8 +7,15 @@ require 'openssl'
 require 'zlib'
 require 'stringio'
 
+class String
+  def hex2bin
+    self.scan(/../).map {|x| x.to_i(16).chr }.join
+  end
+end
+
 class Music_Base
   RETRY = 3
+  X_Real_IP = '61.190.69.142'
 
   def initialize
     @temp = {}
@@ -19,24 +26,20 @@ class Music_Base
 
   def format(fmt = true)
     @format = fmt
-    return self
+    self
   end
 
   def with_format(fmt = true)
     @format = fmt
-    return self
+    self
   end
 
   def without_format()
     @format = false
-    return self
+    self
   end
 
-  def fetch(api)
-    if api['encode']
-      api = send api['encode'], api
-    end
-    ip = '61.190.69.142'
+  def request_and_uri_with(api)
     if api['method'] == 'POST'
       uri = URI api['url']
       api['body'] = URI.encode_www_form(api['body']) if api['body'].is_a? Hash
@@ -47,17 +50,19 @@ class Music_Base
       uri.query = URI.encode_www_form(api['body']) if api['body']
       req = Net::HTTP::Get.new uri
     end
-    req['X-Real-IP'] = ip
+    req['X-Real-IP'] = X_Real_IP
     req['Accept-Encoding'] = 'gzip'
     req['Cookie'] = @req_setting['cookie']
     req['Referer'] = @req_setting['referer']
     req['User-Agent'] = @req_setting['useragent']
-    # req.open_timeout = 40
-    # req.read_timeout = 20
-    data = nil
-    error = nil
-    info = nil
-    RETRY.times do |i|
+    [req, uri]
+  end
+
+  def fetch(api)
+    api = send api['encode'], api if api['encode']
+    req, uri = request_and_uri_with api
+    data, error, info = nil, nil, nil
+    RETRY.times do
       res = Net::HTTP.start(uri.hostname, uri.port) {|http| http.request req }
       case res
       when Net::HTTPSuccess
@@ -73,17 +78,9 @@ class Music_Base
       end
       break unless error
     end
-    if error
-      return {
-          error: error,
-          info: info
-      }.to_json
-    end
+    return { error: error, info: info }.to_json if error
     data = (send api['decode'], data) if @format && api['decode']
-    if @format && api['format']
-      data = JSON.parse data
-      data = (clean data, api['format']).to_json
-    end
+    data = (clean JSON.parse(data), api['format']).to_json if @format && api['format']
     data
   end
 
@@ -102,35 +99,19 @@ class Music_Base
     elsif !raw[0] && raw.size
       raw = [raw]
     end
-    raw.map {|e| send "format_#{@site}", e}
+    raw.map {|e| send "format_#{@site}", e }
   end
 
-  def search(keyword, page = 1, limit = 30)
-  end
-
-  def song(id)
-  end
-
-  def album(id)
-  end
-
-  def artist(id, limit = 50)
-  end
-
-  def playlist(id)
-  end
-
-  def url(id, br = 320)
-  end
-
-  def lyric(id)
-  end
-
-  def pic(id, size = 300)
-  end
+  def search(keyword, page = 1, limit = 30); end
+  def song(id); end
+  def album(id); end
+  def artist(id, limit = 50); end
+  def playlist(id); end
+  def url(id, br = 320); end
+  def lyric(id); end
+  def pic(id, size = 300); end
 
   def json_from(jsonp)
     jsonp[/{.+}/]
   end
-
 end

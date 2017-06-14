@@ -1,0 +1,10 @@
+source 'https://rubygems.org'
+
+gem 'net'
+gem 'json'
+gem 'digest'
+# gem 'base64'
+gem 'openssl'
+# gem 'zlib'
+# gem 'stringio'
+gem 'sinatra'
