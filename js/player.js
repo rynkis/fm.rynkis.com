@@ -166,6 +166,13 @@ function next_music() {
 function load_music(id,ikite) {
 	$.getJSON("src/player.php?id=" + id + "&妳媽死了=" + (new Date()).getTime(), function (mp3_info) {
 		$("#player").attr("src", mp3_info.mp3);
+    $("#player").on('error', function(e) {
+      var pos = oAudio.currentTime;
+      $("#player").attr("src", mp3_info.mp3);
+      oAudio.load();
+      oAudio.currentTime = pos;
+      oAudio.play();
+    });
 		album.css("background-image", "url('" + mp3_info.cover + "')");
 		music_name.html(mp3_info.music_name);
 		artist.html(mp3_info.artists);
