@@ -1,9 +1,8 @@
+<!DOCTYPE html>
 <html>
-    <header>
-    </header>
     <body>
         <link rel="stylesheet" href="css/playlist.css">
-	<link rel="stylesheet" href="/icons/css/font-awesome.min.css">
+	<link rel="stylesheet" href="//at.alicdn.com/t/font_nr7nxvzlhpzrrudi.css">
         <script src="js/jquery-3.2.1.min.js" type="text/javascript">
         </script>
         <link rel="stylesheet" href="css/player.css">
@@ -26,30 +25,30 @@
                     </div>
                     <div id="scroll_Track">
                     </div>
-                    <div id="scroll_Thumb" draggable="true">
+                    <div id="scroll_Thumb">
                     </div>
                 </div>
                 <div class="toolBar">
                     <a href="javascript:rewindAudio()">
-                        <i id="rewindAudio" class="fa fa-backward fa-lg" title="-10s" aria-hidden="true"></i>
+                        <i id="rewindAudio" class="iconfont icon-music_rewind_button" title="-10s" aria-hidden="true"></i>
                     </a>
                     <div id="scrollBarTxt">
                     </div>
                     <a href="javascript:forwardAudio()">
-                        <i id="forwardAudio" class="fa fa-forward fa-lg" title="+10s" aria-hidden="true"></i>
+                        <i id="forwardAudio" class="iconfont icon-music_fastforward_button" title="+10s" aria-hidden="true"></i>
                     </a>
                 </div>
                 <div class="action">
                     <a href="javascript:playMode()">
-                        <i id="mode" class="fa fa-align-justify fa-lg" title="列表循环" aria-hidden="true"></i>
+                        <i id="mode" class="iconfont icon-music_repeat_button" title="列表循环" aria-hidden="true"></i>
                     <a href="javascript:m_play()">
-                        <i id="m_play" class="fa fa-play fa-lg" title="播放" aria-hidden="true"></i>
+                        <i id="m_play" class="iconfont icon-music_play_button" title="播放" aria-hidden="true"></i>
                     </a>
                     <a href="javascript:next_music()">
-                        <i id="next_music" class="fa fa-step-forward fa-lg" title="下一首" aria-hidden="true"></i>
+                        <i id="next_music" class="iconfont icon-music_end_button" title="下一首" aria-hidden="true"></i>
                     </a>
                     <a href="javascript:mute()">
-                        <i id="vol" class="fa fa-volume-up fa-lg" title="点击即可静音" aria-hidden="true"></i>
+                        <i id="vol" class="iconfont icon-music_volume_up" title="点击即可静音" aria-hidden="true"></i>
                     </a>
                     <input id="range" type="range" min="0" max="100" value="50" onchange="volume(this.value)">
                 </div>

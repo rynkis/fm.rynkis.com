@@ -16,6 +16,10 @@
     margin: 0 auto 0;
 }
 
+.iconfont {
+    font-size: 1.5em;
+}
+
 .cd {
     width: 200px;
     height: 200px;
@@ -118,7 +122,7 @@ input[type="range"] {
     1px 0px 2px rgba(0, 0, 0, 0.4) inset,
     0 0px 1px rgba(0, 0, 0, 0.6) inset;
     position: relative;
-    bottom: 3px;
+    bottom: 7px;
     background-color: #0F0F0F;
     border-radius: 5px;
     height: 5px;
@@ -138,7 +142,7 @@ input[type="range"]::-webkit-slider-thumb {
 
 .info {
     font-family: "Times New Roman", "Meiryo";
-    font-weight: bold;
+    font-weight: 900;
     font-size: 1.5rem;
     line-height: 1.5em;
     text-align: center;

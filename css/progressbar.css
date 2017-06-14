@@ -50,19 +50,17 @@
 }
 #scrollBarTxt {
     display: inline-block;
-    font-family: fantasy;
+    font-family: "Times New Roman";
+    font-size: 18px;
     text-align: center;
     width: 100px;
     position: relative;
     margin: 0 auto 0;
+    bottom: 2px;
 }
 .toolBar {
     display: block;
     position: relative;
     margin: 10px auto 10px;
     text-align: center;
-}
-
-@media screen and (max-width:721px) {
-
 }

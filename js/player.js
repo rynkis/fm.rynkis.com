@@ -48,7 +48,7 @@ $(document).ready(function () {
 		});
 		//播放模式//
 		plymde = function songPlayMode(direction, mode) {
-			if (mde.attr("class") === "fa fa-random fa-lg") {
+			if (mde.attr("class") === "iconfont icon-music_shuffle_button") {
 				var randomId = Math.round((songNum-1) * Math.random() + 1);
 				load_music(playList[randomId].id,randomId);
 				playingIndex = randomId;
@@ -123,7 +123,7 @@ $("#player").bind("ended", function () {
 });
 function pause() {
         oAudio.pause();
-        btn.attr({"class": "fa fa-play fa-lg","title": "播放"});
+        btn.attr({"class": "iconfont icon-music_play_button","title": "播放"});
         album.removeClass("roll");
         inn.removeClass("roll");
 }
@@ -131,7 +131,7 @@ function pause() {
 function m_play() {
 	if (oAudio.paused) {
 		oAudio.play();
-		btn.attr({"class": "fa fa-pause fa-lg","title": "暂停"});
+		btn.attr({"class": "iconfont icon-music_pause_button","title": "暂停"});
 		album.addClass("roll");
 		inn.addClass("roll");
 		if (lrc != "") {
@@ -160,7 +160,7 @@ function next_music() {
 		clearInterval(tlrc_interval);
 	}
 	plymde("next", mode);
-	btn.attr({"class": "fa fa-play fa-lg","title": "播放"});
+	btn.attr({"class": "iconfont icon-music_play_button","title": "播放"});
 }
 
 function load_music(id,ikite) {
@@ -172,7 +172,7 @@ function load_music(id,ikite) {
 		$('li').css({"background-color": "","font-weight": "","color": "#000"});
 		$("li[data-index = " + ikite + "]").css({"background-color": "#bfbfbf","font-weight": "bold","color": "#fff"});
 		oAudio.play();
-		btn.attr({"class": "fa fa-pause fa-lg","title": "暂停"});
+		btn.attr({"class": "iconfont icon-music_pause_button","title": "暂停"});
 		album.addClass("roll");
 		inn.addClass("roll");
 		lrc_row.html("");
@@ -195,34 +195,34 @@ function load_music(id,ikite) {
 function volume(vol) {
 	oAudio.volume = vol / 100;
 	if (oAudio.volume <= 0) {
-		volimg.attr({"class": "fa fa-volume-off fa-lg","title": "点击即可开启声音"});
+		volimg.attr({"class": "iconfont icon-music_mute","title": "点击即可开启声音"});
 	} else {
-		volimg.attr({"class": "fa fa-volume-up fa-lg","title": "点击即可静音"});
+		volimg.attr({"class": "iconfont icon-music_volume_up","title": "点击即可静音"});
 	}
 }
 function mute() {
 	if (!oAudio.muted) {
 		oAudio.muted = true;
-		volimg.attr({"class": "fa fa-volume-off fa-lg","title": "点击即可开启声音"});
+		volimg.attr({"class": "iconfont icon-music_mute","title": "点击即可开启声音"});
 	} else {
 		oAudio.muted = false;
-		volimg.attr({"class": "fa fa-volume-up fa-lg","title": "点击即可静音"});
+		volimg.attr({"class": "iconfont icon-music_volume_up","title": "点击即可静音"});
 	}
 }
 
 function playMode() {
 	switch (mde.attr("class")) {
-	case "fa fa-align-justify fa-lg":
+	case "iconfont icon-music_repeat_button":
 		oAudio.loop = true;
-		mde.attr({"class": "fa fa-repeat fa-lg","title": "单曲循环"});
+		mde.attr({"class": "iconfont icon-music_loop_button","title": "单曲循环"});
 		break;
-	case "fa fa-repeat fa-lg":
+	case "iconfont icon-music_loop_button":
 		oAudio.loop = false;
-		mde.attr({"class": "fa fa-random fa-lg","title": "随机播放"});
+		mde.attr({"class": "iconfont icon-music_shuffle_button","title": "随机播放"});
 		break;
-	case "fa fa-random fa-lg":
+	case "iconfont icon-music_shuffle_button":
 		oAudio.loop = false;
-		mde.attr({"class": "fa fa-align-justify fa-lg","title": "列表循环"});
+		mde.attr({"class": "iconfont icon-music_repeat_button","title": "列表循环"});
 		break;
 	}
 }
