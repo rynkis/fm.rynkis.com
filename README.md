@@ -11,14 +11,14 @@ Musicoon
 相应地，下面的内容也要改变。我相信能够找到这里的人水平肯定都比我高，所以我就不细说了
 
 
-由于加入了fontawesome，在使用的时候请您自行把index.html里面的
+由于加入了~~fontawesome~~iconfont，在使用的时候请您自行把index.html里面的
 
-`<link rel="stylesheet" href="/icons/css/font-awesome.min.css">`
+`<link rel="stylesheet" href="//at.alicdn.com/t/font_nr7nxvzlhpzrrudi.css>`
 
 这一行改成您要引用字体的css文件。
 
 Changed API to Meting<br>
 Changed background-image to Arai-san & Fennic<br>
-Used fontawesome <br>
+Used ~~fontawesome~~iconfont <br>
 
 Enjoy it :)
