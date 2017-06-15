@@ -338,9 +338,21 @@ class FM_GITMV {
     })
 
     $(document).on('keydown', this, e => {
-      if (e.which === 39) { // Right
+      switch (e.which) {
+      case 32: // Space
         e.preventDefault()
+        this.audio.paused ? this.playAudio() : this.pauseAudio()
+        break
+      case 37:// Left
+        e.preventDefault()
+        this.touched = true
+        this.prevTrack()
+        break
+      case 39:// Right
+        e.preventDefault()
+        this.touched = true
         this.nextTrack()
+        break
       }
     })
 
