@@ -37,6 +37,7 @@ html =<<__TEXT__
       <div class="magic"><i class="fa fa-play"></i></div>
     </div>
     <div id="thread">
+      <div class="buffered"></div>
       <div class="elapsed"></div>
     </div>
     <div id="detail">

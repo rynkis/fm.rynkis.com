@@ -34,6 +34,7 @@ class FM_GITMV {
       album: document.querySelector('#surface .album'),
       magic: document.querySelector('#surface .magic'),
       artists: document.querySelector('#detail .artists'),
+      buffered: document.querySelector('#thread .buffered'),
       elapsed: document.querySelector('#thread .elapsed'),
       surface: document.querySelector('#surface'),
       faMagic: document.querySelector('#surface .magic .fa'),
@@ -330,6 +331,14 @@ class FM_GITMV {
           this.recursion.currentTime = null
         }
     })
+
+    setInterval(this.audio.addEventListener("progress", () => {
+      this.domNodes.buffered.style.width = `${
+        this.audio.buffered.length > 0
+        ? Math.round(this.audio.buffered.end(0)) / Math.round(this.audio.duration) * 100
+        : 0
+      }%`
+    }), 60)
   }
 
   addOtherEvents () {
