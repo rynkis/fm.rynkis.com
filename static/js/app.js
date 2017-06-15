@@ -350,11 +350,11 @@ class FM_GITMV {
       switch (e.which) {
       case 32: // Space
         e.preventDefault()
+        this.touched = true
         this.audio.paused ? this.playAudio() : this.pauseAudio()
         break
       case 37:// Left
         e.preventDefault()
-        this.touched = true
         this.prevTrack()
         break
       case 39:// Right
