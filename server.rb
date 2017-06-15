@@ -7,10 +7,10 @@
 #  Copyright 2017, Rynki <gernischt@gmail.com>
 #  Released under the MIT license
 #
-require './gitmv/netease'
+require './lib/netease'
 require 'sinatra'
 
-set :public_folder, File.dirname(__FILE__)
+set :public_folder, File.dirname(__FILE__) + '/static'
 
 $api = Netease.new
 
