@@ -66,7 +66,7 @@ template {
         right: 0;
         bottom: 0;
         left: 0;
-        background: url("../images/landscape.png") no-repeat center;
+        background: url("../images/landscape.jpg") no-repeat center;
         background-size: cover;
         pointer-events: none;
         z-index: -1;
