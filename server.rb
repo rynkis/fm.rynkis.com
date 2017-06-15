@@ -67,7 +67,7 @@ get('/') do
 end
 
 get('/playlist') do
-  data = %w{314048981 314103108 736959900 474153888}.inject([]) do |mem, id|
+  data = %w{314048981 314103108 736959900 474153888 474169501 575981675 588510730}.inject([]) do |mem, id|
     result = $api.with_format.playlist id
     mem + (JSON.parse result)
   end

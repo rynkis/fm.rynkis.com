@@ -8,7 +8,7 @@
 **/
 
 class FM_GITMV {
-  constructor () {
+  constructor() {
     this.data = {}
     this.recursion = {
       currentTime: null,
@@ -17,7 +17,7 @@ class FM_GITMV {
       needCheck: false
     }
     this.config = {
-      volume: 0.5,
+      volume: 1.0,
       expire: 1200,
       localName: 'FM.GITMV.logger',
       localAlbum: 'images/album.jpg',
@@ -62,7 +62,7 @@ class FM_GITMV {
     })
   }
 
-  decorator () {
+  decorator() {
     this.createAlbum()
     this.addAlbumEvents()
     this.getLatestData()
@@ -71,7 +71,7 @@ class FM_GITMV {
     this.addOtherEvents()
   }
 
-  getLatestData () {
+  getLatestData() {
     let latestData = this.getLocalData()
     let dom = $('#mode')
 
@@ -94,7 +94,7 @@ class FM_GITMV {
     }
   }
 
-  getLocalData () {
+  getLocalData() {
     try {
       return JSON.parse(localStorage.getItem(this.config.localName))
     } catch (e) {
@@ -103,7 +103,7 @@ class FM_GITMV {
     }
   }
 
-  setLocalData () {
+  setLocalData() {
     this.data.lastID = this.playingIndex
     this.data.playMode = $('#mode').attr('class')
     try {
@@ -113,43 +113,38 @@ class FM_GITMV {
     }
   }
 
-  nextTrack () {
+  nextTrack() {
     this.pauseAudio()
     if ($('#mode').attr('class') === 'fa fa-random') {
       this.playingIndex = Math.round((this.songNum - 1) * Math.random() + 1)
       this.loadMusicInfo()
-      // console.log("正在播放的歌曲序号：" + this.playingIndex)
     } else {
       if (this.playingIndex + 1 === this.songNum) {
         this.playingIndex = 0
         this.loadMusicInfo()
-        // console.log("正在播放的歌曲序号：" + this.playingIndex)
       } else {
         this.playingIndex = this.playingIndex + 1
         this.loadMusicInfo()
-        // console.log("正在播放的歌曲序号：" + this.playingIndex)
       }
     }
   }
 
-  prevTrack () {
+  prevTrack() {
     this.pauseAudio()
     if (this.playingIndex === 0) {
       this.playingIndex = this.songNum - 1
       this.loadMusicInfo()
-      // console.log("正在播放的歌曲序号：" + this.playingIndex)
     } else {
       this.playingIndex = this.playingIndex - 1
       this.loadMusicInfo()
-      // console.log("正在播放的歌曲序号：" + this.playingIndex)
     }
   }
 
-  createAlbum (src) {
+  createAlbum(src) {
     this.image.src = typeof src === 'string' ? src : this.config.localAlbum
   }
 
-  requestAlbumRotate () {
+  requestAlbumRotate() {
     const ANIMATION_FPS = 60
     const ONE_TURN_TIME = 30
     const ONE_TURN = Math.PI * 2
@@ -195,11 +190,11 @@ class FM_GITMV {
     this.recursion.requestID = window.requestAnimationFrame(loopAnimation)
   }
 
-  cancelAlbumRotate () {
+  cancelAlbumRotate() {
     this.recursion.requestID && window.cancelAnimationFrame(this.recursion.requestID)
   }
 
-  addAlbumEvents () {
+  addAlbumEvents() {
     $(this.image).on({
       'load': e => {
         const ONE_TURN = Math.PI * 2
@@ -231,7 +226,7 @@ class FM_GITMV {
     }, this)
   }
 
-  loadMusicInfo () {
+  loadMusicInfo() {
     let id = this.playList[this.playingIndex].id
     $.getJSON(`${this.config.player}?id=${id}`, songInfo => {
       this.renderAudio(songInfo)
@@ -239,7 +234,7 @@ class FM_GITMV {
     })
   }
 
-  renderAudio (song) {
+  renderAudio(song) {
     this.image.src = song.cover
     this.domNodes.name.textContent = song.music_name
     this.domNodes.artists.textContent = song.artists
@@ -251,7 +246,7 @@ class FM_GITMV {
     this.tlrc = song.tlrc
   }
 
-  playAudio () {
+  playAudio() {
     let time = Math.ceil(Date.now() / 1000)
     let song = this.audio.sourcePointer
     let rest = this.audio.duration - this.audio.currentTime // Maybe `NaN`
@@ -262,7 +257,7 @@ class FM_GITMV {
     // NO risk of recursion
     if (isExpire) {
       this.recursion.currentTime = this.audio.currentTime
-      this.nextTrack(song['id'])
+      this.loadMusicInfo()
     } else {
       if (this.recursion.currentTime) {
         this.audio.currentTime = this.recursion.currentTime
@@ -278,7 +273,7 @@ class FM_GITMV {
     }
   }
 
-  pauseAudio () {
+  pauseAudio() {
     this.audio.pause()
     if (this.lrc != '') {
       clearInterval(this.lrc_interval)
@@ -288,7 +283,7 @@ class FM_GITMV {
     }
   }
 
-  display_lrc () {
+  display_lrc() {
     let playTime = Math.floor(this.audio.currentTime).toString()
     this.domNodes.lrcRow.html(this.lrc[playTime])
   }
@@ -298,7 +293,7 @@ class FM_GITMV {
     this.domNodes.tlrcRow.html(this.tlrc[playTime])
   }
 
-  addAudioEvents () {
+  addAudioEvents() {
     $(this.audio).on({
         'playing': e => {
           this.requestAlbumRotate()
@@ -322,7 +317,7 @@ class FM_GITMV {
           $(this.domNodes.elapsed).css('width', (this.audio.currentTime / this.audio.duration).toFixed(5) * 100 + '%');
         },
         'error': e => {
-          console.warn(e.message)
+          // console.warn(e.message)
           this.recursion.currentTime = this.audio.currentTime
           this.audio.src = this.audio.src
           this.audio.load()
@@ -332,16 +327,16 @@ class FM_GITMV {
         }
     })
 
-    setInterval(this.audio.addEventListener("progress", () => {
+    setInterval(() => {
       this.domNodes.buffered.style.width = `${
         this.audio.buffered.length > 0
         ? Math.round(this.audio.buffered.end(0)) / Math.round(this.audio.duration) * 100
         : 0
       }%`
-    }), 60)
+    }, 60)
   }
 
-  addOtherEvents () {
+  addOtherEvents() {
     $(window).on('unload', this, (e) => {
       this.setLocalData()
     })
