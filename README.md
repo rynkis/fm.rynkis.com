@@ -15,7 +15,7 @@ FM.GITMV
 
 ```
 git clone https://github.com/Shy07/Musicoon.git
-cd Musicoon
+cd FM.GITMV
 bundle install
 ruby server.rb
 ```
