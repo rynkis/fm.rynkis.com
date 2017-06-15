@@ -355,6 +355,7 @@ class FM_GITMV {
         break
       case 37:// Left
         e.preventDefault()
+        this.touched = true
         this.prevTrack()
         break
       case 39:// Right
