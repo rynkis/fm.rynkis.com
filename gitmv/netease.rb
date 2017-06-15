@@ -171,13 +171,19 @@ class Netease < Music_Base
     data = JSON.parse result
     url = if data['data'] && data['data'][0] && data['data'][0]['uf'] && data['data'][0]['uf']['url']
       {
+        'size' => data['data'][0]['size'],
         'url' => data['data'][0]['uf']['url'],
-        'br'  => data['data'][0]['uf']['br'] / 1000
+        'br'  => data['data'][0]['uf']['br'] / 1000,
+        'expire' => data['data'][0]['expi'],
+        'timestamp' => Time.now.to_i
       }
     elsif data['data'] && data['data'][0] && data['data'][0]['url']
       {
+        'size' => data['data'][0]['size'],
         'url' => data['data'][0]['url'],
-        'br'  => data['data'][0]['br'] / 1000
+        'br'  => data['data'][0]['br'] / 1000,
+        'expire' => data['data'][0]['expi'],
+        'timestamp' => Time.now.to_i
       }
     else
       {

@@ -24,62 +24,37 @@ html =<<__TEXT__
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="keywords" content="FM.GITMV">
   <meta name="description" content="get my way">
-  <link rel="stylesheet" href="//at.alicdn.com/t/font_nr7nxvzlhpzrrudi.css">
-  <link rel="stylesheet" href="css/playlist.css">
-  <link rel="stylesheet" href="css/player.css">
-  <link rel="stylesheet" href="css/progressbar.css">
-  <script src="js/jquery-3.2.1.min.js"></script>
+  <base href="./">
+  <link rel="stylesheet" href="css/font-awesome.min.css">
+  <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
-  <div class="back"></div>
-  <div id="container">
-    <div class="player">
-      <div id="cd" class="cd">
-        <div class="out"></div>
-        <div id="album" class="album"></div>
-        <div id="in" class="in"></div>
-      </div>
-      <div id="slider"></div>
-      <div id="scrollBar">
-        <div id="scroll_Buffered"></div>
-        <div id="scroll_Track"></div>
-        <div id="scroll_Thumb" draggable="true"></div>
-      </div>
-      <div class="toolBar">
-        <a href="javascript:rewindAudio()">
-          <i id="rewindAudio" class="fa fa-backward fa-lg" title="-10s" aria-hidden="true"></i>
-        </a>
-        <div id="scrollBarTxt"></div>
-        <a href="javascript:forwardAudio()">
-          <i id="forwardAudio" class="fa fa-forward fa-lg" title="+10s" aria-hidden="true"></i>
-        </a>
-      </div>
-      <div class="action">
-        <a href="javascript:playMode()">
-          <i id="mode" class="fa fa-align-justify fa-lg" title="列表循环" aria-hidden="true"></i>
-        <a href="javascript:m_play()">
-          <i id="m_play" class="fa fa-play fa-lg" title="播放" aria-hidden="true"></i>
-        </a>
-        <a href="javascript:next_music()">
-          <i id="next_music" class="fa fa-step-forward fa-lg" title="下一首" aria-hidden="true"></i>
-        </a>
-        <a href="javascript:mute()">
-          <i id="vol" class="fa fa-volume-up fa-lg" title="点击即可静音" aria-hidden="true"></i>
-        </a>
-        <input id="range" type="range" min="0" max="100" value="50" onchange="volume(this.value)">
-      </div>
-      <div class="info">
-        <span id="music_name"></span>
-        <span id="artist"></span>
-      </div>
-      <div id="lrc" class="lrc"></div>
-      <div id="tlrc" class="tlrc"></div>
+<article>
+  <div id="backdrop"></div>
+  <div id="showcase">
+    <div id="surface">
+      <div class="cover"><canvas class="album" width="100" height="100"></canvas></div>
+      <div class="magic"><i class="fa fa-play"></i></div>
     </div>
-    <ul id="playList"></ul>
+    <div id="thread">
+      <div class="elapsed"></div>
+    </div>
+    <div id="detail">
+      <div class="name">音乐标题</div>
+      <div class="artists">歌手</div>
+    </div>
+    <div id="lyric">
+      <div class="lrc"></div>
+      <div class="tlrc"></div>
+    </div>
   </div>
-  <audio id="player" preload="auto"></audio>
-  <script src="js/player.js"></script>
-  <script src="js/progressbar.js"></script>
+  <div id="controller">
+    <div class="item" data-id="fa-home"><a class="fa-button"><i class="fa fa-home" title="Home"></i></a></div>
+    <div class="item" data-id="fa-over"><a class="fa-button"><i class="fa fa-chevron-right" title="Next"></i></a></div>
+  </div>
+</article>
+<script src="js/jquery-3.2.1.min.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
 __TEXT__
@@ -101,21 +76,19 @@ get('/player') do
   id = params['id']
   det_info = JSON.parse $api.with_format.song id
   cov_info = JSON.parse $api.with_format.pic det_info[0]['pic_id']
-  mp3_info = JSON.parse $api.with_format.url id
   lrc_info = JSON.parse $api.with_format.lyric id
 
-  play_info = {}
+  play_info = JSON.parse $api.with_format.url id
   play_info['id'] = id
   play_info['lrc'] = {}
   play_info['tlrc'] = {}
   play_info['cover'] = cov_info['url']
   play_info['music_name'] = det_info[0]['name']
-  play_info['mp3'] = mp3_info['url']
-  play_info['mp3'] = play_info['mp3'].gsub('http://', 'https://')
+  play_info['url'] = play_info['url'].gsub('http://', 'https://')
                                      .gsub('https://m8', 'https://m7')
   play_info['artists'] = det_info[0]['artist'].join ', '
 
-  { 'lyric' => ['lrc', 'No Lyrics / 很抱歉，這首曲子暫無歌詞'],
+  { 'lyric' => ['lrc', 'No Lyrics'],
     'tlyric' => ['tlrc', ''] }.each do |lyric, value|
     if lrc_info[lyric] != ''
       lrc = lrc_info[lyric].split "\n"
