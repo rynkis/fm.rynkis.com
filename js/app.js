@@ -27,7 +27,9 @@ class FM_GITMV {
     }
     this.domNodes = {
       home: document.querySelector('#controller [data-id="fa-home"] .fa-button'),
+      back: document.querySelector('#controller [data-id="fa-back"] .fa-button'),
       over: document.querySelector('#controller [data-id="fa-over"] .fa-button'),
+      mode: document.querySelector('#controller [data-id="fa-mode"] .fa-button'),
       name: document.querySelector('#detail .name'),
       album: document.querySelector('#surface .album'),
       magic: document.querySelector('#surface .magic'),
@@ -54,6 +56,7 @@ class FM_GITMV {
     $.getJSON(this.config.playlist, data => {
       this.playList = data
       this.songNum = data.length
+      this.playingIndex = Math.round((this.songNum - 1) * Math.random() + 1)
       this.decorator()
     })
   }
@@ -69,9 +72,25 @@ class FM_GITMV {
 
   getLatestData () {
     let latestData = this.getLocalData()
+    let dom = $('#mode')
 
     $.isPlainObject(latestData) && (this.data = latestData)
     this.data.lastID && (this.playingIndex = this.data.lastID)
+    this.data.playMode && (dom.attr('class', this.data.playMode))
+    switch (this.data.playMode) {
+    case 'fa fa-align-justify':
+      this.audio.loop = false
+      dom.attr({'class': 'fa fa-align-justify', 'title': 'List'})
+      break
+    case 'fa fa-repeat':
+      this.audio.loop = true
+      dom.attr({'class': 'fa fa-repeat', 'title': 'Single'})
+      break
+    case 'fa fa-random':
+      this.audio.loop = false
+      dom.attr({'class': 'fa fa-random', 'title': 'Random'})
+      break
+    }
   }
 
   getLocalData () {
@@ -85,6 +104,7 @@ class FM_GITMV {
 
   setLocalData () {
     this.data.lastID = this.playingIndex
+    this.data.playMode = $('#mode').attr('class')
     try {
       localStorage.setItem(this.config.localName, JSON.stringify(this.data))
     } catch (e) {
@@ -94,9 +114,8 @@ class FM_GITMV {
 
   nextTrack () {
     this.pauseAudio()
-    if (true) {
-      let randomId = Math.round((this.songNum - 1) * Math.random() + 1)
-      this.playingIndex = randomId
+    if ($('#mode').attr('class') === 'fa fa-random') {
+      this.playingIndex = Math.round((this.songNum - 1) * Math.random() + 1)
       this.loadMusicInfo()
       // console.log("正在播放的歌曲序号：" + this.playingIndex)
     } else {
@@ -105,7 +124,7 @@ class FM_GITMV {
         this.loadMusicInfo()
         // console.log("正在播放的歌曲序号：" + this.playingIndex)
       } else {
-        this.playingIndex = playingIndex + 1
+        this.playingIndex = this.playingIndex + 1
         this.loadMusicInfo()
         // console.log("正在播放的歌曲序号：" + this.playingIndex)
       }
@@ -119,7 +138,7 @@ class FM_GITMV {
       this.loadMusicInfo()
       // console.log("正在播放的歌曲序号：" + this.playingIndex)
     } else {
-      this.playingIndex = playingIndex - 1
+      this.playingIndex = this.playingIndex - 1
       this.loadMusicInfo()
       // console.log("正在播放的歌曲序号：" + this.playingIndex)
     }
@@ -227,13 +246,8 @@ class FM_GITMV {
     this.audio.sourcePointer = song
     this.domNodes.lrcRow.html('')
     this.domNodes.tlrcRow.html('')
-    if (song.lrc != 'no') {
-      this.lrc = song.lrc
-      this.tlrc = song.tlrc
-    } else {
-      this.lrc = 'no'
-      this.tlrc = ''
-    }
+    this.lrc = song.lrc
+    this.tlrc = song.tlrc
   }
 
   playAudio () {
@@ -334,9 +348,32 @@ class FM_GITMV {
       window.open(this.config.source)
     })
 
+    $(this.domNodes.back).on('click', this, e => {
+      this.touched = true
+      this.prevTrack()
+    })
+
     $(this.domNodes.over).on('click', this, e => {
       this.touched = true
       this.nextTrack()
+    })
+
+    $(this.domNodes.mode).on('click', this, e => {
+      let dom = $('#mode')
+      switch (dom.attr('class')) {
+      case 'fa fa-align-justify':
+        this.audio.loop = true
+        dom.attr({'class': 'fa fa-repeat', 'title': 'Single'})
+        break
+      case 'fa fa-repeat':
+        this.audio.loop = false
+        dom.attr({'class': 'fa fa-random', 'title': 'Random'})
+        break
+      case 'fa fa-random':
+        this.audio.loop = false
+        dom.attr({'class': 'fa fa-align-justify', 'title': 'List'})
+        break
+      }
     })
 
     $(this.domNodes.magic).on('click', this, e => {

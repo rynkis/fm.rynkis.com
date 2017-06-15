@@ -50,7 +50,9 @@ html =<<__TEXT__
   </div>
   <div id="controller">
     <div class="item" data-id="fa-home"><a class="fa-button"><i class="fa fa-home" title="Home"></i></a></div>
-    <div class="item" data-id="fa-over"><a class="fa-button"><i class="fa fa-chevron-right" title="Next"></i></a></div>
+    <div class="item" data-id="fa-back"><a class="fa-button"><i class="fa fa-chevron-up" title="Prev"></i></a></div>
+    <div class="item" data-id="fa-over"><a class="fa-button"><i class="fa fa-chevron-down" title="Next"></i></a></div>
+    <div class="item" data-id="fa-mode"><a class="fa-button"><i id="mode" class="fa fa-random" title="Random"></i></a></div>
   </div>
 </article>
 <script src="js/jquery-3.2.1.min.js"></script>
@@ -97,7 +99,7 @@ get('/player') do
         times = []
         rows.scan(/\[[^\[\]]*\]/) { |match| times << match }
         if times.size.zero?
-          play_info[value[0]][0] = 'no'
+          play_info[value[0]][0] = value[1]
           break
         end
         col_text = rows.gsub(/\[[^\[\]]*\]/, '')
