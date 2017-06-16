@@ -54,7 +54,6 @@ class FM_GITMV {
     this.playList = null
 
     this.autoSkip = false
-    this.touched = false  // for iOS
 
     $.getJSON(this.config.playlist, data => {
       this.playList = data
@@ -145,7 +144,6 @@ class FM_GITMV {
     const EACH_FRAME_RADIAN = 1 / (ANIMATION_FPS * ONE_TURN_TIME) * ONE_TURN
 
     let context = this.domNodes.album.getContext('2d')
-
     let prevTimestamp = 0
     let loopAnimation = timestamp => {
       const MAX_LENGTH = Math.max(this.domNodes.album.width, this.domNodes.album.height) / 2
@@ -160,7 +158,7 @@ class FM_GITMV {
       context.clearRect(0, 0, MAX_LENGTH, MAX_LENGTH)
 
       context.beginPath()
-      context.fillStyle = context.createPattern(this.image, 'no-repeat')
+      context.fillStyle = this.domNodes.album.pattern
       context.arc(HALF_LENGTH, HALF_LENGTH, HALF_LENGTH, 0, ONE_TURN)
       context.fill()
       context.closePath()
@@ -199,10 +197,11 @@ class FM_GITMV {
 
         let context = this.domNodes.album.getContext('2d')
         context.scale(2, 2)
+        this.domNodes.album.pattern = context.createPattern(this.image, 'no-repeat')
 
         context.clearRect(0, 0, MAX_LENGTH, MAX_LENGTH)
         context.beginPath()
-        context.fillStyle = context.createPattern(this.image, 'no-repeat')
+        context.fillStyle = this.domNodes.album.pattern
         context.arc(HALF_LENGTH, HALF_LENGTH, HALF_LENGTH, 0, ONE_TURN)
         context.fill()
         context.closePath()
@@ -244,7 +243,7 @@ class FM_GITMV {
       this.domNodes.tLyric.html('因版权原因暂时无法播放')
     } else {
       this.audio.src = song.url
-      this.touched && this.playAudio()
+      this.playAudio()
     }
   }
 
@@ -267,7 +266,7 @@ class FM_GITMV {
       }`, song => {
         this.audio.src = song.url
         this.audio.sourcePointer = song
-        this.touched && this.playAudio()
+        this.playAudio()
       })
     } else {
       if (this.recursion.currentTime) {
@@ -351,18 +350,18 @@ class FM_GITMV {
       switch (e.which) {
       case 32: // Space
         e.preventDefault()
-        this.touched = true
+
         this.audio.paused ? this.playAudio() : this.pauseAudio()
         break
       case 37:// Left
         e.preventDefault()
-        this.touched = true
+
         this.autoSkip = false
         this.prevTrack()
         break
       case 39:// Right
         e.preventDefault()
-        this.touched = true
+
         this.autoSkip = false
         this.nextTrack()
         break
@@ -374,13 +373,11 @@ class FM_GITMV {
     })
 
     $(this.domNodes.back).on('click', e => {
-      this.touched = true
       this.autoSkip = false
       this.prevTrack()
     })
 
     $(this.domNodes.over).on('click', e => {
-      this.touched = true
       this.autoSkip = false
       this.nextTrack()
     })
@@ -404,7 +401,6 @@ class FM_GITMV {
     })
 
     $(this.domNodes.magic).on('click', e => {
-      this.touched = true
       this.audio.paused ? this.playAudio() : this.pauseAudio()
     })
   }
