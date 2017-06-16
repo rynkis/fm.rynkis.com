@@ -8,7 +8,7 @@
 **/
 import '../css/app.sass'
 import 'font-awesome/css/font-awesome.css'
-import jQuery from 'jQuery'
+import jQuery from 'jquery'
 import localAlbum from '../images/album.jpg'
 window.$ = window.jQuery = jQuery
 
