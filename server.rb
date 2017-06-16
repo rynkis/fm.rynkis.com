@@ -39,7 +39,7 @@ html =<<__TEXT__
       <div class="elapsed"></div>
     </div>
     <div id="detail">
-      <div class="name"></div>
+      <div class="title"></div>
       <div class="artists"></div>
     </div>
     <div id="lyric">
@@ -83,7 +83,7 @@ get('/player') do
   play_info['lrc'] = {}
   play_info['tlrc'] = {}
   play_info['cover'] = cov_info['url']
-  play_info['music_name'] = det_info[0]['name']
+  play_info['title'] = det_info[0]['name']
   play_info['url'] = play_info['url'].gsub('http://', 'https://')
                                      .gsub('https://m8', 'https://m7')
   play_info['artists'] = det_info[0]['artist'].join ', '

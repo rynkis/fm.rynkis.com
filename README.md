@@ -12,6 +12,7 @@ FM.GITMV
 ```
 git clone https://github.com/Shy07/Musicoon.git
 cd FM.GITMV
+yarn install && yarn test
 bundle install
 ruby server.rb
 ```

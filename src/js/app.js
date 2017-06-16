@@ -6,7 +6,7 @@
  *  Copyright 2017, Rynki <gernischt@gmail.com>
  *  Released under the MIT license
 **/
-import '../css/app.css'
+import '../css/app.sass'
 import 'font-awesome/css/font-awesome.css'
 import jQuery from 'jQuery'
 import localAlbum from '../images/album.jpg'
@@ -32,7 +32,7 @@ class FM_GITMV {
       back: document.querySelector('#controller [data-id="fa-back"] .fa-button'),
       over: document.querySelector('#controller [data-id="fa-over"] .fa-button'),
       mode: document.querySelector('#controller [data-id="fa-mode"] .fa-button'),
-      name: document.querySelector('#detail .name'),
+      title: document.querySelector('#detail .title'),
       album: document.querySelector('#surface .album'),
       magic: document.querySelector('#surface .magic'),
       artists: document.querySelector('#detail .artists'),
@@ -46,7 +46,7 @@ class FM_GITMV {
     this.audio = document.createElement('audio')
     this.audio.volume = this.config.volume
     this.image = new Image()
-    this.domNodes.name.textContent = 'Title'
+    this.domNodes.title.textContent = 'Title'
     this.domNodes.artists.textContent = 'Artists'
 
     this.playingIndex = 0
@@ -132,6 +132,85 @@ class FM_GITMV {
     this.loadMusicInfo()
   }
 
+  loadMusicInfo() {
+    $.getJSON(`${this.config.player}?id=${
+      this.playList[this.playingIndex].id
+    }`, song => {
+      if (song.url === '' && this.autoSkip) {
+        this.nextTrack()
+      } else {
+        this.renderAudio(song)
+      }
+    })
+  }
+
+  renderAudio(song) {
+    let size = $(this.domNodes.album).width() * 2
+    this.image.src = song.cover.replace(/\d+y\d+/, `${size}y${size}`)
+    this.domNodes.title.textContent = song.title
+    this.domNodes.artists.textContent = song.artists
+    this.domNodes.lyric.html('')
+    this.domNodes.tLyric.html('')
+    this.audio.sourcePointer = song
+    if (song.url === '') {
+      this.domNodes.lyric.html("Can't be played because of Copyright")
+      this.domNodes.tLyric.html('因版权原因暂时无法播放')
+    } else {
+      this.audio.src = song.url
+      this.playAudio()
+    }
+  }
+
+  playAudio() {
+    if (this.audio.sourcePointer.url === '') return
+
+    let time = Math.ceil(Date.now() / 1000)
+    let song = this.audio.sourcePointer
+    let rest = this.audio.duration - this.audio.currentTime // Maybe `NaN`
+    let minExpire = this.audio.duration || 120
+    let expire = song.expire < minExpire ? this.config.expire : song.expire
+    let isExpire = Math.ceil(rest) < expire && time - song.timestamp + Math.ceil(rest || 0) > expire
+    // NO risk of recursion
+    if (isExpire) {
+      this.recursion.currentTime = this.audio.currentTime
+      $.getJSON(`${this.config.player}?id=${
+        this.playList[this.playingIndex].id
+      }`, song => {
+        this.audio.src = song.url
+        this.audio.sourcePointer = song
+        this.playAudio()
+      })
+    } else {
+      if (this.recursion.currentTime) {
+        this.audio.currentTime = this.recursion.currentTime
+        this.recursion.currentTime = null
+      }
+      this.audio.play()
+      if (this.audio.sourcePointer.lrc != '') {
+        this.lrcInterval = setInterval(this.displayLrc.bind(this), 500)
+      }
+      if (this.audio.sourcePointer.tlrc != '') {
+        this.tlrcInterval = setInterval(this.displayTlrc.bind(this), 500)
+      }
+    }
+  }
+
+  pauseAudio() {
+    this.audio.pause()
+    this.audio.sourcePointer.lrc != '' &&  clearInterval(this.lrcInterval)
+    this.audio.sourcePointer.tlrc != '' && clearInterval(this.tlrcInterval)
+  }
+
+  displayLrc() {
+    let playTime = Math.floor(this.audio.currentTime).toString()
+    this.domNodes.lyric.html(this.audio.sourcePointer.lrc[playTime])
+  }
+
+  displayTlrc() {
+    let playTime = Math.floor(this.audio.currentTime).toString()
+    this.domNodes.tLyric.html(this.audio.sourcePointer.tlrc[playTime])
+  }
+
   createAlbum(src) {
     this.image.src = typeof src === 'string' ? src : localAlbum
   }
@@ -194,11 +273,10 @@ class FM_GITMV {
         const HALF_LENGTH = MAX_LENGTH / 2
 
         this.domNodes.album.width = this.domNodes.album.height = MAX_LENGTH * 2
-
         let context = this.domNodes.album.getContext('2d')
-        context.scale(2, 2)
         this.domNodes.album.pattern = context.createPattern(this.image, 'no-repeat')
 
+        context.scale(2, 2)
         context.clearRect(0, 0, MAX_LENGTH, MAX_LENGTH)
         context.beginPath()
         context.fillStyle = this.domNodes.album.pattern
@@ -216,87 +294,6 @@ class FM_GITMV {
         this.src !== localAlbum && this.createAlbum(localAlbum)
       }
     })
-  }
-
-  loadMusicInfo() {
-    $.getJSON(`${this.config.player}?id=${
-      this.playList[this.playingIndex].id
-    }`, song => {
-      if (song.url === '' && this.autoSkip) {
-        this.nextTrack()
-      } else {
-        this.renderAudio(song)
-      }
-    })
-  }
-
-  renderAudio(song) {
-    let size = $(this.domNodes.album).width() * 2
-    this.image.src = song.cover.replace(/\d+y\d+/, `${size}y${size}`)
-    this.domNodes.name.textContent = song.music_name
-    this.domNodes.artists.textContent = song.artists
-    this.domNodes.lyric.html('')
-    this.domNodes.tLyric.html('')
-    this.audio.sourcePointer = song
-    if (song.url === '') {
-      this.domNodes.lyric.html("Can't be played because of Copyright")
-      this.domNodes.tLyric.html('因版权原因暂时无法播放')
-    } else {
-      this.audio.src = song.url
-      this.playAudio()
-    }
-  }
-
-  playAudio() {
-    if (this.audio.sourcePointer.url === '') return
-
-    let time = Math.ceil(Date.now() / 1000)
-    let song = this.audio.sourcePointer
-    let rest = this.audio.duration - this.audio.currentTime // Maybe `NaN`
-    let minExpire = this.audio.duration || 120
-    let expire = song.expire < minExpire ? this.config.expire : song.expire
-    let isExpire = Math.ceil(rest) < expire && time - song.timestamp + Math.ceil(rest || 0) > expire
-
-    // NO risk of recursion
-    if (isExpire) {
-      this.recursion.currentTime = this.audio.currentTime
-
-      $.getJSON(`${this.config.player}?id=${
-        this.playList[this.playingIndex].id
-      }`, song => {
-        this.audio.src = song.url
-        this.audio.sourcePointer = song
-        this.playAudio()
-      })
-    } else {
-      if (this.recursion.currentTime) {
-        this.audio.currentTime = this.recursion.currentTime
-        this.recursion.currentTime = null
-      }
-      this.audio.play()
-      if (this.audio.sourcePointer.lrc != '') {
-        this.lrcInterval = setInterval(this.displayLrc.bind(this), 500)
-      }
-      if (this.audio.sourcePointer.tlrc != '') {
-        this.tlrcInterval = setInterval(this.displayTlrc.bind(this), 500)
-      }
-    }
-  }
-
-  pauseAudio() {
-    this.audio.pause()
-    this.audio.sourcePointer.lrc != '' &&  clearInterval(this.lrcInterval)
-    this.audio.sourcePointer.tlrc != '' && clearInterval(this.tlrcInterval)
-  }
-
-  displayLrc() {
-    let playTime = Math.floor(this.audio.currentTime).toString()
-    this.domNodes.lyric.html(this.audio.sourcePointer.lrc[playTime])
-  }
-
-  displayTlrc() {
-    let playTime = Math.floor(this.audio.currentTime).toString()
-    this.domNodes.tLyric.html(this.audio.sourcePointer.tlrc[playTime])
   }
 
   addAudioEvents() {
@@ -320,13 +317,14 @@ class FM_GITMV {
         this.nextTrack()
       },
       'timeupdate': e => {
-        $(this.domNodes.elapsed).css('width', (this.audio.currentTime / this.audio.duration).toFixed(5) * 100 + '%');
+        $(this.domNodes.elapsed).css('width', `${
+          (this.audio.currentTime / this.audio.duration).toFixed(5) * 100}%`)
       },
       'error': e => {
         // console.warn(e.message)
         this.recursion.currentTime = this.audio.currentTime
         this.pauseAudio()
-        this.audio.src = this.audio.src
+        this.audio.src = this.audio.sourcePointer.url
         this.audio.load()
         this.playAudio()
       }
@@ -342,35 +340,28 @@ class FM_GITMV {
   }
 
   addOtherEvents() {
-    $(window).on('unload', e => {
-      this.setLocalData()
-    })
+    $(window).on('unload', e => this.setLocalData())
 
     $(document).on('keydown', e => {
       switch (e.which) {
       case 32: // Space
         e.preventDefault()
-
         this.audio.paused ? this.playAudio() : this.pauseAudio()
         break
       case 37:// Left
         e.preventDefault()
-
         this.autoSkip = false
         this.prevTrack()
         break
       case 39:// Right
         e.preventDefault()
-
         this.autoSkip = false
         this.nextTrack()
         break
       }
     })
 
-    $(this.domNodes.home).on('click', e => {
-      window.open(this.config.source)
-    })
+    $(this.domNodes.home).on('click', e => window.open(this.config.source))
 
     $(this.domNodes.back).on('click', e => {
       this.autoSkip = false
