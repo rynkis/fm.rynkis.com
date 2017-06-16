@@ -121,7 +121,7 @@ class FM_GITMV {
       this.playingIndex = Math.round((this.songNum - 1) * Math.random() + 1)
     } else {
       this.playingIndex += 1
-      if (this.playingIndex === this.songNum) this.playingIndex = 0
+      this.playingIndex === this.songNum && (this.playingIndex = 0)
     }
     this.loadMusicInfo()
   }
@@ -129,7 +129,7 @@ class FM_GITMV {
   prevTrack() {
     this.pauseAudio()
     this.playingIndex -= 1
-    if (this.playingIndex === 0) this.playingIndex = this.songNum - 1
+    this.playingIndex === 0 && (this.playingIndex = this.songNum - 1)
     this.loadMusicInfo()
   }
 
@@ -145,9 +145,10 @@ class FM_GITMV {
     const EACH_FRAME_RADIAN = 1 / (ANIMATION_FPS * ONE_TURN_TIME) * ONE_TURN
 
     let context = this.domNodes.album.getContext('2d')
+
     let prevTimestamp = 0
     let loopAnimation = timestamp => {
-      const MAX_LENGTH = Math.max(this.domNodes.album.width, this.domNodes.album.height)
+      const MAX_LENGTH = Math.max(this.domNodes.album.width, this.domNodes.album.height) / 2
       const HALF_LENGTH = MAX_LENGTH / 2
 
       // prevTimestamp && timestamp - prevTimestamp > MAX_EACH_FRAME_TIME && console.warn(timestamp - prevTimestamp)
@@ -191,15 +192,15 @@ class FM_GITMV {
     $(this.image).on({
       'load': e => {
         const ONE_TURN = Math.PI * 2
-        const MAX_LENGTH = Math.max(e.data.image.width, e.data.image.height)
+        const MAX_LENGTH = Math.max(this.image.width, this.image.height)
         const HALF_LENGTH = MAX_LENGTH / 2
 
-        let canvas = e.data.domNodes.album
-        let context = canvas.getContext('2d')
+        this.domNodes.album.width = this.domNodes.album.height = MAX_LENGTH * 2
 
-        canvas.width = canvas.height = MAX_LENGTH
+        let context = this.domNodes.album.getContext('2d')
+        context.scale(2, 2)
+
         context.clearRect(0, 0, MAX_LENGTH, MAX_LENGTH)
-
         context.beginPath()
         context.fillStyle = context.createPattern(this.image, 'no-repeat')
         context.arc(HALF_LENGTH, HALF_LENGTH, HALF_LENGTH, 0, ONE_TURN)
@@ -213,9 +214,9 @@ class FM_GITMV {
         context.closePath()
       },
       'error': e => {
-        this.src !== localAlbum && e.data.createAlbum(localAlbum)
+        this.src !== localAlbum && this.createAlbum(localAlbum)
       }
-    }, this)
+    })
   }
 
   loadMusicInfo() {
@@ -231,7 +232,8 @@ class FM_GITMV {
   }
 
   renderAudio(song) {
-    this.image.src = song.cover
+    let size = $(this.domNodes.album).width() * 2
+    this.image.src = song.cover.replace(/\d+y\d+/, `${size}y${size}`)
     this.domNodes.name.textContent = song.music_name
     this.domNodes.artists.textContent = song.artists
     this.domNodes.lyric.html('')
@@ -284,8 +286,8 @@ class FM_GITMV {
 
   pauseAudio() {
     this.audio.pause()
-    if (this.audio.sourcePointer.lrc != '')  clearInterval(this.lrcInterval)
-    if (this.audio.sourcePointer.tlrc != '') clearInterval(this.tlrcInterval)
+    this.audio.sourcePointer.lrc != '' &&  clearInterval(this.lrcInterval)
+    this.audio.sourcePointer.tlrc != '' && clearInterval(this.tlrcInterval)
   }
 
   displayLrc() {
