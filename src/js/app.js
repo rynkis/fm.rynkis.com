@@ -9,9 +9,8 @@
 import '../css/app.css'
 import 'font-awesome/css/font-awesome.css'
 import jQuery from 'jQuery'
-window.$ = window.jQuery = jQuery
-
 import localAlbum from '../images/album.jpg'
+window.$ = window.jQuery = jQuery
 
 class FM_GITMV {
   constructor() {
@@ -47,6 +46,8 @@ class FM_GITMV {
     this.audio = document.createElement('audio')
     this.audio.volume = this.config.volume
     this.image = new Image()
+    this.domNodes.name.textContent = 'Title'
+    this.domNodes.artists.textContent = 'Artists'
 
     this.playingIndex = 0
     this.songNum = 0
