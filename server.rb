@@ -25,8 +25,6 @@ html =<<__TEXT__
   <meta name="keywords" content="FM.GITMV">
   <meta name="description" content="get my way">
   <base href="./">
-  <link rel="stylesheet" href="css/font-awesome.min.css">
-  <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
 <article>
@@ -41,8 +39,8 @@ html =<<__TEXT__
       <div class="elapsed"></div>
     </div>
     <div id="detail">
-      <div class="name">音乐标题</div>
-      <div class="artists">歌手</div>
+      <div class="name"></div>
+      <div class="artists"></div>
     </div>
     <div id="lyric">
       <div class="lrc"></div>
@@ -56,8 +54,7 @@ html =<<__TEXT__
     <div class="item" data-id="fa-mode"><a class="fa-button"><i id="mode" class="fa fa-random" title="Random"></i></a></div>
   </div>
 </article>
-<script src="js/jquery-3.2.1.min.js"></script>
-<script src="js/app.js"></script>
+<script src="assets/app.js"></script>
 </body>
 </html>
 __TEXT__

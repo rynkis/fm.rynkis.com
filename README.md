@@ -18,5 +18,6 @@ ruby server.rb
 Then open http://localhost:4567 in your web browser and enjoy!  
 
 ### Update log  
+Use Webpack to pack all front-end resources.  
 Rewrite player with jQuery + ES6.  
 Rewrite API with Ruby and use Sinatra Server.  

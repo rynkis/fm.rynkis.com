@@ -6,21 +6,24 @@
  *  Copyright 2017, Rynki <gernischt@gmail.com>
  *  Released under the MIT license
 **/
+import '../css/app.css'
+import 'font-awesome/css/font-awesome.css'
+import jQuery from 'jQuery'
+window.$ = window.jQuery = jQuery
+
+import localAlbum from '../images/album.jpg'
 
 class FM_GITMV {
   constructor() {
     this.data = {}
     this.recursion = {
       currentTime: null,
-      requestID: null,
-      startType: null,
-      needCheck: false
+      requestID: null
     }
     this.config = {
       volume: 1.0,
       expire: 1200,
       localName: 'FM.GITMV.logger',
-      localAlbum: 'images/album.jpg',
       source: 'https://github.com/Shy07/FM.GITMV',
       player: 'player',
       playlist: 'playlist'
@@ -38,21 +41,19 @@ class FM_GITMV {
       elapsed: document.querySelector('#thread .elapsed'),
       surface: document.querySelector('#surface'),
       faMagic: document.querySelector('#surface .magic .fa'),
-      lrcRow: $('.lrc'),
-      tlrcRow: $('.tlrc')
+      lyric: $('.lrc'),
+      tLyric: $('.tlrc')
     }
     this.audio = document.createElement('audio')
     this.audio.volume = this.config.volume
     this.image = new Image()
 
-    this.lrc = ''
-    this.tlrc = ''
-    this.songInfo = null
     this.playingIndex = 0
     this.songNum = 0
     this.playList = null
 
-    this.touched = false
+    this.autoSkip = false
+    this.touched = false  // for iOS
 
     $.getJSON(this.config.playlist, data => {
       this.playList = data
@@ -77,7 +78,7 @@ class FM_GITMV {
 
     $.isPlainObject(latestData) && (this.data = latestData)
     this.data.lastID && (this.playingIndex = this.data.lastID)
-    this.data.playMode && (dom.attr('class', this.data.playMode))
+    this.data.playMode && dom.attr('class', this.data.playMode)
     switch (this.data.playMode) {
     case 'fa fa-align-justify':
       this.audio.loop = false
@@ -117,31 +118,22 @@ class FM_GITMV {
     this.pauseAudio()
     if ($('#mode').attr('class') === 'fa fa-random') {
       this.playingIndex = Math.round((this.songNum - 1) * Math.random() + 1)
-      this.loadMusicInfo()
     } else {
-      if (this.playingIndex + 1 === this.songNum) {
-        this.playingIndex = 0
-        this.loadMusicInfo()
-      } else {
-        this.playingIndex = this.playingIndex + 1
-        this.loadMusicInfo()
-      }
+      this.playingIndex += 1
+      if (this.playingIndex === this.songNum) this.playingIndex = 0
     }
+    this.loadMusicInfo()
   }
 
   prevTrack() {
     this.pauseAudio()
-    if (this.playingIndex === 0) {
-      this.playingIndex = this.songNum - 1
-      this.loadMusicInfo()
-    } else {
-      this.playingIndex = this.playingIndex - 1
-      this.loadMusicInfo()
-    }
+    this.playingIndex -= 1
+    if (this.playingIndex === 0) this.playingIndex = this.songNum - 1
+    this.loadMusicInfo()
   }
 
   createAlbum(src) {
-    this.image.src = typeof src === 'string' ? src : this.config.localAlbum
+    this.image.src = typeof src === 'string' ? src : localAlbum
   }
 
   requestAlbumRotate() {
@@ -153,11 +145,11 @@ class FM_GITMV {
 
     let context = this.domNodes.album.getContext('2d')
     let prevTimestamp = 0
-    let loopAnimation = (timestamp => {
+    let loopAnimation = timestamp => {
       const MAX_LENGTH = Math.max(this.domNodes.album.width, this.domNodes.album.height)
       const HALF_LENGTH = MAX_LENGTH / 2
 
-      prevTimestamp && timestamp - prevTimestamp > MAX_EACH_FRAME_TIME// && console.warn(timestamp - prevTimestamp);
+      // prevTimestamp && timestamp - prevTimestamp > MAX_EACH_FRAME_TIME && console.warn(timestamp - prevTimestamp)
       prevTimestamp = timestamp
 
       context.translate(HALF_LENGTH, HALF_LENGTH)
@@ -182,7 +174,7 @@ class FM_GITMV {
       } else {
         this.recursion.requestID = window.requestAnimationFrame(loopAnimation);
       }
-    })//.bind(this)
+    }
 
     // In slow network, `this.requestAlbumRotate` will be trigger many times.
     // So we should run `cancelAnimationFrame` firstly.
@@ -218,19 +210,22 @@ class FM_GITMV {
         context.arc(HALF_LENGTH, HALF_LENGTH, HALF_LENGTH / 8, 0, ONE_TURN)
         context.fill()
         context.closePath()
-
       },
       'error': e => {
-        this.src !== e.data.config.localAlbum && e.data.createAlbum(e.data.config.localAlbum)
+        this.src !== localAlbum && e.data.createAlbum(localAlbum)
       }
     }, this)
   }
 
   loadMusicInfo() {
-    let id = this.playList[this.playingIndex].id
-    $.getJSON(`${this.config.player}?id=${id}`, songInfo => {
-      this.renderAudio(songInfo)
-      if (this.touched) this.playAudio()
+    $.getJSON(`${this.config.player}?id=${
+      this.playList[this.playingIndex].id
+    }`, song => {
+      if (song.url === '' && this.autoSkip) {
+        this.nextTrack()
+      } else {
+        this.renderAudio(song)
+      }
     })
   }
 
@@ -238,15 +233,21 @@ class FM_GITMV {
     this.image.src = song.cover
     this.domNodes.name.textContent = song.music_name
     this.domNodes.artists.textContent = song.artists
-    this.audio.src = song.url
+    this.domNodes.lyric.html('')
+    this.domNodes.tLyric.html('')
     this.audio.sourcePointer = song
-    this.domNodes.lrcRow.html('')
-    this.domNodes.tlrcRow.html('')
-    this.lrc = song.lrc
-    this.tlrc = song.tlrc
+    if (song.url === '') {
+      this.domNodes.lyric.html("Can't be played because of Copyright")
+      this.domNodes.tLyric.html('因版权原因暂时无法播放')
+    } else {
+      this.audio.src = song.url
+      this.touched && this.playAudio()
+    }
   }
 
   playAudio() {
+    if (this.audio.sourcePointer.url === '') return
+
     let time = Math.ceil(Date.now() / 1000)
     let song = this.audio.sourcePointer
     let rest = this.audio.duration - this.audio.currentTime // Maybe `NaN`
@@ -257,74 +258,76 @@ class FM_GITMV {
     // NO risk of recursion
     if (isExpire) {
       this.recursion.currentTime = this.audio.currentTime
-      this.loadMusicInfo()
+
+      $.getJSON(`${this.config.player}?id=${
+        this.playList[this.playingIndex].id
+      }`, song => {
+        this.audio.src = song.url
+        this.audio.sourcePointer = song
+        this.touched && this.playAudio()
+      })
     } else {
       if (this.recursion.currentTime) {
         this.audio.currentTime = this.recursion.currentTime
         this.recursion.currentTime = null
       }
       this.audio.play()
-      if (this.lrc != '') {
-        this.lrc_interval = setInterval(this.display_lrc.bind(this), 500)
+      if (this.audio.sourcePointer.lrc != '') {
+        this.lrcInterval = setInterval(this.displayLrc.bind(this), 500)
       }
-      if (this.tlrc != '') {
-        this.tlrc_interval = setInterval(this.display_tlrc.bind(this), 500)
+      if (this.audio.sourcePointer.tlrc != '') {
+        this.tlrcInterval = setInterval(this.displayTlrc.bind(this), 500)
       }
     }
   }
 
   pauseAudio() {
     this.audio.pause()
-    if (this.lrc != '') {
-      clearInterval(this.lrc_interval)
-    }
-    if (this.tlrc != '') {
-      clearInterval(this.tlrc_interval)
-    }
+    if (this.audio.sourcePointer.lrc != '')  clearInterval(this.lrcInterval)
+    if (this.audio.sourcePointer.tlrc != '') clearInterval(this.tlrcInterval)
   }
 
-  display_lrc() {
+  displayLrc() {
     let playTime = Math.floor(this.audio.currentTime).toString()
-    this.domNodes.lrcRow.html(this.lrc[playTime])
+    this.domNodes.lyric.html(this.audio.sourcePointer.lrc[playTime])
   }
 
-  display_tlrc() {
+  displayTlrc() {
     let playTime = Math.floor(this.audio.currentTime).toString()
-    this.domNodes.tlrcRow.html(this.tlrc[playTime])
+    this.domNodes.tLyric.html(this.audio.sourcePointer.tlrc[playTime])
   }
 
   addAudioEvents() {
     $(this.audio).on({
-        'playing': e => {
-          this.requestAlbumRotate()
-        },
-        'waiting': e => {
-          this.cancelAlbumRotate()
-        },
-        'play': e => {
-            $(this.domNodes.faMagic).removeClass('fa-play').addClass('fa-pause')
-        },
-        'pause': e => {
-            $(this.domNodes.faMagic).removeClass('fa-pause').addClass('fa-play')
-        },
-        'ended': e => {
-          // HTML5 video/audio doesn't become paused after playback ends on IE
-          // Bug: https://connect.microsoft.com/IE/feedback/details/810454/html5-video-audio-doesnt-become-paused-after-playback-ends
-          this.pauseAudio()
-          this.nextTrack()
-        },
-        'timeupdate': e => {
-          $(this.domNodes.elapsed).css('width', (this.audio.currentTime / this.audio.duration).toFixed(5) * 100 + '%');
-        },
-        'error': e => {
-          // console.warn(e.message)
-          this.recursion.currentTime = this.audio.currentTime
-          this.audio.src = this.audio.src
-          this.audio.load()
-          this.audio.currentTime = this.recursion.currentTime
-          this.audio.play()
-          this.recursion.currentTime = null
-        }
+      'playing': e => {
+        this.requestAlbumRotate()
+      },
+      'waiting': e => {
+        this.cancelAlbumRotate()
+      },
+      'play': e => {
+        $(this.domNodes.faMagic).removeClass('fa-play').addClass('fa-pause')
+      },
+      'pause': e => {
+        $(this.domNodes.faMagic).removeClass('fa-pause').addClass('fa-play')
+      },
+      'ended': e => {
+        // HTML5 video/audio doesn't become paused after playback ends on IE
+        // Bug: https://connect.microsoft.com/IE/feedback/details/810454/html5-video-audio-doesnt-become-paused-after-playback-ends
+        this.autoSkip = true
+        this.nextTrack()
+      },
+      'timeupdate': e => {
+        $(this.domNodes.elapsed).css('width', (this.audio.currentTime / this.audio.duration).toFixed(5) * 100 + '%');
+      },
+      'error': e => {
+        // console.warn(e.message)
+        this.recursion.currentTime = this.audio.currentTime
+        this.pauseAudio()
+        this.audio.src = this.audio.src
+        this.audio.load()
+        this.playAudio()
+      }
     })
 
     setInterval(() => {
@@ -337,11 +340,11 @@ class FM_GITMV {
   }
 
   addOtherEvents() {
-    $(window).on('unload', this, (e) => {
+    $(window).on('unload', e => {
       this.setLocalData()
     })
 
-    $(document).on('keydown', this, e => {
+    $(document).on('keydown', e => {
       switch (e.which) {
       case 32: // Space
         e.preventDefault()
@@ -351,31 +354,35 @@ class FM_GITMV {
       case 37:// Left
         e.preventDefault()
         this.touched = true
+        this.autoSkip = false
         this.prevTrack()
         break
       case 39:// Right
         e.preventDefault()
         this.touched = true
+        this.autoSkip = false
         this.nextTrack()
         break
       }
     })
 
-    $(this.domNodes.home).on('click', this, e => {
+    $(this.domNodes.home).on('click', e => {
       window.open(this.config.source)
     })
 
-    $(this.domNodes.back).on('click', this, e => {
+    $(this.domNodes.back).on('click', e => {
       this.touched = true
+      this.autoSkip = false
       this.prevTrack()
     })
 
-    $(this.domNodes.over).on('click', this, e => {
+    $(this.domNodes.over).on('click', e => {
       this.touched = true
+      this.autoSkip = false
       this.nextTrack()
     })
 
-    $(this.domNodes.mode).on('click', this, e => {
+    $(this.domNodes.mode).on('click', e => {
       let dom = $('#mode')
       switch (dom.attr('class')) {
       case 'fa fa-align-justify':
@@ -393,12 +400,11 @@ class FM_GITMV {
       }
     })
 
-    $(this.domNodes.magic).on('click', this, e => {
+    $(this.domNodes.magic).on('click', e => {
       this.touched = true
       this.audio.paused ? this.playAudio() : this.pauseAudio()
     })
   }
-
 }
 
 $(document).ready(() => new FM_GITMV())
