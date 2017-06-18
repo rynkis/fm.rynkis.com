@@ -51,7 +51,7 @@ html =<<__TEXT__
     <div class="item" data-id="fa-home"><a class="fa-button"><i class="fa fa-home" title="Home"></i></a></div>
     <div class="item" data-id="fa-back"><a class="fa-button"><i class="fa fa-chevron-up" title="Prev"></i></a></div>
     <div class="item" data-id="fa-over"><a class="fa-button"><i class="fa fa-chevron-down" title="Next"></i></a></div>
-    <div class="item" data-id="fa-mode"><a class="fa-button"><i id="mode" class="fa fa-random" title="Random"></i></a></div>
+    <div class="item" data-id="fa-mode"><a class="fa-button"><i class="fa fa-random" title="Random"></i></a></div>
   </div>
 </article>
 <script src="assets/app.js"></script>
@@ -84,8 +84,7 @@ get('/player') do
   play_info['tlrc'] = {}
   play_info['cover'] = cov_info['url']
   play_info['title'] = det_info[0]['name']
-  play_info['url'] = play_info['url'].gsub('http://', 'https://')
-                                     .gsub('https://m8', 'https://m7')
+  play_info['url'] = play_info['url'].gsub /http??:\/\/m8/, 'http://m7'
   play_info['artists'] = det_info[0]['artist'].join ', '
 
   { 'lyric' => ['lrc', 'No Lyrics'],

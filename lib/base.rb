@@ -63,18 +63,21 @@ class Music_Base
     req, uri = request_and_uri_with api
     data, error, info = nil, nil, nil
     RETRY.times do
-      res = Net::HTTP.start(uri.hostname, uri.port) {|http| http.request req }
-      case res
-      when Net::HTTPSuccess
-        if res['Content-Encoding'] == 'gzip'
-          gz = Zlib::GzipReader.new(StringIO.new(res.body.to_s))
-          data = gz.read
+      begin
+        res = Net::HTTP.start(uri.hostname, uri.port) {|http| http.request req }
+        case res
+        when Net::HTTPSuccess
+          if res['Content-Encoding'] == 'gzip'
+            gz = Zlib::GzipReader.new(StringIO.new(res.body.to_s))
+            data = gz.read
+          else
+            data = res.body
+          end
         else
-          data = res.body
+          error, info = res.code, res.message
         end
-      else
-        error = res.code
-        info = res.message
+      rescue
+        error, info = 500, '500'
       end
       break unless error
     end

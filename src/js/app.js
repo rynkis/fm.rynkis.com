@@ -31,7 +31,7 @@ class FM_GITMV {
       home: document.querySelector('#controller [data-id="fa-home"] .fa-button'),
       back: document.querySelector('#controller [data-id="fa-back"] .fa-button'),
       over: document.querySelector('#controller [data-id="fa-over"] .fa-button'),
-      mode: document.querySelector('#controller [data-id="fa-mode"] .fa-button'),
+      mode: document.querySelector('#controller [data-id="fa-mode"] .fa-button i'),
       title: document.querySelector('#detail .title'),
       album: document.querySelector('#surface .album'),
       magic: document.querySelector('#surface .magic'),
@@ -40,57 +40,57 @@ class FM_GITMV {
       elapsed: document.querySelector('#thread .elapsed'),
       surface: document.querySelector('#surface'),
       faMagic: document.querySelector('#surface .magic .fa'),
-      lyric: $('.lrc'),
-      tLyric: $('.tlrc')
+      lyric: document.querySelector('#lyric .lrc'),
+      tLyric: document.querySelector('#lyric .tlrc')
     }
     this.audio = document.createElement('audio')
     this.audio.volume = this.config.volume
     this.image = new Image()
     this.domNodes.title.textContent = 'Title'
     this.domNodes.artists.textContent = 'Artists'
-
     this.playingIndex = 0
     this.songNum = 0
     this.playList = null
-
     this.autoSkip = false
+    this.prevFrameRadian = 0
+    this.lrcInterval = null
+    this.start()
+  }
 
+  start() {
     $.getJSON(this.config.playlist, data => {
       this.playList = data
       this.songNum = data.length
       this.playingIndex = Math.round((this.songNum - 1) * Math.random() + 1)
-      this.decorator()
+      this.createAlbum()
+      this.addAlbumEvents()
+      this.getLatestData()
+      this.loadMusicInfo()
+      this.addAudioEvents()
+      this.addOtherEvents()
     })
-  }
-
-  decorator() {
-    this.createAlbum()
-    this.addAlbumEvents()
-    this.getLatestData()
-    this.loadMusicInfo()
-    this.addAudioEvents()
-    this.addOtherEvents()
   }
 
   getLatestData() {
     let latestData = this.getLocalData()
-    let dom = $('#mode')
-
     $.isPlainObject(latestData) && (this.data = latestData)
     this.data.lastID && (this.playingIndex = this.data.lastID)
-    this.data.playMode && dom.attr('class', this.data.playMode)
+    this.data.playMode && this.domNodes.mode.setAttribute('class', this.data.playMode)
     switch (this.data.playMode) {
     case 'fa fa-align-justify':
       this.audio.loop = false
-      dom.attr({'class': 'fa fa-align-justify', 'title': 'List'})
+      this.domNodes.mode.setAttribute('class', 'fa fa-align-justify')
+      this.domNodes.mode.setAttribute('title', 'List')
       break
     case 'fa fa-repeat':
       this.audio.loop = true
-      dom.attr({'class': 'fa fa-repeat', 'title': 'Single'})
+      this.domNodes.mode.setAttribute('class', 'fa fa-repeat')
+      this.domNodes.mode.setAttribute('title', 'Single')
       break
     case 'fa fa-random':
       this.audio.loop = false
-      dom.attr({'class': 'fa fa-random', 'title': 'Random'})
+      this.domNodes.mode.setAttribute('class', 'fa fa-random')
+      this.domNodes.mode.setAttribute('title', 'Random')
       break
     }
   }
@@ -106,7 +106,7 @@ class FM_GITMV {
 
   setLocalData() {
     this.data.lastID = this.playingIndex
-    this.data.playMode = $('#mode').attr('class')
+    this.data.playMode = this.domNodes.mode.getAttribute('class')
     try {
       localStorage.setItem(this.config.localName, JSON.stringify(this.data))
     } catch (e) {
@@ -116,7 +116,7 @@ class FM_GITMV {
 
   nextTrack() {
     this.pauseAudio()
-    if ($('#mode').attr('class') === 'fa fa-random') {
+    if (this.domNodes.mode.getAttribute('class') === 'fa fa-random') {
       this.playingIndex = Math.round((this.songNum - 1) * Math.random() + 1)
     } else {
       this.playingIndex += 1
@@ -136,11 +136,7 @@ class FM_GITMV {
     $.getJSON(`${this.config.player}?id=${
       this.playList[this.playingIndex].id
     }`, song => {
-      if (song.url === '' && this.autoSkip) {
-        this.nextTrack()
-      } else {
-        this.renderAudio(song)
-      }
+      song.url === '' && this.autoSkip ? this.nextTrack() : this.renderAudio(song)
     })
   }
 
@@ -149,12 +145,12 @@ class FM_GITMV {
     this.image.src = song.cover.replace(/\d+y\d+/, `${size}y${size}`)
     this.domNodes.title.textContent = song.title
     this.domNodes.artists.textContent = song.artists
-    this.domNodes.lyric.html('')
-    this.domNodes.tLyric.html('')
+    this.domNodes.lyric.textContent = ''
+    this.domNodes.tLyric.textContent = ''
     this.audio.sourcePointer = song
     if (song.url === '') {
-      this.domNodes.lyric.html("Can't be played because of Copyright")
-      this.domNodes.tLyric.html('因版权原因暂时无法播放')
+      this.domNodes.lyric.textContent = "Can't be played because of Copyright"
+      this.domNodes.tLyric.textContent = '因版权原因暂时无法播放'
     } else {
       this.audio.src = song.url
       this.playAudio()
@@ -186,67 +182,51 @@ class FM_GITMV {
         this.recursion.currentTime = null
       }
       this.audio.play()
-      if (this.audio.sourcePointer.lrc != '') {
-        this.lrcInterval = setInterval(this.displayLrc.bind(this), 500)
-      }
-      if (this.audio.sourcePointer.tlrc != '') {
-        this.tlrcInterval = setInterval(this.displayTlrc.bind(this), 500)
-      }
     }
   }
 
   pauseAudio() {
     this.audio.pause()
-    this.audio.sourcePointer.lrc != '' &&  clearInterval(this.lrcInterval)
-    this.audio.sourcePointer.tlrc != '' && clearInterval(this.tlrcInterval)
   }
 
   displayLrc() {
-    let playTime = Math.floor(this.audio.currentTime).toString()
-    this.domNodes.lyric.html(this.audio.sourcePointer.lrc[playTime])
-  }
-
-  displayTlrc() {
-    let playTime = Math.floor(this.audio.currentTime).toString()
-    this.domNodes.tLyric.html(this.audio.sourcePointer.tlrc[playTime])
+    let playTime = Math.floor(this.audio.currentTime)
+    if (typeof this.audio.sourcePointer.lrc[playTime] !== 'string') return
+    this.domNodes.lyric.textContent = this.audio.sourcePointer.lrc[playTime]
+    if (this.audio.sourcePointer.lrc[playTime] === '') {
+      return this.domNodes.tLyric.textContent = ''
+    }
+    if (typeof this.audio.sourcePointer.tlrc[playTime] !== 'string') return
+    this.domNodes.tLyric.textContent = this.audio.sourcePointer.tlrc[playTime]
   }
 
   createAlbum(src) {
     this.image.src = typeof src === 'string' ? src : localAlbum
   }
 
+  updateAlbumRotateCSS(deg) {
+    $(this.domNodes.album).css('transform', `rotate(${deg}deg)`)
+    $(this.domNodes.album).css('-ms-transform', `rotate(${deg}deg)`)
+    $(this.domNodes.album).css('-moz-transform', `rotate(${deg}deg)`)
+    $(this.domNodes.album).css('-webkit-transform', `rotate(${deg}deg)`)
+    $(this.domNodes.album).css('-o-transform', `rotate(${deg}deg)`)
+  }
+
   requestAlbumRotate() {
     const ANIMATION_FPS = 60
     const ONE_TURN_TIME = 30
-    const ONE_TURN = Math.PI * 2
+    const ONE_TURN = 360 //Math.PI * 2
     const MAX_EACH_FRAME_TIME = 1000 / 50
     const EACH_FRAME_RADIAN = 1 / (ANIMATION_FPS * ONE_TURN_TIME) * ONE_TURN
 
-    let context = this.domNodes.album.getContext('2d')
     let prevTimestamp = 0
     let loopAnimation = timestamp => {
-      const MAX_LENGTH = Math.max(this.domNodes.album.width, this.domNodes.album.height) / 2
-      const HALF_LENGTH = MAX_LENGTH / 2
-
       // prevTimestamp && timestamp - prevTimestamp > MAX_EACH_FRAME_TIME && console.warn(timestamp - prevTimestamp)
       prevTimestamp = timestamp
 
-      context.translate(HALF_LENGTH, HALF_LENGTH)
-      context.rotate(EACH_FRAME_RADIAN)
-      context.translate(-HALF_LENGTH, -HALF_LENGTH)
-      context.clearRect(0, 0, MAX_LENGTH, MAX_LENGTH)
-
-      context.beginPath()
-      context.fillStyle = this.domNodes.album.pattern
-      context.arc(HALF_LENGTH, HALF_LENGTH, HALF_LENGTH, 0, ONE_TURN)
-      context.fill()
-      context.closePath()
-
-      context.beginPath()
-      context.fillStyle = '#FFF'
-      context.arc(HALF_LENGTH, HALF_LENGTH, HALF_LENGTH / 8, 0, ONE_TURN)
-      context.fill()
-      context.closePath()
+      this.prevFrameRadian += EACH_FRAME_RADIAN
+      this.prevFrameRadian >= ONE_TURN && (this.prevFrameRadian -= ONE_TURN)
+      this.updateAlbumRotateCSS(this.prevFrameRadian)
 
       if (this.audio.paused) {
         this.cancelAlbumRotate()
@@ -272,6 +252,7 @@ class FM_GITMV {
         const MAX_LENGTH = Math.max(this.image.width, this.image.height)
         const HALF_LENGTH = MAX_LENGTH / 2
 
+        this.prevFrameRadian = 0
         this.domNodes.album.width = this.domNodes.album.height = MAX_LENGTH * 2
         let context = this.domNodes.album.getContext('2d')
         this.domNodes.album.pattern = context.createPattern(this.image, 'no-repeat')
@@ -300,9 +281,12 @@ class FM_GITMV {
     $(this.audio).on({
       'playing': e => {
         this.requestAlbumRotate()
+        this.lrcInterval !== null && clearInterval(this.lrcInterval) && (this.lrcInterval = null)
+        this.audio.sourcePointer.lrc !== '' && (this.lrcInterval = setInterval(this.displayLrc.bind(this), 500))
       },
       'waiting': e => {
         this.cancelAlbumRotate()
+        this.lrcInterval !== null && clearInterval(this.lrcInterval) && (this.lrcInterval = null)
       },
       'play': e => {
         $(this.domNodes.faMagic).removeClass('fa-play').addClass('fa-pause')
@@ -321,7 +305,7 @@ class FM_GITMV {
           (this.audio.currentTime / this.audio.duration).toFixed(5) * 100}%`)
       },
       'error': e => {
-        // console.warn(e.message)
+        console.warn(e.message)
         this.recursion.currentTime = this.audio.currentTime
         this.pauseAudio()
         this.audio.src = this.audio.sourcePointer.url
@@ -374,19 +358,21 @@ class FM_GITMV {
     })
 
     $(this.domNodes.mode).on('click', e => {
-      let dom = $('#mode')
-      switch (dom.attr('class')) {
+      switch (this.domNodes.mode.getAttribute('class')) {
       case 'fa fa-align-justify':
         this.audio.loop = true
-        dom.attr({'class': 'fa fa-repeat', 'title': 'Single'})
+        this.domNodes.mode.setAttribute('class', 'fa fa-repeat')
+        this.domNodes.mode.setAttribute('title', 'Single')
         break
       case 'fa fa-repeat':
         this.audio.loop = false
-        dom.attr({'class': 'fa fa-random', 'title': 'Random'})
+        this.domNodes.mode.setAttribute('class', 'fa fa-random')
+        this.domNodes.mode.setAttribute('title', 'Random')
         break
       case 'fa fa-random':
         this.audio.loop = false
-        dom.attr({'class': 'fa fa-align-justify', 'title': 'List'})
+        this.domNodes.mode.setAttribute('class', 'fa fa-align-justify')
+        this.domNodes.mode.setAttribute('title', 'List')
         break
       }
     })
