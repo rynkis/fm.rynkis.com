@@ -15,7 +15,7 @@ set :public_folder, File.dirname(__FILE__) + '/static'
 $api = Netease.new
 
 html =<<__TEXT__
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">

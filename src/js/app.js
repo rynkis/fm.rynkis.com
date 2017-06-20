@@ -5,7 +5,7 @@
  *
  *  Copyright 2017, Rynki <gernischt@gmail.com>
  *  Released under the MIT license
-**/
+ **/
 import '../css/app.sass'
 import 'font-awesome/css/font-awesome.css'
 import jQuery from 'jquery'
@@ -77,21 +77,21 @@ class FM_GITMV {
     this.data.lastID && (this.playingIndex = this.data.lastID)
     this.data.playMode && this.domNodes.mode.setAttribute('class', this.data.playMode)
     switch (this.data.playMode) {
-    case 'fa fa-align-justify':
-      this.audio.loop = false
-      this.domNodes.mode.setAttribute('class', 'fa fa-align-justify')
-      this.domNodes.mode.setAttribute('title', 'List')
-      break
-    case 'fa fa-repeat':
-      this.audio.loop = true
-      this.domNodes.mode.setAttribute('class', 'fa fa-repeat')
-      this.domNodes.mode.setAttribute('title', 'Single')
-      break
-    case 'fa fa-random':
-      this.audio.loop = false
-      this.domNodes.mode.setAttribute('class', 'fa fa-random')
-      this.domNodes.mode.setAttribute('title', 'Random')
-      break
+      case 'fa fa-align-justify':
+        this.audio.loop = false
+        this.domNodes.mode.setAttribute('class', 'fa fa-align-justify')
+        this.domNodes.mode.setAttribute('title', 'List')
+        break
+      case 'fa fa-repeat':
+        this.audio.loop = true
+        this.domNodes.mode.setAttribute('class', 'fa fa-repeat')
+        this.domNodes.mode.setAttribute('title', 'Single')
+        break
+      case 'fa fa-random':
+        this.audio.loop = false
+        this.domNodes.mode.setAttribute('class', 'fa fa-random')
+        this.domNodes.mode.setAttribute('title', 'Random')
+        break
     }
   }
 
@@ -323,20 +323,20 @@ class FM_GITMV {
 
     $(document).on('keydown', e => {
       switch (e.which) {
-      case 32: // Space
-        e.preventDefault()
-        this.audio.paused ? this.playAudio() : this.pauseAudio()
-        break
-      case 37:// Left
-        e.preventDefault()
-        this.autoSkip = false
-        this.prevTrack()
-        break
-      case 39:// Right
-        e.preventDefault()
-        this.autoSkip = false
-        this.nextTrack()
-        break
+        case 32: // Space
+          e.preventDefault()
+          this.audio.paused ? this.playAudio() : this.pauseAudio()
+          break
+        case 37: // Left
+          e.preventDefault()
+          this.autoSkip = false
+          this.prevTrack()
+          break
+        case 39: // Right
+          e.preventDefault()
+          this.autoSkip = false
+          this.nextTrack()
+          break
       }
     })
 
@@ -354,21 +354,21 @@ class FM_GITMV {
 
     $(this.domNodes.mode).on('click', e => {
       switch (this.domNodes.mode.getAttribute('class')) {
-      case 'fa fa-align-justify':
-        this.audio.loop = true
-        this.domNodes.mode.setAttribute('class', 'fa fa-repeat')
-        this.domNodes.mode.setAttribute('title', 'Single')
-        break
-      case 'fa fa-repeat':
-        this.audio.loop = false
-        this.domNodes.mode.setAttribute('class', 'fa fa-random')
-        this.domNodes.mode.setAttribute('title', 'Random')
-        break
-      case 'fa fa-random':
-        this.audio.loop = false
-        this.domNodes.mode.setAttribute('class', 'fa fa-align-justify')
-        this.domNodes.mode.setAttribute('title', 'List')
-        break
+        case 'fa fa-align-justify':
+          this.audio.loop = true
+          this.domNodes.mode.setAttribute('class', 'fa fa-repeat')
+          this.domNodes.mode.setAttribute('title', 'Single')
+          break
+        case 'fa fa-repeat':
+          this.audio.loop = false
+          this.domNodes.mode.setAttribute('class', 'fa fa-random')
+          this.domNodes.mode.setAttribute('title', 'Random')
+          break
+        case 'fa fa-random':
+          this.audio.loop = false
+          this.domNodes.mode.setAttribute('class', 'fa fa-align-justify')
+          this.domNodes.mode.setAttribute('title', 'List')
+          break
       }
     })
 
