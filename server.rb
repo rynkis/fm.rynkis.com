@@ -72,8 +72,7 @@ get('/playlist') do
   data.to_json
 end
 
-get('/player') do
-  id = params['id']
+get('/music/:id') do |id|
   det_info = JSON.parse $api.with_format.song id
   cov_info = JSON.parse $api.with_format.pic det_info[0]['pic_id']
   lrc_info = JSON.parse $api.with_format.lyric id
@@ -84,7 +83,7 @@ get('/player') do
   play_info['tlrc'] = {}
   play_info['cover'] = cov_info['url']
   play_info['title'] = det_info[0]['name']
-  play_info['url'] = play_info['url'].gsub /http??:\/\/m8/, 'http://m7'
+  play_info['url'] = play_info['url'].gsub /https:/, 'http:' #/http??:\/\/m8/, 'http://m7'
   play_info['artists'] = det_info[0]['artist'].join ', '
 
   { 'lyric' => ['lrc', 'No Lyrics'],

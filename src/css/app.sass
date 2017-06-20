@@ -46,7 +46,23 @@ table
 template
   display: none
 
-/* Custom Style */
+/* Global Media Queries */
+@media only screen and (min-width: 1440px)
+  html
+    font-size: 110%
+
+@media only screen and (min-width: 1280px) and (min-resolution: 2dppx)
+  html
+    font-size: 120%
+
+@media only screen and (max-width: 479px)
+  html
+    font-size: 90%
+
+@media only screen and (max-width: 359px)
+  html
+    font-size: 80%
+
 @media screen and (min-width: 720px)
   #backdrop
     position: fixed
@@ -98,10 +114,10 @@ template
   margin-left: auto
   margin-right: auto
   width: 20em
-  -webkit-user-select: none
-  -moz-user-select: none
-  -ms-user-select: none
   user-select: none
+  -ms-user-select: none
+  -moz-user-select: none
+  -webkit-user-select: none
 
 #surface .cover
   padding-bottom: 100%
@@ -197,20 +213,3 @@ template
 #lyric .tlrc
   font-size: 1em
   color: #444
-
-/* Global Media Queries */
-@media only screen and (min-width: 1440px)
-  html
-    font-size: 110%
-
-@media only screen and (min-width: 1280px) and (min-resolution: 2dppx)
-  html
-    font-size: 120%
-
-@media only screen and (max-width: 479px)
-  html
-    font-size: 90%
-
-@media only screen and (max-width: 359px)
-  html
-    font-size: 80%

@@ -24,7 +24,7 @@ class FM_GITMV {
       expire: 1200,
       localName: 'FM.GITMV.logger',
       source: 'https://github.com/Shy07/FM.GITMV',
-      player: 'player',
+      music: 'music',
       playlist: 'playlist'
     }
     this.domNodes = {
@@ -99,7 +99,7 @@ class FM_GITMV {
     try {
       return JSON.parse(localStorage.getItem(this.config.localName))
     } catch (e) {
-      console.warn(e.message)
+      console.warn(e)
       return null
     }
   }
@@ -110,7 +110,7 @@ class FM_GITMV {
     try {
       localStorage.setItem(this.config.localName, JSON.stringify(this.data))
     } catch (e) {
-      console.warn(e.message)
+      console.warn(e)
     }
   }
 
@@ -120,7 +120,6 @@ class FM_GITMV {
       this.playingIndex = Math.round((this.songNum - 1) * Math.random() + 1)
     } else {
       this.playingIndex += 1
-      this.playingIndex === this.songNum && (this.playingIndex = 0)
     }
     this.loadMusicInfo()
   }
@@ -128,14 +127,13 @@ class FM_GITMV {
   prevTrack() {
     this.pauseAudio()
     this.playingIndex -= 1
-    this.playingIndex === 0 && (this.playingIndex = this.songNum - 1)
     this.loadMusicInfo()
   }
 
   loadMusicInfo() {
-    $.getJSON(`${this.config.player}?id=${
-      this.playList[this.playingIndex].id
-    }`, song => {
+    this.playingIndex >= this.songNum && (this.playingIndex = 0)
+    this.playingIndex < 0 && (this.playingIndex = this.songNum - 1)
+    $.getJSON(`${this.config.music}/${this.playList[this.playingIndex].id}`, song => {
       song.url === '' && this.autoSkip ? this.nextTrack() : this.renderAudio(song)
     })
   }
@@ -169,9 +167,7 @@ class FM_GITMV {
     // NO risk of recursion
     if (isExpire) {
       this.recursion.currentTime = this.audio.currentTime
-      $.getJSON(`${this.config.player}?id=${
-        this.playList[this.playingIndex].id
-      }`, song => {
+      $.getJSON(`${this.config.music}/${this.playList[this.playingIndex].id}`, song => {
         this.audio.src = song.url
         this.audio.sourcePointer = song
         this.playAudio()
@@ -205,11 +201,10 @@ class FM_GITMV {
   }
 
   updateAlbumRotateCSS(deg) {
-    $(this.domNodes.album).css('transform', `rotate(${deg}deg)`)
-    $(this.domNodes.album).css('-ms-transform', `rotate(${deg}deg)`)
-    $(this.domNodes.album).css('-moz-transform', `rotate(${deg}deg)`)
-    $(this.domNodes.album).css('-webkit-transform', `rotate(${deg}deg)`)
-    $(this.domNodes.album).css('-o-transform', `rotate(${deg}deg)`)
+    let album = $(this.domNodes.album)
+    let value = `rotate(${deg}deg)`
+    const prefixes = ['', '-ms-', '-moz-', '-webkit-', '-o-']
+    for (let prefix of prefixes) album.css(`${prefix}transform`, value)
   }
 
   requestAlbumRotate() {
@@ -305,12 +300,12 @@ class FM_GITMV {
           (this.audio.currentTime / this.audio.duration).toFixed(5) * 100}%`)
       },
       'error': e => {
-        console.warn(e.message)
-        this.recursion.currentTime = this.audio.currentTime
-        this.pauseAudio()
-        this.audio.src = this.audio.sourcePointer.url
-        this.audio.load()
-        this.playAudio()
+        console.warn(e)
+        // this.recursion.currentTime = this.audio.currentTime
+        // this.pauseAudio()
+        // this.audio.src = this.audio.sourcePointer.url
+        // this.audio.load()
+        // this.playAudio()
       }
     })
 
