@@ -20,7 +20,7 @@ class FM_GITMV {
       requestID: null
     }
     this.config = {
-      volume: 1.0,
+      volume: 0.5,
       expire: 1200,
       localName: 'FM.GITMV.logger',
       source: 'https://github.com/Shy07/FM.GITMV',
@@ -301,11 +301,11 @@ class FM_GITMV {
       },
       'error': e => {
         console.warn(e)
-        // this.recursion.currentTime = this.audio.currentTime
-        // this.pauseAudio()
-        // this.audio.src = this.audio.sourcePointer.url
-        // this.audio.load()
-        // this.playAudio()
+        this.recursion.currentTime = this.audio.currentTime
+        this.pauseAudio()
+        this.audio.src = this.audio.sourcePointer.url
+        this.audio.load()
+        this.playAudio()
       }
     })
 
