@@ -14,6 +14,16 @@ set :public_folder, File.dirname(__FILE__) + '/static'
 
 $api = Netease.new
 
+before do
+  if request.request_method == 'OPTIONS'
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET'
+    response.headers['Access-Control-Allow-Headers'] = 'x-access-token'
+    puts 1
+    halt 200
+  end
+end
+
 html =<<__TEXT__
 <!DOCTYPE HTML>
 <html lang="zh-CN">
@@ -68,6 +78,7 @@ get('/playlist') do
     result = $api.with_format.playlist id
     mem + (JSON.parse result)
   end
+  headers 'Access-Control-Allow-Origin' => '*'
   headers 'Content-type' => 'application/json; charset=UTF-8'
   data.to_json
 end
@@ -110,6 +121,7 @@ get('/music/:id') do |id|
     end
   end
 
+  headers 'Access-Control-Allow-Origin' => '*'
   headers 'Content-type' => 'application/json; charset=UTF-8'
   play_info.to_json
 end
