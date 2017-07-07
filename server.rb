@@ -78,7 +78,7 @@ get('/playlist') do
     result = $api.with_format.playlist id
     mem + (JSON.parse result)
   end
-  data = data.map {|e| e && e['id']}
+  data = data.map {|e|e['id']}
   headers 'Access-Control-Allow-Origin' => '*'
   headers 'Content-type' => 'application/json; charset=UTF-8'
   data.to_json
