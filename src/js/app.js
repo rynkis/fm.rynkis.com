@@ -133,7 +133,7 @@ class FM_GITMV {
   loadMusicInfo() {
     this.playingIndex >= this.songNum && (this.playingIndex = 0)
     this.playingIndex < 0 && (this.playingIndex = this.songNum - 1)
-    $.getJSON(`${this.config.music}/${this.playList[this.playingIndex].id}`, song => {
+    $.getJSON(`${this.config.music}/${this.playList[this.playingIndex]}`, song => {
       song.url === '' && this.autoSkip ? this.nextTrack() : this.renderAudio(song)
     })
   }
@@ -167,7 +167,7 @@ class FM_GITMV {
     // NO risk of recursion
     if (isExpire) {
       this.recursion.currentTime = this.audio.currentTime
-      $.getJSON(`${this.config.music}/${this.playList[this.playingIndex].id}`, song => {
+      $.getJSON(`${this.config.music}/${this.playList[this.playingIndex]}`, song => {
         this.audio.src = song.url
         this.audio.sourcePointer = song
         this.playAudio()
