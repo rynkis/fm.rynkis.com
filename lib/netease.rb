@@ -9,8 +9,8 @@ class Netease < Music_Base
     @site = 'netease'
     @req_setting = {
         'referer' => 'https://music.163.com/',
-        'cookie' => 'os=linux; appver=1.0.0.1026; osver=Ubuntu%2016.10; MUSIC_U=78d411095f4b022667bc8ec49e9a44cca088df057d987f5feaf066d37458e41c4a7d9447977352cf27ea9fee03f6ec4441049cea1c6bb9b6; __remember_me=true',
-        'useragent' => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'
+        'cookie' => 'appver=1.5.9; os=osx; __remember_me=true; osver=%E7%89%88%E6%9C%AC%2010.13.5%EF%BC%88%E7%89%88%E5%8F%B7%2017F77%EF%BC%89;',
+        'useragent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/605.1.15 (KHTML, like Gecko)'
     }
   end
 
@@ -41,7 +41,7 @@ class Netease < Music_Base
       'body' => {
         'method' => 'POST',
         'params' => {
-          'c' => "[{\"id\":#{id}}]"
+          'c' => [{ id: id, v: 0 }].to_json
         },
         'url' => 'http://music.163.com/api/v3/song/detail'
       },
@@ -89,8 +89,10 @@ class Netease < Music_Base
       'body' => {
         'method' => 'POST',
         'params' => {
+          's' => 0,
           'id' => id,
-          'n' => 1000
+          'n' => 1000,
+          't' => 0
         },
         'url' => 'http://music.163.com/api/v3/playlist/detail',
       },

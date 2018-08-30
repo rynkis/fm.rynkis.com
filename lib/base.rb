@@ -15,7 +15,7 @@ end
 
 class Music_Base
   RETRY = 3
-  X_Real_IP = '61.190.69.142'
+  X_REAL_IP = '180.168.253.65'
 
   def initialize
     @temp = {}
@@ -50,11 +50,15 @@ class Music_Base
       uri.query = URI.encode_www_form(api['body']) if api['body']
       req = Net::HTTP::Get.new uri
     end
-    req['X-Real-IP'] = X_Real_IP
+    req['X-Real-IP'] = X_REAL_IP
     req['Accept-Encoding'] = 'gzip'
     req['Cookie'] = @req_setting['cookie']
     req['Referer'] = @req_setting['referer']
     req['User-Agent'] = @req_setting['useragent']
+    req['Accept'] = '*/*'
+    req['Accept-Language'] = 'zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4'
+    req['Connection'] = 'keep-alive'
+    req['Content-Type'] = 'application/x-www-form-urlencoded'
     [req, uri]
   end
 
