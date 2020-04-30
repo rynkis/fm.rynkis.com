@@ -34,6 +34,7 @@ html =<<__TEXT__
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="keywords" content="FM.GITMV">
   <meta name="description" content="get my way">
+  <link rel="shortcut icon" href="/icons/favicon.ico">
   <base href="./">
 </head>
 <body>

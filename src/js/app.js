@@ -6,7 +6,7 @@
  *  Copyright 2017, Rynki <gernischt@gmail.com>
  *  Released under the MIT license
  **/
-import '../css/app.sass'
+import '../css/app.less'
 import 'font-awesome/css/font-awesome.css'
 import jQuery from 'jquery'
 import localAlbum from '../images/album.jpg'

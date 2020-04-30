@@ -36,8 +36,8 @@ webpackConfig = {
         test: /\.css$/,
         use: ['style-loader', 'css-loader']
       }, {
-        test: /\.sass$/,
-        use: ['style-loader', 'css-loader', 'sass-loader?indentedSyntax']
+        test: /\.less$/,
+        use: ['style-loader', 'css-loader', 'less-loader']
       }, {
         test: /\.gif/,
         use: ['url-loader?limit=100000&minetype=image/gif']
