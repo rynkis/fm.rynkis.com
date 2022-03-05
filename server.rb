@@ -19,7 +19,6 @@ before do
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET'
     response.headers['Access-Control-Allow-Headers'] = 'x-access-token'
-    puts 1
     halt 200
   end
 end
@@ -75,7 +74,7 @@ get('/') do
 end
 
 get('/playlist') do
-  data = %w{314100094 314048981 765223365 765206688}.inject([]) do |mem, id|
+  data = %w{7320208569}.inject([]) do |mem, id|
     result = $api.with_format.playlist id
     mem + (JSON.parse result)
   end
