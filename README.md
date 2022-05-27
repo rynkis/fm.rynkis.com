@@ -24,7 +24,7 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
 
 ### Update log  
-Rewrite project with nextjs.
+Rewrite project with nextjs.  
 Use Webpack to pack all front-end resources.  
 Rewrite player with jQuery + ES6.  
 Rewrite API with Ruby and use Sinatra Server.  
