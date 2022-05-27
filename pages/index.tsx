@@ -3,7 +3,7 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 import 'font-awesome/css/font-awesome.css'
 
-import Player from './player'
+import Player from '../lib/player'
 
 const Home: NextPage = () => {
   const [showAfterRender, setShowAfterRender] = useState(false)

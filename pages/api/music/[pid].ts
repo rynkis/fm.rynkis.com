@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import fp from 'lodash/fp'
 
-import Meting from '../../lib/meting'
+import Meting from '../../../lib/meting'
 
 const handler = async (
   req: NextApiRequest,
