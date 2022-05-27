@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import fp from 'lodash/fp'
 
 import Meting from '../../../lib/meting'
+import allowCors from '../../../lib/allowCORS'
 
 const handler = async (
   req: NextApiRequest,
@@ -58,4 +59,4 @@ const handler = async (
   res.status(200).json(playInfo)
 }
 
-export default handler
+export default allowCors(handler)
