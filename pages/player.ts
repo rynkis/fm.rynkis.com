@@ -103,7 +103,9 @@ class Player {
       context.closePath()
     })
     this.image.addEventListener('error', () => {
-      this.image.src !== localAlbum && this.createAlbum(localAlbum)
+      if (this.image.src !== localAlbum) {
+        this.createAlbum(localAlbum)
+      }
     })
   }
 
@@ -131,8 +133,8 @@ class Player {
     if (isPlainObject(latestData)) {
       this.data = latestData
     }
-    this.data.lastID && (this.playingIndex = this.data.lastID)
-    this.data.playMode && this.domNodes.mode.setAttribute('class', this.data.playMode)
+    if (this.data.lastID) this.playingIndex = this.data.lastID
+    if (this.data.playMode) this.domNodes.mode.setAttribute('class', this.data.playMode)
     switch (this.data.playMode) {
       case 'fa fa-align-justify':
         this.audio.loop = false
@@ -283,18 +285,28 @@ class Player {
   }
 
   cancelAlbumRotate() {
-    this.recursion.requestID && window.cancelAnimationFrame(this.recursion.requestID)
+    if (this.recursion.requestID) {
+      window.cancelAnimationFrame(this.recursion.requestID)
+    }
   }
 
   addAudioEvents () {
     this.audio.addEventListener('playing', () => {
       this.requestAlbumRotate()
-      this.lrcInterval !== null && clearInterval(this.lrcInterval) && (this.lrcInterval = null)
-      this.audio.sourcePointer.lrc !== '' && (this.lrcInterval = setInterval(() => this.displayLrc(), 500))
+      if (this.lrcInterval !== null) {
+        clearInterval(this.lrcInterval)
+        this.lrcInterval = null
+      }
+      if (this.audio.sourcePointer.lrc !== '') {
+        this.lrcInterval = setInterval(() => this.displayLrc(), 500)
+      }
     })
     this.audio.addEventListener('waiting', () => {
       this.cancelAlbumRotate()
-      this.lrcInterval !== null && clearInterval(this.lrcInterval) && (this.lrcInterval = null)
+      if (this.lrcInterval !== null) {
+        clearInterval(this.lrcInterval)
+        this.lrcInterval = null
+      }
     })
     this.audio.addEventListener('play', () => {
       const list = this.domNodes.faMagic.className.split(' ')
