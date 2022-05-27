@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import fp from 'lodash/fp'
 
 import Meting from '../../lib/meting'
-import allowCors from '../../lib/allowCORS'
+import allowCors from '../../lib/allowCors'
 
 const handler = async (
   req: NextApiRequest,
