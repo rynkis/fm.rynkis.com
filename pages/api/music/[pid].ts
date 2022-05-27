@@ -14,7 +14,7 @@ const handler = async (
   const detInfo: any = await meting.format(true).song(pid as any)
   const covInfo: any = await meting.format(true).pic(detInfo[0]['pic_id'])
   const lrcInfo: any = await meting.format(true).lyric(pid as any)
-  console.log(covInfo, detInfo[0]['pic_id'])
+
   const urlInfo = await meting.format(true).url(pid as any)
   const playInfo: any = {
     ...urlInfo,

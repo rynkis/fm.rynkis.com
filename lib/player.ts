@@ -155,7 +155,6 @@ class Player {
   }
 
   private async loadMusicInfo (caller: any = null) {
-    console.log(caller)
     if (this.playingIndex >= this.songNum) {
       this.playingIndex = 0
     }
@@ -230,7 +229,6 @@ class Player {
       this.domNodes.tLyric.textContent = '因版权原因暂时无法播放'
     } else {
       this.audio.src = song.url
-      console.log(this.audio.src)
       this.playAudio()
     }
   }

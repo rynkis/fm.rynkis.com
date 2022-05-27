@@ -31,6 +31,7 @@ class Meting {
   proxyVal: Proxy | null = null
   formatVal: boolean = false
   header: any
+  realIP: string = '118.31.65.90'
 
   constructor (value: string = 'netease') {
     this.site(value)
@@ -355,7 +356,8 @@ class Meting {
       url: api.url,
       params: api.method === 'GET' ? api.body : {},
       data: api.method === 'GET' ? {} : qs.stringify(api.body),
-      proxy: this.proxyVal
+      proxy: this.proxyVal,
+      headers: this.header
     } as any)
     const { status, data } = res
 
@@ -370,7 +372,7 @@ class Meting {
         'Referer': 'https://music.163.com/',
         'Cookie': 'appver=1.5.9; os=osx; __remember_me=true; osver=%E7%89%88%E6%9C%AC%2010.13.5%EF%BC%88%E7%89%88%E5%8F%B7%2017F77%EF%BC%89;',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/605.1.15 (KHTML, like Gecko)',
-        'X-Real-IP': this.long2ip(this.randBetween(1884815360, 1884890111)),
+        'X-Real-IP': this.realIP,
         'Accept': '*/*',
         'Accept-Language': 'zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4',
         'Connection': 'keep-alive',
