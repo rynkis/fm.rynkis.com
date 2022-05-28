@@ -44,11 +44,13 @@ class Player {
       surface: document.querySelector('#surface'),
       faMagic: document.querySelector('#surface .magic .fa'),
       lyric: document.querySelector('#lyric .lrc'),
-      tLyric: document.querySelector('#lyric .tlrc')
+      tLyric: document.querySelector('#lyric .tlrc'),
+      backdrop: document.querySelector('#backdrop'),
     }
     this.audio = window.document.createElement('audio')
     this.audio.volume = this.config.volume
     this.image = new Image()
+    this.image.crossOrigin = 'anonymous'
     this.domNodes.title.textContent = 'Title'
     this.domNodes.artists.textContent = 'Artists'
     this.playingIndex = 0
@@ -101,6 +103,8 @@ class Player {
       context.arc(HALF_LENGTH, HALF_LENGTH, HALF_LENGTH / 8, 0, ONE_TURN)
       context.fill()
       context.closePath()
+
+      this.domNodes.backdrop.style['background-image'] = `url(${this.image.src})`
     })
     this.image.addEventListener('error', () => {
       if (this.image.src !== localAlbum) {

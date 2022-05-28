@@ -95,10 +95,23 @@ template {
     right: 0;
     bottom: 0;
     left: 0;
-    background: url("/images/landscape.jpg") no-repeat center;
-    background-size: cover;
     pointer-events: none;
+    background: url("/images/album.jpg") no-repeat center;
+    background-size: cover;
+    filter: blur(16px);
+    transform: scale(1.2);
     z-index: -1;
+  }
+  #backdrop .color {
+    display: block;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: #fff;
+    opacity: 0.6;
+    pointer-events: none;
   }
 }
 
