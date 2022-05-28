@@ -16,6 +16,11 @@ const handler = async (
     fp.map('id'),
     fp.flatten
   )(playlist)
+
+  res.setHeader(
+    'Cache-Control',
+    'no-cache, no-store, max-age=0, must-revalidate'
+  )
   res.status(200).json(ids)
 }
 
