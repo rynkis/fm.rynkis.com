@@ -4,6 +4,7 @@ import Head from 'next/head'
 import 'font-awesome/css/font-awesome.css'
 
 import Player from '../lib/player'
+import GA from '../components/GA'
 
 const Home: NextPage = () => {
   const [showAfterRender, setShowAfterRender] = useState(false)
@@ -23,6 +24,7 @@ const Home: NextPage = () => {
         <meta name="description" content="Rynkis' FM" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      <GA gid='UA-33540710-3' aid='music-fm' />
 
       <article>
         <div id="backdrop">
