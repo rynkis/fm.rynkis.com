@@ -220,6 +220,7 @@ template {
   width: 20em;
   height: 3px;
   background-color: #e5e9ef;
+  border-radius: 4px;
 }
 
 #thread .buffered {
@@ -227,6 +228,7 @@ template {
   height: 100%;
   background-color: #d2d2d2;
   transition: all ease 0.5s;
+  border-radius: 4px;
 }
 
 #thread .elapsed {
@@ -235,6 +237,7 @@ template {
   height: 100%;
   background-color: #666;
   transition: all ease 0.5s;
+  border-radius: 4px;
 }
 
 #detail {
