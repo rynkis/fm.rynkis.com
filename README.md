@@ -3,9 +3,9 @@ Rynkis' FM
 
 ### Personal FM  
 
-If you wanna specify your personal playlist，you may find following code in `pages/api/playlist.ts`：  
+If you wanna specify your personal playlist，you may find following codes in `pages/api/playlist.ts`：  
 `const promises = ['7320208569'].map(id => meting.format(true).playlist(id))`  
-And then change the id in array (netease playlist id).  
+And then change the id in array, it should be netease playlist id.  
 
 ### Usage  
 
@@ -24,7 +24,7 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
 
 ### Update log  
-Rewrite project with nextjs.  
+Rewrite project with Next.js.  
 Use Webpack to pack all front-end resources.  
 Rewrite player with jQuery + ES6.  
 Rewrite API with Ruby and use Sinatra Server.  

@@ -2,7 +2,6 @@ import axios from 'axios'
 import axiosRetry from 'axios-retry'
 import _ from 'lodash'
 import fp from 'lodash/fp'
-import Decimal from 'decimal.js'
 import crypto from 'crypto'
 import md5 from 'md5'
 import base64 from 'base-64'
@@ -227,28 +226,6 @@ class Meting {
     return { url }
   }
 
-  private bcdechex (dec: number) {
-    let hex = ''
-    do {
-      const last = new Decimal(dec).mod(16).toNumber()
-      hex = last.toString(16) + hex
-      const subVal = new Decimal(dec).sub(last)
-      dec = new Decimal(subVal).div(16).toNumber()
-    } while (dec > 0)
-
-    return hex
-  }
-
-  private str2hex (str: string) {
-    let hex = ''
-    for (let i = 0; i < str.length; i++) {
-      const hexCode = '0' + str.codePointAt(i)?.toString(16)
-      hex += hexCode.substring(hexCode.length - 2)
-    }
-
-    return hex
-  }
-
   private hex2bin (str: string) {
     let ret = ''
     for (let i = 0; i < str.length - 1; i += 2) {
@@ -257,13 +234,6 @@ class Meting {
       ret += c
     }
     return ret
-  }
-
-  private aes128cbc (key: string, iv: string, data: string) {
-    const encipher = crypto.createCipheriv('aes-128-cbc', key, iv)
-    let encoded = encipher.update(data, 'utf8', 'hex')
-    encoded += encipher.final('hex')
-    return encoded
   }
 
   private neteaseAESCBC = (api: any) => {
@@ -381,45 +351,6 @@ class Meting {
     }
     const result = funcs[this.server]()
     return result
-  }
-
-  private long2ip (long: number) {
-    const MAX_IP_IN_LONG = 4294967295 // 255.255.255.255
-    const MIN_IP_IN_LONG = 0 // 0.0.0.0
-
-    if (typeof long !== 'number' ||
-      long > MAX_IP_IN_LONG || long < MIN_IP_IN_LONG
-    ) {
-      return false
-    }
-
-    const ip = [
-      long >>> 24,
-      long >>> 16 & 0xFF,
-      long >>> 8 & 0xFF,
-      long & 0xFF
-    ].join('.')
-
-    return ip
-  }
-
-  private randBetween (min: number, max: number) {
-    const [minVal, maxVal] = min > max ? [max, min] : [min, max]
-    const rand = (maxVal - minVal) * Math.random() + min
-    return Math.floor(rand)
-  }
-
-  private getRandomHex (length: number) {
-    const maxLength = 8
-    const min = Math.pow(16, Math.min(length, maxLength) - 1)
-    const max = Math.pow(16,Math.min(length, maxLength)) - 1
-    const n = Math.floor(Math.random() * (max - min + 1)) + min
-    let r = n.toString(16)
-    while (r.length < length) {
-      r = r + this.getRandomHex(length - maxLength)
-    }
-
-    return r
   }
 
   private clean (raw: any, rule: string) {
