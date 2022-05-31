@@ -1,11 +1,11 @@
 Rynkis' FM
 ========
 
-### 私人电台  
+### Personal FM  
 
-如果您想更换歌单的话，请到 pages/api/playlist.ts 里找到：  
+If you wanna specify your personal playlist，you may find following code in `pages/api/playlist.ts`：  
 `const promises = ['7320208569'].map(id => meting.format(true).playlist(id))`  
-将里面的数字改成您想播放的歌单的 id（当然，是 netease 的）。  
+And then change the id in array (netease playlist id).  
 
 ### Usage  
 
