@@ -3,7 +3,7 @@ Rynkis' FM
 
 ### Personal FM  
 
-If you wanna specify your personal playlist，you may find following codes in `pages/api/playlist.ts`：  
+If you wanna specify your personal playlist，you may find out following codes in `pages/api/playlist.ts`：  
 `const promises = ['7320208569'].map(id => meting.format(true).playlist(id))`  
 And then change the id in array, it should be netease playlist id.  
 
