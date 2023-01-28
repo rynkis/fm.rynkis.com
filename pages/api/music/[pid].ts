@@ -8,58 +8,62 @@ const handler = async (
   req: NextApiRequest,
   res: NextApiResponse<any>
 ) => {
-  const { pid } = req.query
-  const meting = new Meting()
+  try {
+    const { pid } = req.query
+    const meting = new Meting()
+    const detInfo: any = await meting.format(true).song(pid as any)
+    const covInfo: any = await meting.format(true).pic(detInfo[0]['pic_id'])
+    const lrcInfo: any = await meting.format(true).lyric(pid as any)
+    const urlInfo = await meting.format(true).url(pid as any)
 
-  const detInfo: any = await meting.format(true).song(pid as any)
-  const covInfo: any = await meting.format(true).pic(detInfo[0]['pic_id'])
-  const lrcInfo: any = await meting.format(true).lyric(pid as any)
-
-  const urlInfo = await meting.format(true).url(pid as any)
-  const playInfo: any = {
-    ...urlInfo,
-    id: pid,
-    lrc: {},
-    tlrc: {},
-    cover: covInfo.url,
-    title: detInfo[0]['name'],
-    url: urlInfo.url.replace(/https:/, 'http:'),
-    artists: detInfo[0]['artist'].join(', ')
-  }
-
-  const ly: any = {
-    lyric: ['lrc', 'No Lyrics'],
-    tlyric: ['tlrc', '']
-  }
-  Object.keys(ly).forEach(keyName => {
-    const value = ly[keyName]
-    if (lrcInfo[keyName] !== '') {
-      const lrc = lrcInfo[keyName].split('\n')
-      for (const rows of lrc) {
-        const match = rows.match(/\[[^\[\]]*\]/g) || []
-        const times = match.map((val: string) => val.substring(1, val.length - 1))
-        if (times.length === 0) {
-          playInfo[value[0]][0] = value[1]
-          break
-        } else {
-          const colText = rows.replace(/\[[^\[\]]*\]/g, '')
-          times.every((key: string) => {
-            const arr = key.split(':')
-            const time = parseInt(arr[0]) * 60 + parseInt(arr[1])
-            playInfo[value[0]][time] = colText
-          })
-        }
-      }
-    } else {
-      playInfo[value[0]][0] = value[1]
+    const playInfo: any = {
+      ...urlInfo,
+      id: pid,
+      lrc: {},
+      tlrc: {},
+      cover: covInfo.url,
+      title: detInfo[0]['name'],
+      url: urlInfo.url.replace(/https:/, 'http:'),
+      artists: detInfo[0]['artist'].join(', ')
     }
-  })
 
-  res.setHeader(
-    'Cache-Control',
-    'no-cache, no-store, max-age=0, must-revalidate'
-  )
-  res.status(200).json(playInfo)
+    const ly: any = {
+      lyric: ['lrc', 'No Lyrics'],
+      tlyric: ['tlrc', '']
+    }
+    Object.keys(ly).forEach(keyName => {
+      const value = ly[keyName]
+      if (lrcInfo[keyName] !== '') {
+        const lrc = lrcInfo[keyName].split('\n')
+        for (const rows of lrc) {
+          const match = rows.match(/\[[^\[\]]*\]/g) || []
+          const times = match.map((val: string) => val.substring(1, val.length - 1))
+          if (times.length === 0) {
+            playInfo[value[0]][0] = value[1]
+            break
+          } else {
+            const colText = rows.replace(/\[[^\[\]]*\]/g, '')
+            times.every((key: string) => {
+              const arr = key.split(':')
+              const time = parseInt(arr[0]) * 60 + parseInt(arr[1])
+              playInfo[value[0]][time] = colText
+            })
+          }
+        }
+      } else {
+        playInfo[value[0]][0] = value[1]
+      }
+    })
+
+    res.setHeader(
+      'Cache-Control',
+      'no-cache, no-store, max-age=0, must-revalidate'
+    )
+    res.status(200).json(playInfo)
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({})
+  }
 }
 
 export default allowCors(handler)

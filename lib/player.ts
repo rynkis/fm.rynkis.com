@@ -64,6 +64,7 @@ class Player {
 
   private async start () {
     const { data } = await axios(this.config.playlist)
+    if (!data) return
     this.playList = data
     this.songNum = data.length
     this.playingIndex = Math.floor(Math.random() * this.songNum)
@@ -166,6 +167,7 @@ class Player {
       this.playingIndex = this.songNum - 1
     }
     const { data: song } = await axios.get(`${this.config.music}/${this.playList[this.playingIndex]}`)
+    if (!song) return
     song.url === '' && this.autoSkip ? this.nextTrack() : this.renderAudio(song)
   }
 
