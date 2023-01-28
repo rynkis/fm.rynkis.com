@@ -30,7 +30,7 @@ class Meting {
   proxyVal: Proxy | null = null
   formatVal: boolean = false
   header: any
-  realIP: string = '211.144.24.218'
+  realIP: string = '118.31.65.90'
 
   constructor (value: string = 'netease') {
     this.site(value)

@@ -28,6 +28,7 @@ class Player {
       localName: 'FM.GITMV.logger',
       source: 'https://github.com/Shy07/FM.GITMV',
       music: '/api/music',
+      lyrics: '/api/lyrics',
       playlist: '/api/playlist'
     }
     this.domNodes = {
@@ -166,8 +167,14 @@ class Player {
     if (this.playingIndex < 0) {
       this.playingIndex = this.songNum - 1
     }
-    const { data: song } = await axios.get(`${this.config.music}/${this.playList[this.playingIndex]}`)
-    if (!song) return
+    const sid = this.playList[this.playingIndex]
+    const { data: result } = await axios.get(`${this.config.music}/${sid}`)
+    if (!result) return
+    const { data: lyrics } = await axios.get(`${this.config.lyrics}/${sid}`)
+    const song = {
+      ...result,
+      ...lyrics
+    }
     song.url === '' && this.autoSkip ? this.nextTrack() : this.renderAudio(song)
   }
 
