@@ -1,7 +1,10 @@
 import axios from 'axios'
 import { isPlainObject } from 'lodash/fp'
+import setTitle from './setTitle'
 
 const localAlbum = '/images/album.jpg'
+
+const SIZES = [96, 128, 192, 256, 384, 512]
 
 class Player {
   data: any
@@ -23,6 +26,7 @@ class Player {
       requestID: null
     }
     this.config = {
+      siteTitle: "Rynkis' FM",
       volume: 0.5,
       expire: 1200,
       localName: 'FM.GITMV.logger',
@@ -175,6 +179,7 @@ class Player {
       ...result,
       ...lyrics
     }
+    this.updateMediaSession(song)
     song.url === '' && this.autoSkip ? this.nextTrack() : this.renderAudio(song)
   }
 
@@ -199,6 +204,7 @@ class Player {
         this.audio.currentTime = this.recursion.currentTime
         this.recursion.currentTime = null
       }
+      setTitle([this.config.siteTitle, song.title].join(' | '))
       this.audio.play()
     }
   }
@@ -298,6 +304,25 @@ class Player {
   cancelAlbumRotate() {
     if (this.recursion.requestID) {
       window.cancelAnimationFrame(this.recursion.requestID)
+    }
+  }
+
+  private updateMediaSession(song: any) {
+    if ('mediaSession' in navigator) {
+      const { title, artists: artist, album, cover } = song
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title,
+        artist,
+        album,
+        artwork: SIZES.map(x => ({
+          src: cover.replace(/\d+y\d+/, `${x}y${x}`),   sizes: `${x}x${x}`,   type: 'image/png'
+        }))
+      });
+    
+      navigator.mediaSession.setActionHandler('play', () => this.playAudio());
+      navigator.mediaSession.setActionHandler('pause', () => this.pauseAudio());
+      navigator.mediaSession.setActionHandler('previoustrack', () => this.prevTrack());
+      navigator.mediaSession.setActionHandler('nexttrack', () => this.nextTrack());
     }
   }
 

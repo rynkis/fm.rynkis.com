@@ -20,6 +20,7 @@ const handler = async (
       id: pid,
       cover: covInfo.url,
       title: detInfo[0]['name'],
+      album: detInfo[0]['album'],
       url: urlInfo.url.replace(/https:/, 'http:'),
       artists: detInfo[0]['artist'].join(', ')
     }
