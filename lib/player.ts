@@ -6,13 +6,30 @@ const localAlbum = '/images/album.jpg'
 
 const SIZES = [96, 128, 192, 256, 384, 512]
 
+interface Song {
+  id: string
+  cover: string
+  title: string
+  album: string
+  url: string
+  artists: string
+  expire: number
+  timestamp: number
+  lrc: string[] | string
+  tlrc: string[] | string
+}
+
+interface Audio extends HTMLAudioElement {
+  sourcePointer: Song
+}
+
 class Player {
   data: any
   recursion: any
   config: any
   domNodes: any
-  audio: any
-  image: any
+  audio: Audio
+  image: HTMLImageElement
   playingIndex: number
   songNum: number
   playList: []
@@ -29,17 +46,25 @@ class Player {
       siteTitle: "Rynkis' FM",
       volume: 0.5,
       expire: 1200,
-      localName: 'FM.GITMV.logger',
-      source: 'https://github.com/Shy07/FM.GITMV',
+      localName: 'Rynkis.FM.logger',
+      source: 'https://github.com/Shy07/src.shy07.com',
       music: '/api/music',
       lyrics: '/api/lyrics',
       playlist: '/api/playlist'
     }
     this.domNodes = {
-      home: document.querySelector('#controller [data-id="fa-home"] .fa-button'),
-      back: document.querySelector('#controller [data-id="fa-back"] .fa-button'),
-      over: document.querySelector('#controller [data-id="fa-over"] .fa-button'),
-      mode: document.querySelector('#controller [data-id="fa-mode"] .fa-button i'),
+      home: document.querySelector(
+        '#controller [data-id="fa-home"] .fa-button'
+      ),
+      back: document.querySelector(
+        '#controller [data-id="fa-back"] .fa-button'
+      ),
+      over: document.querySelector(
+        '#controller [data-id="fa-over"] .fa-button'
+      ),
+      mode: document.querySelector(
+        '#controller [data-id="fa-mode"] .fa-button i'
+      ),
       title: document.querySelector('#detail .title'),
       album: document.querySelector('#surface .album'),
       magic: document.querySelector('#surface .magic'),
@@ -50,9 +75,9 @@ class Player {
       faMagic: document.querySelector('#surface .magic .fa'),
       lyric: document.querySelector('#lyric .lrc'),
       tLyric: document.querySelector('#lyric .tlrc'),
-      backdrop: document.querySelector('#backdrop'),
+      backdrop: document.querySelector('#backdrop')
     }
-    this.audio = window.document.createElement('audio')
+    this.audio = window.document.createElement('audio') as Audio
     this.audio.volume = this.config.volume
     this.image = new Image()
     this.image.crossOrigin = 'anonymous'
@@ -67,7 +92,7 @@ class Player {
     this.start()
   }
 
-  private async start () {
+  private async start() {
     const { data } = await axios(this.config.playlist)
     if (!data) return
     this.playList = data
@@ -81,7 +106,7 @@ class Player {
     this.addOtherEvents()
   }
 
-  private createAlbum (src: any = null) {
+  private createAlbum(src: any = null) {
     this.image.src = typeof src === 'string' ? src : localAlbum
   }
 
@@ -94,7 +119,10 @@ class Player {
       this.prevFrameRadian = 0
       this.domNodes.album.width = this.domNodes.album.height = MAX_LENGTH * 2
       const context = this.domNodes.album.getContext('2d')
-      this.domNodes.album.pattern = context.createPattern(this.image, 'no-repeat')
+      this.domNodes.album.pattern = context.createPattern(
+        this.image,
+        'no-repeat'
+      )
 
       context.scale(2, 2)
       context.clearRect(0, 0, MAX_LENGTH, MAX_LENGTH)
@@ -110,7 +138,9 @@ class Player {
       context.fill()
       context.closePath()
 
-      this.domNodes.backdrop.style['background-image'] = `url(${this.image.src})`
+      this.domNodes.backdrop.style[
+        'background-image'
+      ] = `url(${this.image.src})`
     })
     this.image.addEventListener('error', () => {
       if (this.image.src !== localAlbum) {
@@ -119,7 +149,7 @@ class Player {
     })
   }
 
-  private setLocalData () {
+  private setLocalData() {
     this.data.lastID = this.playingIndex
     this.data.playMode = this.domNodes.mode.getAttribute('class')
     try {
@@ -129,7 +159,7 @@ class Player {
     }
   }
 
-  private getLocalData () {
+  private getLocalData() {
     try {
       return JSON.parse(localStorage.getItem(this.config.localName) as any)
     } catch (e) {
@@ -144,7 +174,8 @@ class Player {
       this.data = latestData
     }
     if (this.data.lastID) this.playingIndex = this.data.lastID
-    if (this.data.playMode) this.domNodes.mode.setAttribute('class', this.data.playMode)
+    if (this.data.playMode)
+      this.domNodes.mode.setAttribute('class', this.data.playMode)
     switch (this.data.playMode) {
       case 'fa fa-align-justify':
         this.audio.loop = false
@@ -164,7 +195,7 @@ class Player {
     }
   }
 
-  private async loadMusicInfo (caller: any = null) {
+  private async loadMusicInfo(caller: any = null) {
     if (this.playingIndex >= this.songNum) {
       this.playingIndex = 0
     }
@@ -183,7 +214,7 @@ class Player {
     song.url === '' && this.autoSkip ? this.nextTrack() : this.renderAudio(song)
   }
 
-  async playAudio () {
+  async playAudio() {
     if (this.audio.sourcePointer.url === '') return
 
     const time = Math.ceil(Date.now() / 1000)
@@ -191,11 +222,15 @@ class Player {
     const rest = this.audio.duration - this.audio.currentTime // Maybe `NaN`
     const minExpire = this.audio.duration || 120
     const expire = song.expire < minExpire ? this.config.expire : song.expire
-    const isExpire = Math.ceil(rest) < expire && time - song.timestamp + Math.ceil(rest || 0) > expire
+    const isExpire =
+      Math.ceil(rest) < expire &&
+      time - song.timestamp + Math.ceil(rest || 0) > expire
     // NO risk of recursion
     if (isExpire) {
       this.recursion.currentTime = this.audio.currentTime
-      const { data: song } = await axios.get(`${this.config.music}/${this.playList[this.playingIndex]}`)
+      const { data: song } = await axios.get(
+        `${this.config.music}/${this.playList[this.playingIndex]}`
+      )
       this.audio.src = song.url
       this.audio.sourcePointer = song
       this.playAudio()
@@ -252,23 +287,23 @@ class Player {
     }
   }
 
-  displayLrc () {
+  displayLrc() {
     const playTime = Math.floor(this.audio.currentTime)
     if (typeof this.audio.sourcePointer.lrc[playTime] !== 'string') return
     this.domNodes.lyric.textContent = this.audio.sourcePointer.lrc[playTime]
     if (this.audio.sourcePointer.lrc[playTime] === '') {
-      return this.domNodes.tLyric.textContent = ''
+      return (this.domNodes.tLyric.textContent = '')
     }
     if (typeof this.audio.sourcePointer.tlrc[playTime] !== 'string') return
     this.domNodes.tLyric.textContent = this.audio.sourcePointer.tlrc[playTime]
   }
 
-  requestAlbumRotate () {
+  requestAlbumRotate() {
     const ANIMATION_FPS = 60
     const ONE_TURN_TIME = 30
     const ONE_TURN = 360 //Math.PI * 2
     const MAX_EACH_FRAME_TIME = 1000 / 50
-    const EACH_FRAME_RADIAN = 1 / (ANIMATION_FPS * ONE_TURN_TIME) * ONE_TURN
+    const EACH_FRAME_RADIAN = (1 / (ANIMATION_FPS * ONE_TURN_TIME)) * ONE_TURN
 
     let prevTimestamp = 0
     const loopAnimation = (timestamp: any) => {
@@ -282,7 +317,7 @@ class Player {
       if (this.audio.paused) {
         this.cancelAlbumRotate()
       } else {
-        this.recursion.requestID = window.requestAnimationFrame(loopAnimation);
+        this.recursion.requestID = window.requestAnimationFrame(loopAnimation)
       }
     }
 
@@ -292,7 +327,7 @@ class Player {
     this.recursion.requestID = window.requestAnimationFrame(loopAnimation)
   }
 
-  updateAlbumRotateCSS (deg: number) {
+  updateAlbumRotateCSS(deg: number) {
     const { album } = this.domNodes
     const value = `rotate(${deg}deg)`
     const prefixes = ['', '-ms-', '-moz-', '-webkit-', '-o-']
@@ -315,18 +350,24 @@ class Player {
         artist,
         album,
         artwork: SIZES.map(x => ({
-          src: cover.replace(/\d+y\d+/, `${x}y${x}`),   sizes: `${x}x${x}`,   type: 'image/png'
+          src: cover.replace(/\d+y\d+/, `${x}y${x}`),
+          sizes: `${x}x${x}`,
+          type: 'image/png'
         }))
-      });
-    
-      navigator.mediaSession.setActionHandler('play', () => this.playAudio());
-      navigator.mediaSession.setActionHandler('pause', () => this.pauseAudio());
-      navigator.mediaSession.setActionHandler('previoustrack', () => this.prevTrack());
-      navigator.mediaSession.setActionHandler('nexttrack', () => this.nextTrack());
+      })
+
+      navigator.mediaSession.setActionHandler('play', () => this.playAudio())
+      navigator.mediaSession.setActionHandler('pause', () => this.pauseAudio())
+      navigator.mediaSession.setActionHandler('previoustrack', () =>
+        this.prevTrack()
+      )
+      navigator.mediaSession.setActionHandler('nexttrack', () =>
+        this.nextTrack()
+      )
     }
   }
 
-  addAudioEvents () {
+  addAudioEvents() {
     this.audio.addEventListener('playing', () => {
       this.requestAlbumRotate()
       if (this.lrcInterval !== null) {
@@ -345,12 +386,14 @@ class Player {
       }
     })
     this.audio.addEventListener('play', () => {
-      const list = this.domNodes.faMagic.className.split(' ')
+      const list = this.domNodes.faMagic.className
+        .split(' ')
         .filter((val: string) => val !== 'fa-play')
       this.domNodes.faMagic.className = [...list, 'fa-pause'].join(' ')
     })
     this.audio.addEventListener('pause', () => {
-      const list = this.domNodes.faMagic.className.split(' ')
+      const list = this.domNodes.faMagic.className
+        .split(' ')
         .filter((val: string) => val !== 'fa-pause')
       this.domNodes.faMagic.className = [...list, 'fa-play'].join(' ')
     })
@@ -364,8 +407,7 @@ class Player {
       const val: any = this.audio.currentTime / this.audio.duration
       this.domNodes.elapsed.style.width = `${val.toFixed(5) * 100}%`
     })
-    this.audio.addEventListener('error', (e: Error) => {
-      console.warn(e)
+    this.audio.addEventListener('error', () => {
       this.recursion.currentTime = this.audio.currentTime
       this.pauseAudio()
       this.audio.src = this.audio.sourcePointer.url
@@ -376,8 +418,10 @@ class Player {
     setInterval(() => {
       this.domNodes.buffered.style.width = `${
         this.audio.buffered.length > 0
-        ? Math.round(this.audio.buffered.end(0)) / Math.round(this.audio.duration) * 100
-        : 0
+          ? (Math.round(this.audio.buffered.end(0)) /
+              Math.round(this.audio.duration)) *
+            100
+          : 0
       }%`
     }, 60)
   }
@@ -385,7 +429,7 @@ class Player {
   addOtherEvents() {
     window.addEventListener('unload', () => this.setLocalData())
 
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', e => {
       switch (e.which) {
         case 32: // Space
           e.preventDefault()
@@ -404,7 +448,9 @@ class Player {
       }
     })
 
-    this.domNodes.home.addEventListener('click', () => window.open(this.config.source))
+    this.domNodes.home.addEventListener('click', () =>
+      window.open(this.config.source)
+    )
 
     this.domNodes.back.addEventListener('click', () => {
       this.autoSkip = false
