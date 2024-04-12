@@ -4,6 +4,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import Meting from '../../../lib/meting'
 import allowCors from '../../../lib/allowCors'
 import KVCache from '../../../lib/kvCache'
+import { _24_HOURS } from '../../../lib/consts'
 
 const handler = async (
   req: NextApiRequest,
@@ -58,7 +59,7 @@ const handler = async (
     })
 
     res.status(200).json(result)
-    await KVCache.set(CACHE_KEY, result, 24 * 60 * 60 * 1000)
+    await KVCache.set(CACHE_KEY, result, _24_HOURS)
   } catch (err) {
     console.log(err)
     res.status(500).json({})

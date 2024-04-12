@@ -6,7 +6,6 @@ class KVCache {
   }
   static async get (key: string) {
     const cached = await kv.get(key)
-    console.log(cached)
     return cached
   }
 }
