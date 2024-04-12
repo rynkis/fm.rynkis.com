@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 import Meting from '../../../lib/meting'
 import allowCors from '../../../lib/allowCors'
-import KVCache from '../../../lib/KVCache'
+import KVCache from '../../../lib/kvCache'
 
 const handler = async (
   req: NextApiRequest,

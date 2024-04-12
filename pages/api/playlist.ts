@@ -4,7 +4,7 @@ import fp from 'lodash/fp'
 
 import Meting from '../../lib/meting'
 import allowCors from '../../lib/allowCors'
-import KVCache from '../../lib/KVCache'
+import KVCache from '../../lib/kvCache'
 
 const handler = async (
   req: NextApiRequest,
