@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 import Meting from '../../../lib/meting'
 import allowCors from '../../../lib/allowCors'
-import localCache from '../../../lib/LocalCache'
+import localCache from '../../../lib/localCache'
 
 const handler = async (
   req: NextApiRequest,
