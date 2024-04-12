@@ -47,7 +47,7 @@ class Player {
       volume: 0.5,
       expire: 1200,
       localName: 'Rynkis.FM.logger',
-      source: 'https://github.com/Shy07/src.shy07.com',
+      source: 'https://github.com/Shy07/fm.rynkis.com',
       music: '/api/music',
       lyrics: '/api/lyrics',
       playlist: '/api/playlist'
@@ -206,7 +206,7 @@ class Player {
     const { data: result } = await axios.get(`${this.config.music}/${sid}`)
     if (!result) return
     const { data: lyrics } = await axios.get(`${this.config.lyrics}/${sid}`)
-    const song = {
+    const song: Song = {
       ...result,
       ...lyrics
     }
@@ -270,7 +270,7 @@ class Player {
     this.loadMusicInfo('prev')
   }
 
-  private renderAudio(song: any) {
+  private renderAudio(song: Song) {
     const size = this.domNodes.album.clientWidth * 2
     this.image.src = song.cover.replace(/\d+y\d+/, `${size}y${size}`)
     this.domNodes.title.textContent = song.title
@@ -342,7 +342,7 @@ class Player {
     }
   }
 
-  private updateMediaSession(song: any) {
+  private updateMediaSession(song: Song) {
     if ('mediaSession' in navigator) {
       const { title, artists: artist, album, cover } = song
       navigator.mediaSession.metadata = new MediaMetadata({
