@@ -1,26 +1,22 @@
-import fs from 'fs'
-import { resolve } from 'path'
+import { kv } from '@vercel/kv'
 
-class LocalCache {
-  private cachePath: string
+class KVCache {
+  private readonly KV_KEY = 'FM-CACHE'
   private cache: any = {}
   constructor() {
-    this.cachePath = resolve(process.cwd(), 'temp/cache')
     this.load()
   }
-  private load() {
-    if (fs.existsSync(this.cachePath)) {
-      const json = fs.readFileSync(this.cachePath, 'utf-8')
-      try {
-        this.cache = JSON.parse(json)
-      } catch (err) {
-        console.error(err)
-      }
+  private async load() {
+    try {
+      const json = await kv.get(this.KV_KEY)
+      this.cache = JSON.parse(json as string)
+    } catch (err) {
+      console.error(err)
     }
   }
-  private save() {
+  private async save() {
     const json = JSON.stringify(this.cache)
-    fs.writeFileSync(this.cachePath, json, { encoding: 'utf-8' })
+    await kv.set(this.KV_KEY, json)
   }
   set (key: string, item: any, ms: number = 0) {
     this.cache[key] = { item, ms, time: new Date().valueOf() }
@@ -45,6 +41,6 @@ class LocalCache {
   }
 }
 
-const localCache = new LocalCache()
+const kvCache = new KVCache()
 
-export default localCache
+export default kvCache
