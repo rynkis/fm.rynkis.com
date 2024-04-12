@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 import Meting from '../../../lib/meting'
 import allowCors from '../../../lib/allowCors'
-import localCache from '../../../lib/kvCache'
+import KVCache from '../../../lib/KVCache'
 
 const handler = async (
   req: NextApiRequest,
@@ -16,7 +16,7 @@ const handler = async (
   try {
     const { pid } = req.query
     const CACHE_KEY = `lyrics-${pid}`
-    const cached = localCache.get(CACHE_KEY)
+    const cached = await KVCache.get(CACHE_KEY)
     if (cached) {
       return res.status(200).json(cached)
     }
@@ -56,9 +56,9 @@ const handler = async (
         result[value[0]][0] = value[1]
       }
     })
-    localCache.set(CACHE_KEY, result, 24 * 60 * 60 * 1000)
 
     res.status(200).json(result)
+    await KVCache.set(CACHE_KEY, result, 24 * 60 * 60 * 1000)
   } catch (err) {
     console.log(err)
     res.status(500).json({})

@@ -4,7 +4,7 @@ import fp from 'lodash/fp'
 
 import Meting from '../../lib/meting'
 import allowCors from '../../lib/allowCors'
-import localCache from '../../lib/kvCache'
+import KVCache from '../../lib/KVCache'
 
 const handler = async (
   req: NextApiRequest,
@@ -16,7 +16,7 @@ const handler = async (
   )
 
   const CACHE_KEY = 'PLAYLIST'
-  const cached = localCache.get(CACHE_KEY)
+  const cached = await KVCache.get(CACHE_KEY)
   if (cached) {
     return res.status(200).json(cached)
   }
@@ -28,9 +28,9 @@ const handler = async (
     fp.map('id'),
     fp.flatten
   )(playlist)
-  localCache.set(CACHE_KEY, ids, 60 * 60 * 1000)
 
   res.status(200).json(ids)
+  await KVCache.set(CACHE_KEY, ids, 60 * 60 * 1000)
 }
 
 export default allowCors(handler)
