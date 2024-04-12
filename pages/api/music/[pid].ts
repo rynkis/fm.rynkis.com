@@ -28,7 +28,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<any>) => {
     const { pid } = req.query
     const URL_CACHE_KEY = `music-url-${pid}`
     const DAT_CACHE_KEY = `music-info-${pid}`
-    const cachedUrl = await KVCache.get(URL_CACHE_KEY)
+    const cachedUrl: any = await KVCache.get(URL_CACHE_KEY)
     const cachedDat: any = await KVCache.get(DAT_CACHE_KEY)
     const meting = new Meting()
 
@@ -36,13 +36,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<any>) => {
       const data = { ...cachedUrl, ...cachedDat }
       return res.status(200).json(data)
     } else if (cachedDat) {
-      const urlCache = await makeUrlCache(URL_CACHE_KEY, cachedDat.picId, pid)
+      const urlCache = await makeUrlCache(URL_CACHE_KEY, cachedDat.picId, pid as string)
       const data = { ...urlCache, ...cachedDat }
       return res.status(200).json(data)
     }
 
-    const detInfo: any = await meting.format(true).song(pid as any)
-    const urlCache = await makeUrlCache(URL_CACHE_KEY, detInfo[0]['pic_id'], pid)
+    const detInfo: any = await meting.format(true).song(pid as string)
+    const urlCache = await makeUrlCache(URL_CACHE_KEY, detInfo[0]['pic_id'], pid as string)
 
     const playInfo: any = {
       id: pid,
