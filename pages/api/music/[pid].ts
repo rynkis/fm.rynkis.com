@@ -4,7 +4,21 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import Meting from '../../../lib/meting'
 import allowCors from '../../../lib/allowCors'
 import KVCache from '../../../lib/kvCache'
-import { _1_MINS, _5_MINS } from '../../../lib/consts'
+import { _5_MINS, _24_HOURS } from '../../../lib/consts'
+
+const makeDatCache = async (cacheKey: string, pid: string) => {
+  const meting = new Meting()
+  const datInfo: any = await meting.format(true).song(pid as string)
+  const datCache: any = {
+    id: pid,
+    title: datInfo[0]['name'],
+    album: datInfo[0]['album'],
+    artists: datInfo[0]['artist'].join(', '),
+    picId: datInfo[0]['pic_id']
+  }
+  await KVCache.set(cacheKey, datCache, _24_HOURS)
+  return datCache
+}
 
 const makeUrlCache = async (cacheKey: string, picId: string, pid: string) => {
   const meting = new Meting()
@@ -30,7 +44,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<any>) => {
     const DAT_CACHE_KEY = `music-info-${pid}`
     const cachedUrl: any = await KVCache.get(URL_CACHE_KEY)
     const cachedDat: any = await KVCache.get(DAT_CACHE_KEY)
-    const meting = new Meting()
 
     if (cachedUrl) {
       const data = { ...cachedUrl, ...cachedDat }
@@ -41,19 +54,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<any>) => {
       return res.status(200).json(data)
     }
 
-    const detInfo: any = await meting.format(true).song(pid as string)
-    const urlCache = await makeUrlCache(URL_CACHE_KEY, detInfo[0]['pic_id'], pid as string)
+    const datCache = await makeDatCache(DAT_CACHE_KEY, pid as string)
+    const urlCache = await makeUrlCache(URL_CACHE_KEY, datCache.picId, pid as string)
 
-    const playInfo: any = {
-      id: pid,
-      title: detInfo[0]['name'],
-      album: detInfo[0]['album'],
-      artists: detInfo[0]['artist'].join(', ')
-    }
-
-    const data = { ...urlCache, ...playInfo }
+    const data = { ...urlCache, ...datCache }
     res.status(200).json(data)
-    await KVCache.set(DAT_CACHE_KEY, playInfo, _1_MINS)
   } catch (err) {
     console.log(err)
     res.status(500).json({})
