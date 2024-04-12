@@ -40,23 +40,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<any>) => {
     const { pid } = req.query
     const URL_CACHE_KEY = `music-url-${pid}`
     const DAT_CACHE_KEY = `music-info-${pid}`
-    let cachedUrl: any = await KVCache.get(URL_CACHE_KEY)
-    let cachedDat: any = await KVCache.get(DAT_CACHE_KEY)
+    let urlCache: any = await KVCache.get(URL_CACHE_KEY)
+    let datCache: any = await KVCache.get(DAT_CACHE_KEY)
 
-    if (cachedUrl) {
-      // do nothing
-    } else if (cachedDat) {
-      cachedUrl = await makeUrlCache(cachedDat.picId, pid as string)
-    } else {
-      cachedDat = await makeDatCache(pid as string)
-      cachedUrl = await makeUrlCache(cachedDat.picId, pid as string)
+    if (!urlCache) {
+      urlCache = await makeUrlCache(datCache.picId, pid as string)
+    }
+    if (!datCache) {
+      datCache = await makeDatCache(pid as string)
     }
 
-    const data = { ...cachedUrl, ...cachedDat }
+    const data = { ...urlCache, ...datCache }
     res.status(200).json(data)
 
-    await KVCache.set(URL_CACHE_KEY, cachedUrl, _5_MINS)
-    await KVCache.set(DAT_CACHE_KEY, cachedDat, _24_HOURS)
+    await KVCache.set(URL_CACHE_KEY, urlCache, _5_MINS)
+    await KVCache.set(DAT_CACHE_KEY, datCache, _24_HOURS)
   } catch (err) {
     console.log(err)
     res.status(500).json({})

@@ -58,9 +58,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<any>) => {
     const CACHE_KEY = `lyrics-${pid}`
     let lyricsCache = await KVCache.get(CACHE_KEY)
 
-    if (lyricsCache) {
-      // do nothing
-    } else {
+    if (!lyricsCache) {
       lyricsCache = await makeLyricsCache(pid as string)
     }
 

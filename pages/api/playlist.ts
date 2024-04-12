@@ -24,9 +24,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<any>) => {
   const CACHE_KEY = 'PLAYLIST'
   let playlistCache = await KVCache.get(CACHE_KEY)
 
-  if (playlistCache) {
-    // do nothing
-  } else {
+  if (!playlistCache) {
     playlistCache = await makePlaylistCache()
   }
 

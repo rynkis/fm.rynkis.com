@@ -8,10 +8,10 @@ import base64 from 'base-64'
 import qs from 'qs'
 
 interface Proxy {
-  host: string,
-  port: number,
+  host: string
+  port: number
   auth?: {
-    username: string,
+    username: string
     password: string
   }
 }
@@ -32,11 +32,11 @@ class Meting {
   header: any
   realIP: string = '118.31.65.90'
 
-  constructor (value: string = 'netease') {
+  constructor(value: string = 'netease') {
     this.site(value)
   }
 
-  site (value: string) {
+  site(value: string) {
     const suppose = ['netease']
     this.server = suppose.includes(value) ? value : 'netease'
     this.header = this.curlSet()
@@ -44,35 +44,36 @@ class Meting {
     return this
   }
 
-  cookie (value: string) {
+  cookie(value: string) {
     this.header['Cookie'] = value
     return this
   }
 
-  format (value: boolean = true) {
+  format(value: boolean = true) {
     this.formatVal = value
     return this
   }
 
-  proxy (value: Proxy) {
+  proxy(value: Proxy) {
     this.proxyVal = value
     return this
   }
 
-  search (keyword: string, option: any = {}) {
+  search(keyword: string, option: any = {}) {
     const funcs: any = {
       netease: () => ({
-        'method': 'POST',
-        'url': 'http://music.163.com/api/cloudsearch/pc',
-        'body': {
-          's': keyword,
-          'type'  : option.type ? option.type : 1,
-          'limit' : option.limit ? option.limit : 30,
-          'total' : 'true',
-          'offset': option.page && option.limit ? (option.page - 1) * option.limit : 0
+        method: 'POST',
+        url: 'http://music.163.com/api/cloudsearch/pc',
+        body: {
+          s: keyword,
+          type: option.type ? option.type : 1,
+          limit: option.limit ? option.limit : 30,
+          total: 'true',
+          offset:
+            option.page && option.limit ? (option.page - 1) * option.limit : 0
         },
-        'encode': 'neteaseAESCBC',
-        'format': 'result.songs'
+        encode: 'neteaseAESCBC',
+        format: 'result.songs'
       })
     }
     const api = funcs[this.server]()
@@ -80,20 +81,20 @@ class Meting {
     return this.exec(api)
   }
 
-  song (id: string) {
+  song(id: string) {
     const funcs: any = {
       netease: () => ({
-        'method': 'POST',
-        'url': 'http://music.163.com/api/linux/forward',
-        'body': {
-          'method': 'POST',
-          'params': {
-            'c': '[{"id":' + id + ',"v":0}]'
+        method: 'POST',
+        url: 'http://music.163.com/api/linux/forward',
+        body: {
+          method: 'POST',
+          params: {
+            c: '[{"id":' + id + ',"v":0}]'
           },
-          'url': 'http://music.163.com/api/v3/song/detail'
+          url: 'http://music.163.com/api/v3/song/detail'
         },
-        'encode': 'neteaseAESCBC',
-        'format': 'songs'
+        encode: 'neteaseAESCBC',
+        format: 'songs'
       })
     }
     const api = funcs[this.server]()
@@ -101,21 +102,21 @@ class Meting {
     return this.exec(api)
   }
 
-  album (id: string) {
+  album(id: string) {
     const funcs: any = {
       netease: () => ({
-        'method': 'POST',
-        'url': 'http://music.163.com/api/v1/album/' + id,
-        'body': {
-          'total': 'true',
-          'offset': '0',
-          'id': id,
-          'limit': '1000',
-          'ext': 'true',
-          'private_cloud': 'true'
+        method: 'POST',
+        url: 'http://music.163.com/api/v1/album/' + id,
+        body: {
+          total: 'true',
+          offset: '0',
+          id: id,
+          limit: '1000',
+          ext: 'true',
+          private_cloud: 'true'
         },
-        'encode': 'neteaseAESCBC',
-        'format': 'songs'
+        encode: 'neteaseAESCBC',
+        format: 'songs'
       })
     }
     const api = funcs[this.server]()
@@ -123,19 +124,19 @@ class Meting {
     return this.exec(api)
   }
 
-  artist (id: string, limit: number = 50) {
+  artist(id: string, limit: number = 50) {
     const funcs: any = {
       netease: () => ({
-        'method': 'POST',
-        'url'   : 'http://music.163.com/api/v1/artist/' + id,
-        'body'  : {
-          'ext': 'true',
-          'private_cloud': 'true',
-          'top': limit,
-          'id': id
+        method: 'POST',
+        url: 'http://music.163.com/api/v1/artist/' + id,
+        body: {
+          ext: 'true',
+          private_cloud: 'true',
+          top: limit,
+          id: id
         },
-        'encode': 'neteaseAESCBC',
-        'format': 'hotSongs'
+        encode: 'neteaseAESCBC',
+        format: 'hotSongs'
       })
     }
     const api = funcs[this.server]()
@@ -143,23 +144,23 @@ class Meting {
     return this.exec(api)
   }
 
-  playlist (id: string) {
+  playlist(id: string) {
     const funcs: any = {
       netease: () => ({
-        'method': 'POST',
-        'url': 'http://music.163.com/api/linux/forward',
-        'body': {
-          'method': 'POST',
-          'params': {
-            's': 0,
+        method: 'POST',
+        url: 'http://music.163.com/api/linux/forward',
+        body: {
+          method: 'POST',
+          params: {
+            s: 0,
             id,
-            'n': 1000,
-            't': 0
+            n: 1000,
+            t: 0
           },
-          'url': 'http://music.163.com/api/v3/playlist/detail'
+          url: 'http://music.163.com/api/v3/playlist/detail'
         },
-        'encode': 'neteaseAESCBC',
-        'format': 'playlist#tracks'
+        encode: 'neteaseAESCBC',
+        format: 'playlist#tracks'
       })
     }
     const api = funcs[this.server]()
@@ -167,21 +168,21 @@ class Meting {
     return this.exec(api)
   }
 
-  url (id: string, br: number = 320) {
+  url(id: string, br: number = 320) {
     const funcs: any = {
       netease: () => ({
-        'method': 'POST',
-        'url': 'http://music.163.com/api/linux/forward',
-        'body': {
-          'method': 'POST',
-          'params': {
-            'ids': [id],
-            'br': br * 1000
+        method: 'POST',
+        url: 'http://music.163.com/api/linux/forward',
+        body: {
+          method: 'POST',
+          params: {
+            ids: [id],
+            br: br * 1000
           },
-          'url': 'http://music.163.com/api/song/enhance/player/url'
+          url: 'http://music.163.com/api/song/enhance/player/url'
         },
-        'encode': 'neteaseAESCBC',
-        'decode': 'neteaseUrl'
+        encode: 'neteaseAESCBC',
+        decode: 'neteaseUrl'
       })
     }
     const api = funcs[this.server]()
@@ -190,24 +191,24 @@ class Meting {
     return this.exec(api)
   }
 
-  lyric (id: string) {
+  lyric(id: string) {
     const funcs: any = {
       netease: () => ({
-        'method': 'POST',
-        'url': 'http://music.163.com/api/linux/forward',
-        'body': {
-          'method': 'POST',
-          'params': {
+        method: 'POST',
+        url: 'http://music.163.com/api/linux/forward',
+        body: {
+          method: 'POST',
+          params: {
             id,
-            'os': 'linux',
-            'lv': -1,
-            'kv': -1,
-            'tv': -1
+            os: 'linux',
+            lv: -1,
+            kv: -1,
+            tv: -1
           },
-          'url': 'http://music.163.com/api/song/lyric'
+          url: 'http://music.163.com/api/song/lyric'
         },
-        'encode': 'neteaseAESCBC',
-        'decode': 'neteaseLyric'
+        encode: 'neteaseAESCBC',
+        decode: 'neteaseLyric'
       })
     }
     const api = funcs[this.server]()
@@ -215,10 +216,19 @@ class Meting {
     return this.exec(api)
   }
 
-  async pic (id: string, size: number = 300) {
+  async pic(id: string, size: number = 300) {
     const funcs: any = {
       netease: () => {
-        return 'https://p3.music.126.net/' + this.neteaseEncryptId(id) + '/' + id + '.jpg?param=' + size + 'y' + size
+        return (
+          'https://p3.music.126.net/' +
+          this.neteaseEncryptId(id) +
+          '/' +
+          id +
+          '.jpg?param=' +
+          size +
+          'y' +
+          size
+        )
       }
     }
     const url = funcs[this.server]()
@@ -226,7 +236,7 @@ class Meting {
     return { url }
   }
 
-  private hex2bin (str: string) {
+  private hex2bin(str: string) {
     let ret = ''
     for (let i = 0; i < str.length - 1; i += 2) {
       const x = str.substring(i, i + 2)
@@ -247,12 +257,13 @@ class Meting {
     return api
   }
 
-  private neteaseEncryptId (id: string) {
+  private neteaseEncryptId(id: string) {
     const magic = '3go8&$8*3*3h0k(2)2'.split('')
     const songId = `${id}`.split('')
     for (let i = 0; i < songId.length; i++) {
       songId[i] = String.fromCodePoint(
-        (songId[i].codePointAt(0) || 0) ^ ((magic[i % magic.length]).codePointAt(0) || 0)
+        (songId[i].codePointAt(0) || 0) ^
+          (magic[i % magic.length].codePointAt(0) || 0)
       )
     }
     const hash = base64.encode(this.hex2bin(md5(songId.join(''))))
@@ -261,39 +272,39 @@ class Meting {
     return result
   }
 
-  private neteaseUrl (data: any) {
+  private neteaseUrl(data: any) {
     let url = null
     if (fp.get('data.0.uf.url')(data)) {
       data['data'][0]['url'] = data['data'][0]['uf']['url']
     }
     if (fp.get('data.0.url')(data)) {
       url = {
-        'url': data['data'][0]['url'],
-        'size': data['data'][0]['size'],
-        'br': data['data'][0]['br'] / 1000
+        url: data['data'][0]['url'],
+        size: data['data'][0]['size'],
+        br: data['data'][0]['br'] / 1000
       }
     } else {
       url = {
-        'url': '',
-        'size': 0,
-        'br': -1
+        url: '',
+        size: 0,
+        br: -1
       }
     }
 
     return url
   }
 
-  private neteaseLyric (json: any) {
+  private neteaseLyric(json: any) {
     if (!this.formatVal) return json
     const data = {
-      'lyric': fp.get('lrc.lyric')(json) || '',
-      'tlyric': fp.get('tlyric.lyric')(json) || ''
+      lyric: fp.get('lrc.lyric')(json) || '',
+      tlyric: fp.get('tlyric.lyric')(json) || ''
     }
 
     return data
   }
 
-  private async exec (api: any) {
+  private async exec(api: any) {
     if (api.encode) {
       const func = (this as any)[api.encode] as Function
       api = func.call(this, api)
@@ -319,7 +330,7 @@ class Meting {
     return this.data
   }
 
-  private async fetch (api: any) {
+  private async fetch(api: any) {
     axiosRetry(axios, { retries: 3 })
     const res = await axios({
       method: api.method,
@@ -336,16 +347,18 @@ class Meting {
     return this
   }
 
-  private curlSet () {
+  private curlSet() {
     const funcs: any = {
       netease: () => ({
-        'Referer': 'https://music.163.com/',
-        'Cookie': 'appver=1.5.9; os=osx; __remember_me=true; osver=%E7%89%88%E6%9C%AC%2010.13.5%EF%BC%88%E7%89%88%E5%8F%B7%2017F77%EF%BC%89;',
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/605.1.15 (KHTML, like Gecko)',
+        Referer: 'https://music.163.com/',
+        Cookie:
+          'appver=1.5.9; os=osx; __remember_me=true; osver=%E7%89%88%E6%9C%AC%2010.13.5%EF%BC%88%E7%89%88%E5%8F%B7%2017F77%EF%BC%89;',
+        'User-Agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/605.1.15 (KHTML, like Gecko)',
         'X-Real-IP': this.realIP,
-        'Accept': '*/*',
+        Accept: '*/*',
         'Accept-Language': 'zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4',
-        'Connection': 'keep-alive',
+        Connection: 'keep-alive',
         'Content-Type': 'application/x-www-form-urlencoded'
       })
     }
@@ -353,7 +366,7 @@ class Meting {
     return result
   }
 
-  private clean (raw: any, rule: string) {
+  private clean(raw: any, rule: string) {
     if (rule.length > 0) {
       raw = this.pickup(raw, rule)
     }
@@ -362,12 +375,14 @@ class Meting {
     } else if (!raw[0] && raw.length) {
       raw = [raw]
     }
-    const func = (this as any)[`format${fp.capitalize(this.server)}`] as Function
+    const func = (this as any)[
+      `format${fp.capitalize(this.server)}`
+    ] as Function
     const result = raw.map((val: any) => func.call(this, val))
     return result
   }
 
-  private pickup (array: [] | any, rule: string) {
+  private pickup(array: [] | any, rule: string) {
     rule.split('#').forEach((value: string) => {
       if (!array) return []
       array = array[value]
@@ -375,16 +390,16 @@ class Meting {
     return array
   }
 
-  private formatNetease (data: any) {
+  private formatNetease(data: any) {
     const result: any = {
-      'id': data.id,
-      'name': data.name,
-      'artist': [],
-      'album': fp.get('al.name')(data),
-      'pic_id': fp.get('al.pic_str')(data) || fp.get('al.pic')(data),
-      'url_id': data.id,
-      'lyric_id': data.id,
-      'source': 'netease'
+      id: data.id,
+      name: data.name,
+      artist: [],
+      album: fp.get('al.name')(data),
+      pic_id: fp.get('al.pic_str')(data) || fp.get('al.pic')(data),
+      url_id: data.id,
+      lyric_id: data.id,
+      source: 'netease'
     }
     if (fp.get('al.picUrl')(data)) {
       const match: any = /\/(\d+)\./g.exec(fp.get('al.picUrl')(data))
