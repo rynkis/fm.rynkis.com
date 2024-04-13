@@ -5,6 +5,7 @@ import fp from 'lodash/fp'
 import Meting from '../../lib/meting'
 import allowCors from '../../lib/allowCors'
 import KVCache from '../../lib/kvCache'
+import { MS_1_HOUR } from '../../lib/consts'
 
 const makePlaylistCache = async () => {
   const meting = new Meting()
@@ -29,7 +30,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<any>) => {
   }
 
   res.status(200).json(playlistCache)
-  await KVCache.set(CACHE_KEY, playlistCache, 60 * 60 * 1000)
+  await KVCache.set(CACHE_KEY, playlistCache, MS_1_HOUR)
 }
 
 export default allowCors(handler)

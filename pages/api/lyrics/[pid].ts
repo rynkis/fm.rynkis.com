@@ -4,7 +4,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import Meting from '../../../lib/meting'
 import allowCors from '../../../lib/allowCors'
 import KVCache from '../../../lib/kvCache'
-import { _24_HOURS } from '../../../lib/consts'
+import { MS_24_HOURS } from '../../../lib/consts'
 
 const makeLyricsCache = async (pid: string) => {
   const meting = new Meting()
@@ -63,7 +63,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<any>) => {
     }
 
     res.status(200).json(lyricsCache)
-    await KVCache.set(CACHE_KEY, lyricsCache, _24_HOURS)
+    await KVCache.set(CACHE_KEY, lyricsCache, MS_24_HOURS)
   } catch (err) {
     console.log(err)
     res.status(500).json({})
