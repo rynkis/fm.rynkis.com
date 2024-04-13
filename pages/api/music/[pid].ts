@@ -43,11 +43,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<any>) => {
     let urlCache: any = await KVCache.get(URL_CACHE_KEY)
     let datCache: any = await KVCache.get(DAT_CACHE_KEY)
 
-    if (!urlCache) {
-      urlCache = await makeUrlCache(datCache.picId, pid as string)
-    }
     if (!datCache) {
       datCache = await makeDatCache(pid as string)
+    }
+    if (!urlCache) {
+      urlCache = await makeUrlCache(datCache.picId, pid as string)
     }
 
     const data = { ...urlCache, ...datCache }
