@@ -28,7 +28,7 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
 
 ### Update log  
-Cache netease api data with Vercel KV.
+Cache netease api data with Vercel KV.  
 Rewrite project with Next.js.  
 Pack all front-end resources with webpack.  
 Rewrite player with jQuery + ES6.  
