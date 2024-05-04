@@ -4,7 +4,7 @@ Rynkis' FM
 ### Personal FM  
 
 If you wanna specify your personal playlist，you may find out following codes in `pages/api/playlist.ts`：  
-`const promises = ['7320208569'].map(id => meting.format(true).playlist(id))`  
+`const promises = ['2829821753'].map(id => meting.format(true).playlist(id))`  
 and then change the id string in array, it should be netease playlist id.  
 
 To reduce the api response time, now we use [Vercel KV](https://vercel.com/docs/storage/vercel-kv) caching api data. It's available on Hobby and Pro plans, with 256MB of free space available for each user. So if you don't need caching feature, find out following codes in `lib/kvCache.ts`:  

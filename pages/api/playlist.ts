@@ -9,7 +9,7 @@ import { MS_1_HOUR } from '../../lib/consts'
 
 const makePlaylistCache = async () => {
   const meting = new Meting()
-  const promises = ['7320208569'].map(id => meting.format(true).playlist(id))
+  const promises = ['2829821753'].map(id => meting.format(true).playlist(id))
   const playlist = await Promise.all(promises)
   const ids = fp.compose(fp.map('id'), fp.flatten)(playlist)
 
