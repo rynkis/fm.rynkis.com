@@ -37,7 +37,7 @@ class Meting {
   }
 
   site(value: string) {
-    const suppose = ['netease']
+    const suppose = ['netease', 'tencent']
     this.server = suppose.includes(value) ? value : 'netease'
     this.header = this.curlSet()
 
@@ -74,6 +74,21 @@ class Meting {
         },
         encode: 'neteaseAESCBC',
         format: 'result.songs'
+      }),
+      tencent: () => ({
+        method: 'GET',
+        url: 'https://c.y.qq.com/soso/fcgi-bin/client_search_cp',
+        body: {
+          format: 'json',
+          p: option.page ? option.page : 1,
+          n: option.limit ? option.limit : 30,
+          w: keyword,
+          aggr: 1,
+          lossless: 1,
+          cr: 1,
+          new_json: 1
+        },
+        format: 'data.song.list'
       })
     }
     const api = funcs[this.server]()
@@ -95,6 +110,16 @@ class Meting {
         },
         encode: 'neteaseAESCBC',
         format: 'songs'
+      }),
+      tencent: () => ({
+        method: 'GET',
+        url: 'https://c.y.qq.com/v8/fcg-bin/fcg_play_single_song.fcg',
+        body: {
+          songmid: id,
+          platform: 'yqq',
+          format: 'json'
+        },
+        format: 'data'
       })
     }
     const api = funcs[this.server]()
@@ -117,6 +142,17 @@ class Meting {
         },
         encode: 'neteaseAESCBC',
         format: 'songs'
+      }),
+      tencent: () => ({
+        method: 'GET',
+        url: 'https://c.y.qq.com/v8/fcg-bin/fcg_v8_album_detail_cp.fcg',
+        body: {
+          albummid: id,
+          platform: 'mac',
+          format: 'json',
+          newsong: 1
+        },
+        format: 'data.getSongInfo'
       })
     }
     const api = funcs[this.server]()
@@ -137,6 +173,19 @@ class Meting {
         },
         encode: 'neteaseAESCBC',
         format: 'hotSongs'
+      }),
+      tencent: () => ({
+        method: 'GET',
+        url: 'https://c.y.qq.com/v8/fcg-bin/fcg_v8_singer_track_cp.fcg',
+        body: {
+          singermid: id,
+          begin: 0,
+          num: limit,
+          order: 'listen',
+          platform: 'mac',
+          newsong: 1
+        },
+        format: 'data.list'
       })
     }
     const api = funcs[this.server]()
@@ -161,6 +210,16 @@ class Meting {
         },
         encode: 'neteaseAESCBC',
         format: 'playlist#tracks'
+      }),
+      tencent: () => ({
+        url: 'https://c.y.qq.com/v8/fcg-bin/fcg_v8_playlist_cp.fcg',
+        body: {
+          id: id,
+          format: 'json',
+          newsong: 1,
+          platform: 'jqspaframe.json'
+        },
+        format: 'data.cdlist.0.songlist'
       })
     }
     const api = funcs[this.server]()
@@ -183,6 +242,16 @@ class Meting {
         },
         encode: 'neteaseAESCBC',
         decode: 'neteaseUrl'
+      }),
+      tencent: () => ({
+        method: 'GET',
+        url: 'https://c.y.qq.com/v8/fcg-bin/fcg_play_single_song.fcg',
+        body: {
+          songmid: id,
+          platform: 'yqq',
+          format: 'json'
+        },
+        decode: 'tencentUrl'
       })
     }
     const api = funcs[this.server]()
@@ -209,6 +278,15 @@ class Meting {
         },
         encode: 'neteaseAESCBC',
         decode: 'neteaseLyric'
+      }),
+      tencent: () => ({
+        method: 'GET',
+        url: 'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg',
+        body: {
+          songmid: id,
+          g_tk: '5381'
+        },
+        decode: 'tencentLyric'
       })
     }
     const api = funcs[this.server]()
@@ -228,6 +306,17 @@ class Meting {
           size +
           'y' +
           size
+        )
+      },
+      tencent: () => {
+        return (
+          'https://y.gtimg.cn/music/photo_new/T002R' +
+          size +
+          'x' +
+          size +
+          'M000' +
+          id +
+          '.jpg?max_age=2592000'
         )
       }
     }
@@ -294,11 +383,104 @@ class Meting {
     return url
   }
 
+  private tencentUrl(data: any) {
+    const guid = Math.random() % 10000000000
+
+    const type = [
+      ['size_flac', 999, 'F000', 'flac'],
+      ['size_320mp3', 320, 'M800', 'mp3'],
+      ['size_192aac', 192, 'C600', 'm4a'],
+      ['size_128mp3', 128, 'M500', 'mp3'],
+      ['size_96aac', 96, 'C400', 'm4a'],
+      ['size_48aac', 48, 'C200', 'm4a'],
+      ['size_24aac', 24, 'C100', 'm4a']
+    ]
+
+    let {
+      proups: { uin }
+    } = /uin=(><uin>\d+)/.exec(this.header['Cookie']) as any
+    if (!uin) uin = 0
+
+    let payload = {
+      req_0: {
+        module: 'vkey.GetVkeyServer',
+        method: 'CgiGetVkey',
+        param: {
+          guid: guid,
+          songmid: [] as any,
+          filename: [] as any,
+          songtype: [] as any,
+          uin: uin,
+          loginflag: 1,
+          platform: '20'
+        }
+      }
+    }
+
+    type.forEach(vo => {
+      payload['req_0']['param']['songmid'].push(data['data'][0]['mid'])
+      payload['req_0']['param']['filename'].push(
+        vo[2] + data['data'][0]['file']['media_mid'] + '.' + vo[3]
+      )
+      payload['req_0']['param']['songtype'].push(data['data'][0]['type'])
+    })
+
+    const api = {
+      method: 'GET',
+      url: 'https://u.y.qq.com/cgi-bin/musicu.fcg',
+      body: {
+        format: 'json',
+        platform: 'yqq.json',
+        needNewCode: 0,
+        data: JSON.stringify(payload)
+      }
+    }
+    const response = this.exec(api) as any
+    const vKeys = response['req_0']['data']['midurlinfo']
+
+    let url = null
+    type.forEach((vo, index) => {})
+    for (let index in type) {
+      const vo = type[index]
+      if (data['data'][0]['file'][vo[0]] && vo[1] <= this.temp['br']) {
+        if (!vKeys[index]['vkey']) {
+          url = {
+            url: response['req_0']['data']['sip'][0] + vKeys[index]['purl'],
+            size: data['data'][0]['file'][vo[0]],
+            br: vo[1]
+          }
+          break
+        }
+      }
+    }
+
+    if (!url || !url['url']) {
+      url = {
+        url: '',
+        size: 0,
+        br: -1
+      }
+    }
+
+    return url
+  }
+
   private neteaseLyric(json: any) {
     if (!this.formatVal) return json
     const data = {
       lyric: fp.get('lrc.lyric')(json) || '',
       tlyric: fp.get('tlyric.lyric')(json) || ''
+    }
+
+    return data
+  }
+
+  private tencentLyric(result: any) {
+    const json = result.slice(18, -1)
+    const obj = JSON.parse(json)
+    const data = {
+      lyric: obj['lyric'] ? base64.decode(obj['lyric']) : '',
+      tlyric: obj['trans'] ? base64.decode(obj['trans']) : ''
     }
 
     return data
@@ -360,6 +542,17 @@ class Meting {
         'Accept-Language': 'zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4',
         Connection: 'keep-alive',
         'Content-Type': 'application/x-www-form-urlencoded'
+      }),
+      tencent: () => ({
+        Referer: 'http://y.qq.com',
+        Cookie:
+          'pgv_pvi=22038528; pgv_si=s3156287488; pgv_pvid=5535248600; yplayer_open=1; ts_last=y.qq.com/portal/player.html; ts_uid=4847550686; yq_index=0; qqmusic_fromtag=66; player_exist=1',
+        'User-Agent':
+          'QQ%E9%9F%B3%E4%B9%90/54409 CFNetwork/901.1 Darwin/17.6.0 (x86_64)',
+        Accept: '*/*',
+        'Accept-Language': 'zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4',
+        Connection: 'keep-alive',
+        'Content-Type': 'application/x-www-form-urlencoded'
       })
     }
     const result = funcs[this.server]()
@@ -407,6 +600,22 @@ class Meting {
     }
     for (const vo of data.ar || []) {
       result.artist.push(vo.name)
+    }
+
+    return result
+  }
+
+  private formatTencent(data: any) {
+    if (data['musicData']) data = data['musicData']
+    const result = {
+      id: data['mid'],
+      name: data['name'],
+      artist: fp.map('name')(data['singer']),
+      album: fp.trim(data['album']['title']),
+      pic_id: data['album']['mid'],
+      url_id: data['mid'],
+      lyric_id: data['mid'],
+      source: 'tencent'
     }
 
     return result
