@@ -7,7 +7,7 @@ import KVCache from '../../../lib/kvCache'
 import { MS_24_HOURS } from '../../../lib/consts'
 
 const makeLyricsCache = async (pid: string) => {
-  const meting = new Meting()
+  const meting = new Meting(process.env.SERVER_NAME)
   const lrcInfo: any = await meting.format(true).lyric(pid)
 
   const result: any = {

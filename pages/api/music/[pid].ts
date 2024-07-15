@@ -7,7 +7,7 @@ import KVCache from '../../../lib/kvCache'
 import { MS_5_MINS, MS_24_HOURS } from '../../../lib/consts'
 
 const makeDatCache = async (pid: string) => {
-  const meting = new Meting()
+  const meting = new Meting(process.env.SERVER_NAME)
   const datInfo: any = await meting.format(true).song(pid as string)
   const datCache: any = {
     id: pid,
@@ -20,7 +20,7 @@ const makeDatCache = async (pid: string) => {
 }
 
 const makeUrlCache = async (picId: string, pid: string) => {
-  const meting = new Meting()
+  const meting = new Meting(process.env.SERVER_NAME)
   const covInfo: any = await meting.format(true).pic(picId)
   const urlInfo = await meting.format(true).url(pid)
   const urlCache = {

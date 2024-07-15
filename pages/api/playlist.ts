@@ -8,8 +8,10 @@ import KVCache from '../../lib/kvCache'
 import { MS_1_HOUR } from '../../lib/consts'
 
 const makePlaylistCache = async () => {
-  const meting = new Meting()
-  const promises = ['10120837951'].map(id => meting.format(true).playlist(id))
+  const meting = new Meting(process.env.SERVER_NAME)
+  const json = process.env.SERVER_PLAYLIST || '["10120837951"]'
+  const list = JSON.parse(json)
+  const promises = list.map((id: string) => meting.format(true).playlist(id))
   const playlist = await Promise.all(promises)
   const ids = fp.compose(fp.map('id'), fp.flatten)(playlist)
 

@@ -1,15 +1,9 @@
 Rynkis' FM
 ========
 
-### Personal FM  
+### 个性化部署  
 
-If you wanna specify your personal playlist，you may find out following codes in `pages/api/playlist.ts`：  
-`const promises = ['2829821753'].map(id => meting.format(true).playlist(id))`  
-and then change the id string in array, it should be netease playlist id.  
-
-To reduce the api response time, now we use [Vercel KV](https://vercel.com/docs/storage/vercel-kv) caching api data. It's available on Hobby and Pro plans, with 256MB of free space available for each user. So if you don't need caching feature, find out following codes in `lib/kvCache.ts`:  
-`static noCache: Boolean = false`  
-and change `false` to `true`.  
+测试或部署前请根据运行环境新建 `.env` 文件，可指定音乐运营商、个人播放列表及是否启用 api 缓存（因为 Vercel 服务器在国外访问国内音乐运营商存在延迟，建议开启；国内测试或部则署无需开启）。
 
 ### Usage  
 
