@@ -32,6 +32,7 @@ class Player {
   image: HTMLImageElement
   playingIndex: number
   songNum: number
+  listHash: string
   playList: []
   autoSkip: boolean
   prevFrameRadian: number
@@ -85,6 +86,7 @@ class Player {
     this.domNodes.artists.textContent = 'Artists'
     this.playingIndex = 0
     this.songNum = 0
+    this.listHash = ''
     this.playList = []
     this.autoSkip = false
     this.prevFrameRadian = 0
@@ -95,7 +97,8 @@ class Player {
   private async start() {
     const { data } = await axios(this.config.playlist)
     if (!data) return
-    this.playList = data
+    this.listHash = data.hash
+    this.playList = data.ids
     this.songNum = data.length
     this.playingIndex = Math.floor(Math.random() * this.songNum)
     this.createAlbum()
@@ -150,6 +153,7 @@ class Player {
   }
 
   private setLocalData() {
+    this.data.lastHash = this.listHash
     this.data.lastID = this.playingIndex
     this.data.playMode = this.domNodes.mode.getAttribute('class')
     try {
@@ -173,7 +177,11 @@ class Player {
     if (isPlainObject(latestData)) {
       this.data = latestData
     }
-    if (this.data.lastID) this.playingIndex = this.data.lastID
+    if (this.listHash === this.data.lastHash) {
+      if (this.data.lastID) this.playingIndex = this.data.lastID
+    } else {
+      this.playingIndex = 0 // start from 0 if playlist changed
+    }
     if (this.data.playMode)
       this.domNodes.mode.setAttribute('class', this.data.playMode)
     switch (this.data.playMode) {

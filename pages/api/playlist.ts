@@ -1,6 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
 import fp from 'lodash/fp'
+import md5 from 'md5'
 
 import Meting from '../../lib/meting'
 import allowCors from '../../lib/allowCors'
@@ -15,7 +16,10 @@ const makePlaylistCache = async () => {
   const playlist = await Promise.all(promises)
   const ids = fp.compose(fp.map('id'), fp.flatten)(playlist)
 
-  return ids
+  return {
+    hash: md5(json),
+    ids
+  }
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse<any>) => {
