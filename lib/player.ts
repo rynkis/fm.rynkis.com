@@ -99,7 +99,7 @@ class Player {
     if (!data) return
     this.listHash = data.hash
     this.playList = data.ids
-    this.songNum = data.length
+    this.songNum = this.playList.length
     this.playingIndex = Math.floor(Math.random() * this.songNum)
     this.createAlbum()
     this.addAlbumEvents()
