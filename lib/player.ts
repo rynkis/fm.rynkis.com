@@ -70,8 +70,9 @@ class Player {
       album: document.querySelector('#surface .album'),
       magic: document.querySelector('#surface .magic'),
       artists: document.querySelector('#detail .artists'),
-      buffered: document.querySelector('#thread .buffered'),
-      elapsed: document.querySelector('#thread .elapsed'),
+      buffered: document.querySelector('#thread .progress .buffered'),
+      elapsed: document.querySelector('#thread .progress .elapsed'),
+      volume: document.querySelector('#thread .volume i'),
       surface: document.querySelector('#surface'),
       faMagic: document.querySelector('#surface .magic .fa'),
       lyric: document.querySelector('#lyric .lrc'),
@@ -156,6 +157,7 @@ class Player {
     this.data.lastHash = this.listHash
     this.data.lastID = this.playingIndex
     this.data.playMode = this.domNodes.mode.getAttribute('class')
+    this.data.volume = this.audio.volume
     try {
       localStorage.setItem(this.config.localName, JSON.stringify(this.data))
     } catch (e) {
@@ -201,6 +203,10 @@ class Player {
         this.domNodes.mode.setAttribute('title', 'Random')
         break
     }
+    if (this.data.volume || this.data.volume === 0) {
+      this.audio.volume = this.data.volume
+      this.renderVolume()
+    }
   }
 
   private async loadMusicInfo(caller: any = null) {
@@ -220,6 +226,15 @@ class Player {
     }
     this.updateMediaSession(song)
     song.url === '' && this.autoSkip ? this.nextTrack() : this.renderAudio(song)
+  }
+
+  private renderVolume () {
+    let icon = 'fa fa-volume-down'
+    if (this.audio.volume === 0) icon = 'fa fa-volume-off'
+    if (this.audio.volume === 1) icon = 'fa fa-volume-up'
+    const title = `Volume (${this.audio.volume * 100}%)`
+    this.domNodes.volume.setAttribute('class', icon)
+    this.domNodes.volume.setAttribute('title', title)
   }
 
   async playAudio() {
@@ -295,7 +310,7 @@ class Player {
     }
   }
 
-  displayLrc() {
+  private displayLrc() {
     const playTime = Math.floor(this.audio.currentTime)
     if (typeof this.audio.sourcePointer.lrc[playTime] !== 'string') return
     this.domNodes.lyric.textContent = this.audio.sourcePointer.lrc[playTime]
@@ -306,7 +321,7 @@ class Player {
     this.domNodes.tLyric.textContent = this.audio.sourcePointer.tlrc[playTime]
   }
 
-  requestAlbumRotate() {
+  private requestAlbumRotate() {
     const ANIMATION_FPS = 60
     const ONE_TURN_TIME = 30
     const ONE_TURN = 360 //Math.PI * 2
@@ -335,7 +350,7 @@ class Player {
     this.recursion.requestID = window.requestAnimationFrame(loopAnimation)
   }
 
-  updateAlbumRotateCSS(deg: number) {
+  private updateAlbumRotateCSS(deg: number) {
     const { album } = this.domNodes
     const value = `rotate(${deg}deg)`
     const prefixes = ['', '-ms-', '-moz-', '-webkit-', '-o-']
@@ -344,7 +359,7 @@ class Player {
     }
   }
 
-  cancelAlbumRotate() {
+  private cancelAlbumRotate() {
     if (this.recursion.requestID) {
       window.cancelAnimationFrame(this.recursion.requestID)
     }
@@ -375,7 +390,7 @@ class Player {
     }
   }
 
-  addAudioEvents() {
+  private addAudioEvents() {
     this.audio.addEventListener('playing', () => {
       this.requestAlbumRotate()
       if (this.lrcInterval !== null) {
@@ -434,25 +449,32 @@ class Player {
     }, 60)
   }
 
-  addOtherEvents() {
+  private addOtherEvents() {
     window.addEventListener('unload', () => this.setLocalData())
 
     document.addEventListener('keydown', e => {
-      switch (e.which) {
-        case 32: // Space
-          e.preventDefault()
-          this.audio.paused ? this.playAudio() : this.pauseAudio()
-          break
-        case 37: // Left
-          e.preventDefault()
-          this.autoSkip = false
-          this.prevTrack()
-          break
-        case 39: // Right
-          e.preventDefault()
-          this.autoSkip = false
-          this.nextTrack()
-          break
+      // `which` and `keyCode` maybe deprecated, so keep both here
+      if (e.keyCode === 32 || e.key === ' ') {
+        e.preventDefault()
+        this.audio.paused ? this.playAudio() : this.pauseAudio()
+      } else if (e.keyCode === 37 || e.key === 'ArrowLeft') {
+        e.preventDefault()
+        this.autoSkip = false
+        this.prevTrack()
+      } else if (e.keyCode === 39 || e.key === 'ArrowRight') {
+        e.preventDefault()
+        this.autoSkip = false
+        this.nextTrack()
+      } else if (e.keyCode === 38 || e.key === 'ArrowUp') {
+        e.preventDefault()
+        const volume = (this.audio.volume * 100 + 10) / 100
+        this.audio.volume = Math.min(1, volume)
+        this.renderVolume()
+      } else if (e.keyCode === 40 || e.key === 'ArrowDown') {
+        e.preventDefault()
+        const volume = (this.audio.volume * 100 - 10) / 100
+        this.audio.volume = Math.max(0, volume)
+        this.renderVolume()
       }
     })
 

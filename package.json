@@ -28,7 +28,8 @@
     "qs": "^6.10.3",
     "react": "18.1.0",
     "react-dom": "18.1.0",
-    "react-ga": "^3.3.0"
+    "react-ga": "^3.3.0",
+    "sass": "^1.77.8"
   },
   "devDependencies": {
     "@types/node": "17.0.35",
