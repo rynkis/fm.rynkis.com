@@ -29,14 +29,14 @@ const makeLyricsCache = async (pid: string) => {
           val.substring(1, val.length - 1)
         )
         if (times.length === 0) {
-          result[value[0]][0] = value[1]
+          if (!result[value[0]][0]) result[value[0]][0] = value[1]
           break
         } else {
           const colText = rows.replace(/\[[^\[\]]*\]/g, '')
           times.every((key: string) => {
             const arr = key.split(':')
             const time = parseInt(arr[0]) * 60 + parseInt(arr[1])
-            result[value[0]][time] = colText
+            if (!Number.isNaN(time)) result[value[0]][time] = colText
           })
         }
       }
