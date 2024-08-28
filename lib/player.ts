@@ -24,21 +24,20 @@ interface Audio extends HTMLAudioElement {
 }
 
 class Player {
-  data: any
+  data: any = {}
   recursion: any
   config: any
   domNodes: any
   audio: Audio
   image: HTMLImageElement
-  playingIndex: number
-  songNum: number
-  listHash: string
-  playList: []
-  autoSkip: boolean
-  prevFrameRadian: number
-  lrcInterval: any
+  playingIndex: number = 0
+  songNum: number = 0
+  listHash: string = ''
+  playList: [] = []
+  autoSkip: boolean = false
+  prevFrameRadian: number = 0
+  lrcInterval: any = null
   constructor() {
-    this.data = {}
     this.recursion = {
       currentTime: null,
       requestID: null
@@ -85,13 +84,6 @@ class Player {
     this.image.crossOrigin = 'anonymous'
     this.domNodes.title.textContent = 'Title'
     this.domNodes.artists.textContent = 'Artists'
-    this.playingIndex = 0
-    this.songNum = 0
-    this.listHash = ''
-    this.playList = []
-    this.autoSkip = false
-    this.prevFrameRadian = 0
-    this.lrcInterval = null
     this.start()
   }
 
@@ -133,12 +125,6 @@ class Player {
       context.beginPath()
       context.fillStyle = this.domNodes.album.pattern
       context.arc(HALF_LENGTH, HALF_LENGTH, HALF_LENGTH, 0, ONE_TURN)
-      context.fill()
-      context.closePath()
-
-      context.beginPath()
-      context.fillStyle = '#FFF'
-      context.arc(HALF_LENGTH, HALF_LENGTH, HALF_LENGTH / 8, 0, ONE_TURN)
       context.fill()
       context.closePath()
 

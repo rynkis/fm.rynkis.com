@@ -88,7 +88,7 @@ template {
   }
 }
 
-@media screen and (min-width: 720px) {
+@media screen and (min-width: 120px) {
   #backdrop {
     position: fixed;
     top: 0;
@@ -161,9 +161,6 @@ template {
   margin-right: auto;
   width: 20em;
   user-select: none;
-  -ms-user-select: none;
-  -moz-user-select: none;
-  -webkit-user-select: none;
 }
 
 #surface .cover {
