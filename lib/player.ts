@@ -46,6 +46,7 @@ class Player {
   autoSkip: boolean = false
   prevFrameRadian: number = 0
   lrcInterval: any = null
+  spoken: any = {}
   speech: Speech = {
     speechPrimed: false,
     messages: null,
@@ -163,6 +164,7 @@ class Player {
     this.data.lastID = this.playingIndex
     this.data.playMode = this.domNodes.mode.getAttribute('class')
     this.data.volume = this.audio.volume
+    this.data.spoken = this.spoken
     try {
       localStorage.setItem(this.config.localName, JSON.stringify(this.data))
     } catch (e) {
@@ -186,8 +188,10 @@ class Player {
     }
     if (this.listHash === this.data.lastHash) {
       if (this.data.lastID >= 0) this.playingIndex = this.data.lastID
+      this.spoken = this.data.spoken || {}
     } else {
       this.playingIndex = 0 // start from 0 if playlist changed
+      this.spoken = {}
     }
     if (this.data.playMode)
       this.domNodes.mode.setAttribute('class', this.data.playMode)
@@ -273,7 +277,9 @@ class Player {
       setTitle([this.config.siteTitle, song.title].join(' | '))
       try {
         this.audio.play()
-      } catch (e) {}
+      } catch (e) {
+        console.error(e)
+      }
     }
   }
 
@@ -323,7 +329,7 @@ class Player {
       this.speech.speechPrimed = true
     }
     const speechMessage = this.speech.messages[this.playingIndex]
-    if (speechMessage) {
+    if (speechMessage && !this.spoken[this.playingIndex]) {
       this.domNodes.fullscreenMask.style.display = 'flex'
       const child = document.createElement('span')
       speechMessage.split('\n').forEach((s: string) => {
@@ -345,6 +351,7 @@ class Player {
       await this.speakMessage(speechMessage)
       this.domNodes.fullscreenMask.style.display = 'none'
     }
+    this.spoken[this.playingIndex] = true
     this.updateMediaSession(song)
     if (song.url === '') {
       this.domNodes.lyric.textContent = "Can't be played because of Copyright"
