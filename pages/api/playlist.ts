@@ -12,13 +12,20 @@ const makePlaylistCache = async () => {
   const meting = new Meting(process.env.SERVER_NAME)
   const json = process.env.SERVER_PLAYLIST || '["10120837951"]'
   const list = JSON.parse(json)
-  const promises = list.map((id: string) => meting.format(true).playlist(id))
-  const playlist = await Promise.all(promises)
-  const ids = fp.compose(fp.map('id'), fp.flatten)(playlist)
+  const promises = list.map((id: string) => meting.format(false).playlist(id))
+  const playlists = await Promise.all(promises)
+  const msgs = fp.get('0.playlist.description')(playlists)
+
+  const ids = fp.compose(
+    fp.map('id'),
+    fp.flatten,
+    fp.map('playlist.tracks')
+  )(playlists)
 
   return {
     hash: md5(json),
-    ids
+    ids,
+    msgs
   }
 }
 

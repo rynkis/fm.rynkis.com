@@ -113,13 +113,14 @@ const Home: NextPage = () => {
           >
             <a className='fa-button'>
               <i
-                className='fa fa-random'
-                title='Random'
+                className='fa fa-align-justify'
+                title='List'
               />
             </a>
           </div>
         </div>
       </article>
+      <div className='fullscreen-mask'><span></span></div>
     </div>
   )
 }

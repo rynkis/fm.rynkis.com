@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { isPlainObject } from 'lodash/fp'
 import setTitle from './setTitle'
+import speech from './speech'
 
 const localAlbum = '/images/album.jpg'
 
@@ -23,6 +24,12 @@ interface Audio extends HTMLAudioElement {
   sourcePointer: Song
 }
 
+interface Speech {
+  messages: any
+  allVoices: any[]
+  synth: SpeechSynthesis
+}
+
 class Player {
   data: any = {}
   recursion: any
@@ -37,6 +44,11 @@ class Player {
   autoSkip: boolean = false
   prevFrameRadian: number = 0
   lrcInterval: any = null
+  speech: Speech = {
+    messages: null,
+    allVoices: [],
+    synth: speechSynthesis
+  }
   constructor() {
     this.recursion = {
       currentTime: null,
@@ -76,7 +88,8 @@ class Player {
       faMagic: document.querySelector('#surface .magic .fa'),
       lyric: document.querySelector('#lyric .lrc'),
       tLyric: document.querySelector('#lyric .tlrc'),
-      backdrop: document.querySelector('#backdrop')
+      backdrop: document.querySelector('#backdrop'),
+      fullscreenMask: document.querySelector('.fullscreen-mask')
     }
     this.audio = window.document.createElement('audio') as Audio
     this.audio.volume = this.config.volume
@@ -90,6 +103,7 @@ class Player {
   private async start() {
     const { data } = await axios(this.config.playlist)
     if (!data) return
+    this.speech.messages = speech.parseSpeech(data.msgs)
     this.listHash = data.hash
     this.playList = data.ids
     this.songNum = this.playList.length
@@ -166,7 +180,7 @@ class Player {
       this.data = latestData
     }
     if (this.listHash === this.data.lastHash) {
-      if (this.data.lastID) this.playingIndex = this.data.lastID
+      if (this.data.lastID >= 0) this.playingIndex = this.data.lastID
     } else {
       this.playingIndex = 0 // start from 0 if playlist changed
     }
@@ -210,8 +224,11 @@ class Player {
       ...result,
       ...lyrics
     }
-    this.updateMediaSession(song)
-    song.url === '' && this.autoSkip ? this.nextTrack() : this.renderAudio(song)
+    if (song.url === '' && this.autoSkip) {
+      await this.nextTrack()
+    } else {
+      await this.renderAudio(song)
+    }
   }
 
   private renderVolume () {
@@ -257,7 +274,7 @@ class Player {
     this.audio.pause()
   }
 
-  private nextTrack() {
+  private async nextTrack() {
     this.pauseAudio()
     if (this.domNodes.mode.getAttribute('class') === 'fa fa-random') {
       while (true) {
@@ -270,7 +287,7 @@ class Player {
     } else {
       this.playingIndex += 1
     }
-    this.loadMusicInfo('next')
+    await this.loadMusicInfo('next')
   }
 
   private prevTrack() {
@@ -279,7 +296,7 @@ class Player {
     this.loadMusicInfo('prev')
   }
 
-  private renderAudio(song: Song) {
+  private async renderAudio(song: Song) {
     const size = this.domNodes.album.clientWidth * 2
     this.image.src = song.cover.replace(/\d+y\d+/, `${size}y${size}`)
     this.domNodes.title.textContent = song.title
@@ -287,6 +304,29 @@ class Player {
     this.domNodes.lyric.textContent = ''
     this.domNodes.tLyric.textContent = ''
     this.audio.sourcePointer = song
+    const speechMessage = this.speech.messages[this.playingIndex]
+    if (speechMessage) {
+      this.domNodes.fullscreenMask.style.display = 'flex'
+      const child = document.createElement('span')
+      speechMessage.split('\n').forEach((s: string) => {
+        const el = document.createElement('p')
+        el.textContent = s
+        child.appendChild(el)
+      })
+      const skipBtn = document.createElement('button')
+      skipBtn.textContent = '跳过'
+      skipBtn.addEventListener('click', () => {
+        this.speech.synth.cancel()
+      })
+      child.appendChild(skipBtn)
+      this.domNodes.fullscreenMask.replaceChild(
+        child,
+        this.domNodes.fullscreenMask.firstChild
+      )
+      await this.speakMessage(speechMessage)
+      this.domNodes.fullscreenMask.style.display = 'none'
+    }
+    this.updateMediaSession(song)
     if (song.url === '') {
       this.domNodes.lyric.textContent = "Can't be played because of Copyright"
       this.domNodes.tLyric.textContent = '因版权原因暂时无法播放'
@@ -435,8 +475,24 @@ class Player {
     }, 60)
   }
 
+  private speakMessage (message: string) {
+    if (typeof SpeechSynthesisUtterance !== undefined) {
+      const speechInstance = new SpeechSynthesisUtterance(message)
+      this.speech.synth.speak(speechInstance)
+      return new Promise(resolve => {
+        speechInstance.onend = resolve
+        speechInstance.onerror = resolve
+      })
+    } else {
+      return false
+    }
+  }
+
   private addOtherEvents() {
-    window.addEventListener('unload', () => this.setLocalData())
+    window.addEventListener('unload', () => {
+      this.setLocalData()
+      this.speech.synth.cancel()
+    })
 
     document.addEventListener('keydown', e => {
       // `which` and `keyCode` maybe deprecated, so keep both here
