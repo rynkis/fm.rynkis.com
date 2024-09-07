@@ -4,7 +4,7 @@ const parseSpeech = (speech: string) => {
   const result: any = {}
   lines.forEach(line => {
     const [index, message] = line.split(':')
-    result[index] = message.trim().replace(/\\\./g, '\n')
+    result[index] = (message || '').trim().replace(/\\\./g, '\n')
   })
   return result
 }
