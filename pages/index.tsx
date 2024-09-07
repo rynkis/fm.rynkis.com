@@ -121,6 +121,7 @@ const Home: NextPage = () => {
         </div>
       </article>
       <div className='fullscreen-mask'><span></span></div>
+      <div className='fullscreen-mask-mobile'><span>点触开始<br />touch to start</span></div>
     </div>
   )
 }

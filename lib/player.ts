@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { isPlainObject } from 'lodash/fp'
+import mobile from 'is-mobile'
 import setTitle from './setTitle'
 import speech from './speech'
 
@@ -25,6 +26,7 @@ interface Audio extends HTMLAudioElement {
 }
 
 interface Speech {
+  speechPrimed: boolean
   messages: any
   allVoices: any[]
   synth: SpeechSynthesis
@@ -45,6 +47,7 @@ class Player {
   prevFrameRadian: number = 0
   lrcInterval: any = null
   speech: Speech = {
+    speechPrimed: false,
     messages: null,
     allVoices: [],
     synth: speechSynthesis
@@ -89,7 +92,8 @@ class Player {
       lyric: document.querySelector('#lyric .lrc'),
       tLyric: document.querySelector('#lyric .tlrc'),
       backdrop: document.querySelector('#backdrop'),
-      fullscreenMask: document.querySelector('.fullscreen-mask')
+      fullscreenMask: document.querySelector('.fullscreen-mask'),
+      fullscreenMaskMobile: document.querySelector('.fullscreen-mask-mobile')
     }
     this.audio = window.document.createElement('audio') as Audio
     this.audio.volume = this.config.volume
@@ -97,6 +101,7 @@ class Player {
     this.image.crossOrigin = 'anonymous'
     this.domNodes.title.textContent = 'Title'
     this.domNodes.artists.textContent = 'Artists'
+    this.speech.allVoices = this.speech.synth.getVoices()
     this.start()
   }
 
@@ -266,7 +271,9 @@ class Player {
         this.recursion.currentTime = null
       }
       setTitle([this.config.siteTitle, song.title].join(' | '))
-      this.audio.play()
+      try {
+        this.audio.play()
+      } catch (e) {}
     }
   }
 
@@ -304,6 +311,17 @@ class Player {
     this.domNodes.lyric.textContent = ''
     this.domNodes.tLyric.textContent = ''
     this.audio.sourcePointer = song
+    if (!this.speech.speechPrimed && mobile()) {
+      this.domNodes.fullscreenMaskMobile.style.display = 'flex'
+      const promise = new Promise(resolve => {
+        this.domNodes.fullscreenMaskMobile.addEventListener('click', () => {
+          resolve(true)
+        })
+      })
+      await promise
+      this.domNodes.fullscreenMaskMobile.style.display = 'none'
+      this.speech.speechPrimed = true
+    }
     const speechMessage = this.speech.messages[this.playingIndex]
     if (speechMessage) {
       this.domNodes.fullscreenMask.style.display = 'flex'
@@ -317,6 +335,7 @@ class Player {
       skipBtn.textContent = '跳过'
       skipBtn.addEventListener('click', () => {
         this.speech.synth.cancel()
+        this.domNodes.fullscreenMask.style.display = 'none'
       })
       child.appendChild(skipBtn)
       this.domNodes.fullscreenMask.replaceChild(
@@ -478,6 +497,8 @@ class Player {
   private speakMessage (message: string) {
     if (typeof SpeechSynthesisUtterance !== undefined) {
       const speechInstance = new SpeechSynthesisUtterance(message)
+      speechInstance.voice = this.speech.allVoices.find(x => x.lang === 'zh-CN')
+      speechInstance.lang = 'zh-CN'
       this.speech.synth.speak(speechInstance)
       return new Promise(resolve => {
         speechInstance.onend = resolve
