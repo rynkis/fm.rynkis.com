@@ -1,6 +1,6 @@
 
 const parseSpeech = (speech: string) => {
-  const lines = speech.trim().split('\n').filter(x => x)
+  const lines = (speech || '').trim().split('\n').filter(x => x)
   const result: any = {}
   lines.forEach(line => {
     const [index, message] = line.split(':')
