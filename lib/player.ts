@@ -4,7 +4,7 @@ import mobile from 'is-mobile'
 import setTitle from './setTitle'
 import speech from './speech'
 
-const localAlbum = '/images/album.jpg'
+const LOCAL_ALBUM = '/images/album.jpg'
 
 const SIZES = [96, 128, 192, 256, 384, 512]
 
@@ -123,7 +123,7 @@ class Player {
   }
 
   private createAlbum(src: any = null) {
-    this.image.src = typeof src === 'string' ? src : localAlbum
+    this.image.src = typeof src === 'string' ? src : LOCAL_ALBUM
   }
 
   private addAlbumEvents() {
@@ -153,8 +153,8 @@ class Player {
       ] = `url(${this.image.src})`
     })
     this.image.addEventListener('error', () => {
-      if (this.image.src !== localAlbum) {
-        this.createAlbum(localAlbum)
+      if (this.image.src !== LOCAL_ALBUM) {
+        this.createAlbum(LOCAL_ALBUM)
       }
     })
   }
