@@ -16,7 +16,7 @@ const makeLyricsCache = async (pid: string) => {
   }
 
   const ly: any = {
-    lyric: ['lrc', 'No Lyrics'],
+    lyric: ['lrc', 'no lyrics'],
     tlyric: ['tlrc', '']
   }
   Object.keys(ly).forEach(keyName => {
