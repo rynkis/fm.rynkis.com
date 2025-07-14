@@ -11,7 +11,7 @@ const makeLrc = (lrcInfo: any) => {
   }
   Object.keys(ly).forEach(keyName => {
     const value = ly[keyName]
-    if (lrcInfo[keyName] !== '') {
+    if (typeof lrcInfo[keyName] === 'string' && lrcInfo[keyName] !== '') {
       const lrc = lrcInfo[keyName].split('\n')
       for (const rows of lrc) {
         const match = rows.match(/\[[^\[\]]*\]/g) || []
