@@ -1,5 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
+import axios from 'axios'
 
 import Meting from '../../../lib/meting'
 import allowCors from '../../../lib/allowCors'
@@ -7,6 +8,15 @@ import KVCache from '../../../lib/kvCache'
 import { MS_5_MINS, MS_24_HOURS } from '../../../lib/consts'
 
 const makeDatCache = async (pid: string) => {
+  if (pid.startsWith('r')) {
+    const url = `${process.env.SERVER_PRIVATE}/${pid.replace(/^r/, '')}.json`
+    const { data } = await axios.get(url)
+    return {
+      id: pid,
+      ...data
+    }
+  }
+
   const meting = new Meting(process.env.SERVER_NAME)
   const datInfo: any = await meting.format(true).song(pid as string)
   const datCache: any = {
@@ -20,6 +30,14 @@ const makeDatCache = async (pid: string) => {
 }
 
 const makeUrlCache = async (picId: string, pid: string) => {
+  if (pid.startsWith('r')) {
+    const baseUrl = `${process.env.SERVER_PRIVATE}/${pid.replace(/^r/, '')}`
+    return {
+      url: baseUrl + '.mp3',
+      cover: baseUrl + '.jpg',
+    }
+  }
+
   const meting = new Meting(process.env.SERVER_NAME)
   const covInfo: any = await meting.format(true).pic(picId)
   const urlInfo = await meting.format(true).url(pid)

@@ -13,7 +13,6 @@ const makePlaylistCache = async (json: string) => {
   const list = JSON.parse(json)
   const promises = list.map((id: string) => meting.format(false).playlist(id))
   const playlists = await Promise.all(promises)
-  const msgs = fp.get('0.playlist.description')(playlists)
 
   const ids = fp.compose(
     fp.map('id'),
@@ -21,10 +20,21 @@ const makePlaylistCache = async (json: string) => {
     fp.map('playlist.tracks')
   )(playlists)
 
+  const description = fp.get('0.playlist.description')(playlists).split('\n')
+  const msgs: string[] = []
+  description.forEach((msg: string) => {
+    if (msg.startsWith('r')) {
+      const [index, hash] = msg.replace(/^r/, '').split(':')
+      ids[index] = 'r' + hash
+    } else {
+      msgs.push(msg)
+    }
+  })
+
   return {
     hash: md5(json),
     ids,
-    msgs
+    msgs: msgs.join('\n')
   }
 }
 
