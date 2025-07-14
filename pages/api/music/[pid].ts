@@ -6,14 +6,17 @@ import Meting from '../../../lib/meting'
 import allowCors from '../../../lib/allowCors'
 import KVCache from '../../../lib/kvCache'
 import { MS_5_MINS, MS_24_HOURS } from '../../../lib/consts'
+import makeLrc from '../../../lib/makeLrc'
 
 const makeDatCache = async (pid: string) => {
   if (pid.startsWith('r')) {
     const url = `${process.env.SERVER_PRIVATE}/${pid.replace(/^r/, '')}.json`
-    const { data } = await axios.get(url)
+    const { data: { lrc: lyric, tlrc: tlyric, ...data } } = await axios.get(url) as any
+    const lrcInfo = { lyric, tlyric }
     return {
       id: pid,
-      ...data
+      ...data,
+      lyrics: makeLrc(lrcInfo)
     }
   }
 

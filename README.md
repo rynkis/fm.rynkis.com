@@ -7,7 +7,7 @@ Rynkis' FM
 - SERVER_NAME，音乐运营商  
 - SERVER_PLAYLIST，个人播放列表  
 - SERVER_PLAYLIST_PL，播放列表 api 参数白名单，可用于共享接口给其它音乐应用  
-- SERVER_PRIVATE, 私有曲库服务器
+- SERVER_PRIVATE, 私有曲库服务器 url
 - NO_CACHE，是否启用 api 缓存（因为 Vercel 服务器在国外访问国内音乐运营商存在延迟，建议开启；国内测试或部署则无需开启）。  
 
 ### 语音合成  
