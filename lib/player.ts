@@ -42,7 +42,7 @@ class Player {
   playingIndex: number = 0
   songNum: number = 0
   listHash: string = ''
-  playList: [] = []
+  playList: string[] = []
   autoSkip: boolean = false
   prevFrameRadian: number = 0
   lrcInterval: any = null
@@ -228,7 +228,13 @@ class Player {
     const sid = this.playList[this.playingIndex]
     const { data: result } = await axios.get(`${this.config.music}/${sid}`)
     if (!result) return
-    const { data: lyrics } = await axios.get(`${this.config.lyrics}/${sid}`)
+    let lyrics: any = null
+    if (typeof sid === 'string' && sid.startsWith('r')) {
+      lyrics = result.lyrics
+    } else {
+      const { data } = await axios.get(`${this.config.lyrics}/${sid}`)
+      lyrics = data
+    }
     const song: Song = {
       ...result,
       ...lyrics
