@@ -41,6 +41,7 @@ r0: Spotlight (feat. Yui Mugino)
 ```
 git clone https://github.com/Shy07/fm.rynkis.com.git
 cd fm.rynkis.com
+cp .env.sample .env.local
 yarn install
 yarn dev
 ```
