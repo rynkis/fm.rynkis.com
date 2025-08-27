@@ -5,11 +5,16 @@ html {
 
 body {
   margin: 0;
-  min-height: calc(100% + env(safe-area-inset-top));
+  min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   font-size: 1rem;
   font-family: "San Francisco", "PingFangSC-Regular", "Helvetica Neue", Helvetica, Arial, sans-serif;
   user-select: none;
+}
+
+* {
+  overscroll-behavior: none;
+  overflow: hidden;
 }
 
 h1,
@@ -118,6 +123,10 @@ template {
   }
 }
 
+#showcase {
+  margin: .5em;
+}
+
 #controller {
   display: flex;
   justify-content: center;
@@ -155,11 +164,6 @@ template {
       background-color: rgba(0, 0, 0, 0.6);
     }
   }
-}
-
-#showcase {
-  margin: 0.5em;
-  padding-top: 5%;
 }
 
 #surface {
@@ -351,16 +355,15 @@ template {
   }
 }
 
-@media (orientation: landscape) and (max-width: 768px) {
+@media (orientation: landscape) and (max-height: 768px) {
   #showcase {
-    display: flex;
-    padding-top: 1em;
+    padding-top: .5em;
     #surface {
-      width: 12em;
-      transform: translateX(3.5em);
+      width: 8em;
     }
-    #music-player {
-      width: 80%;
+    #detail {
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
     }
   }
 }

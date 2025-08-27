@@ -40,99 +40,94 @@ const Home: NextPage = () => {
         gid='UA-33540710-3'
         aid='music-fm'
       />
-
-      <article>
-        <div id='backdrop'>
-          <div className='color' />
+      <div id='backdrop'>
+        <div className='color' />
+      </div>
+      <div id='showcase'>
+        <div id='surface'>
+          <div className='cover'>
+            <canvas
+              className='album'
+              width='100'
+              height='100'
+            />
+          </div>
+          <div className='magic'>
+            <i className='fa fa-play' />
+          </div>
         </div>
-        <div id='showcase'>
-          <div id='surface'>
-            <div className='cover'>
-              <canvas
-                className='album'
-                width='100'
-                height='100'
+        <div id='thread'>
+          <div className='progress'>
+            <div className='buffered' />
+            <div className='elapsed' />
+          </div>
+        </div>
+        <div id='controller' data-id='fa-over'>
+          <div
+            className='item'
+            data-id='fa-home'
+          >
+            <a className='fa-button'>
+              <i
+                className='fa fa-home'
+                title='Home'
               />
-            </div>
-            <div className='magic'>
-              <i className='fa fa-play' />
-            </div>
+            </a>
           </div>
-          <div id='music-player'>
-            <div id='thread'>
-              <div className='progress'>
-                <div className='buffered' />
-                <div className='elapsed' />
-              </div>
-            </div>
-            <div id='controller' data-id='fa-over'>
-              <div
-                className='item'
-                data-id='fa-home'
-              >
-                <a className='fa-button'>
-                  <i
-                    className='fa fa-home'
-                    title='Home'
-                  />
-                </a>
-              </div>
-              <div
-                className='item'
-                data-id='fa-back'
-              >
-                <a className='fa-button'>
-                  <i
-                    className='fa fa-step-backward'
-                    title='Prev'
-                  />
-                </a>
-              </div>
-              <div
-                className='item'
-                data-id='fa-play'
-              >
-                <a className='fa-button fa-button-prime'>
-                  <i
-                    className='fa fa-play'
-                    title='play'
-                  />
-                </a>
-              </div>
-              <div
-                className='item'
-                data-id='fa-over'
-              >
-                <a className='fa-button'>
-                  <i
-                    className='fa fa-step-forward'
-                    title='Next'
-                  />
-                </a>
-              </div>
-              <div
-                className='item'
-                data-id='fa-mode'
-              >
-                <a className='fa-button'>
-                  <i
-                    className='fa fa-align-justify'
-                    title='List'
-                  />
-                </a>
-              </div>
-            </div>
-            <div id='detail'>
-              <div className='title' />
-              <div className='artists' />
-            </div>
-            <div id='lyric'>
-              <div className='lrc' />
-              <div className='tlrc' />
-            </div>
+          <div
+            className='item'
+            data-id='fa-back'
+          >
+            <a className='fa-button'>
+              <i
+                className='fa fa-step-backward'
+                title='Prev'
+              />
+            </a>
+          </div>
+          <div
+            className='item'
+            data-id='fa-play'
+          >
+            <a className='fa-button fa-button-prime'>
+              <i
+                className='fa fa-play'
+                title='play'
+              />
+            </a>
+          </div>
+          <div
+            className='item'
+            data-id='fa-over'
+          >
+            <a className='fa-button'>
+              <i
+                className='fa fa-step-forward'
+                title='Next'
+              />
+            </a>
+          </div>
+          <div
+            className='item'
+            data-id='fa-mode'
+          >
+            <a className='fa-button'>
+              <i
+                className='fa fa-align-justify'
+                title='List'
+              />
+            </a>
           </div>
         </div>
-      </article>
+        <div id='detail'>
+          <div className='title' />
+          <div className='artists' />
+        </div>
+        <div id='lyric'>
+          <div className='lrc' />
+          <div className='tlrc' />
+        </div>
+      </div>
       <div className='fullscreen-mask'><span></span></div>
       <div className='fullscreen-mask-mobile'><span>点触开始<br />touch to start</span></div>
       <Toaster position='top-center' />
