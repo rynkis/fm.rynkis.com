@@ -5,16 +5,17 @@ html {
 
 body {
   margin: 0;
+  max-width: calc(100vw - env(safe-area-inset-right) - env(safe-area-inset-left));
   min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   font-size: 1rem;
   font-family: "San Francisco", "PingFangSC-Regular", "Helvetica Neue", Helvetica, Arial, sans-serif;
   user-select: none;
+  overflow: hidden;
 }
 
 * {
   overscroll-behavior: none;
-  overflow: hidden;
 }
 
 h1,

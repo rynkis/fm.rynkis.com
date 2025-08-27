@@ -262,7 +262,8 @@ class Player {
     toast(bar.update(this.audio.volume, { message: '🎵' }), {
       style: {
         color: '#666',
-        fontFamily: 'serif'
+        fontFamily: 'monospace',
+        whiteSpace: 'nowrap'
       }
     })
   }
