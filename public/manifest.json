@@ -1,0 +1,22 @@
+{
+  "name": "Rynkis' FM",
+  "short_name": "Rynkis' FM",
+  "description": "Rynkis' FM",
+  "categories": ["music", "multimedia"],
+  "theme_color": "#fff",
+  "background_color": "#000",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "/?application=true",
+  "gcm_sender_id": "482941778795",
+  "DO_NOT_CHANGE_GCM_SENDER_ID": "Do not change the GCM Sender ID",
+  "icons": [
+    {
+      "src": "https://fm.rynkis.com/images/album.jpg",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

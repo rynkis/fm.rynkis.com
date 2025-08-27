@@ -5,8 +5,11 @@ html {
 
 body {
   margin: 0;
+  min-height: calc(100% + env(safe-area-inset-top));
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   font-size: 1rem;
   font-family: "San Francisco", "PingFangSC-Regular", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  user-select: none;
 }
 
 h1,
@@ -116,38 +119,42 @@ template {
 }
 
 #controller {
-  position: fixed;
-  top: 0;
-  left: 0;
-  margin: 1.5em;
-  z-index: 100;
-}
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+  margin-top: 1em;
+  .fa-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 2.5em;
+    height: 2.5em;
+    border-radius: 50%;
+    font-size: 1rem;
+    color: #666;
+    transition: all 0.3s;
+    cursor: pointer;
+    &:hover {
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.3);
+    }
+    .fa-play {
+      padding-top: .1em;
+      padding-left: .2em;
+    }
+  }
 
-#controller .item {
-  margin-bottom: 0.8em;
-}
-
-.fa-button {
-  display: table;
-  width: 3.6em;
-  height: 3.6em;
-  border-radius: 50%;
-  color: #fff;
-  background-color: rgba(0, 0, 0, 0.5);
-  box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.3);
-  transition: background-color 0.3s;
-  cursor: pointer;
-}
-
-.fa-button:hover {
-  background-color: rgba(0, 0, 0, 0.6);
-}
-
-.fa-button .fa {
-  display: table-cell;
-  vertical-align: middle;
-  font-size: 1.3em;
-  text-align: center;
+  .fa-button-prime {
+    font-size: 1.4rem;
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.3);
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.6);
+    }
+  }
 }
 
 #showcase {
@@ -341,5 +348,19 @@ template {
   span {
     text-align: center;
     user-select: none;
+  }
+}
+
+@media (orientation: landscape) and (max-width: 768px) {
+  #showcase {
+    display: flex;
+    padding-top: 1em;
+    #surface {
+      width: 12em;
+      transform: translateX(3.5em);
+    }
+    #music-player {
+      width: 80%;
+    }
   }
 }

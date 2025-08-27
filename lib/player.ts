@@ -1,12 +1,20 @@
 import axios from 'axios'
 import { isPlainObject } from 'lodash/fp'
+import { toast } from 'sonner'
 import mobile from 'is-mobile'
 import setTitle from './setTitle'
 import speech from './speech'
+import { ProgressBar } from './ascii-progress'
 
 const LOCAL_ALBUM = '/images/album.jpg'
 
 const SIZES = [96, 128, 192, 256, 384, 512]
+
+const bar = new ProgressBar(':message :bar :percent', {
+  width: 20,
+  completedChar: '▒',
+  incompletedChar: '░'
+})
 
 interface Song {
   id: string
@@ -60,7 +68,7 @@ class Player {
     }
     this.config = {
       siteTitle: "Rynkis' FM",
-      volume: 0.5,
+      volume: mobile() ? 1: 0.5,
       expire: 1200,
       localName: 'Rynkis.FM.logger',
       source: 'https://github.com/Shy07/fm.rynkis.com',
@@ -75,6 +83,12 @@ class Player {
       back: document.querySelector(
         '#controller [data-id="fa-back"] .fa-button'
       ),
+      play: document.querySelector(
+        '#controller [data-id="fa-play"] .fa-button'
+      ),
+      playIcon: document.querySelector(
+        '#controller [data-id="fa-play"] .fa-button i'
+      ),
       over: document.querySelector(
         '#controller [data-id="fa-over"] .fa-button'
       ),
@@ -87,7 +101,6 @@ class Player {
       artists: document.querySelector('#detail .artists'),
       buffered: document.querySelector('#thread .progress .buffered'),
       elapsed: document.querySelector('#thread .progress .elapsed'),
-      volume: document.querySelector('#thread .volume i'),
       surface: document.querySelector('#surface'),
       faMagic: document.querySelector('#surface .magic .fa'),
       lyric: document.querySelector('#lyric .lrc'),
@@ -214,7 +227,6 @@ class Player {
     }
     if (this.data.volume || this.data.volume === 0) {
       this.audio.volume = this.data.volume
-      this.renderVolume()
     }
   }
 
@@ -247,12 +259,12 @@ class Player {
   }
 
   private renderVolume () {
-    let icon = 'fa fa-volume-down'
-    if (this.audio.volume === 0) icon = 'fa fa-volume-off'
-    if (this.audio.volume === 1) icon = 'fa fa-volume-up'
-    const title = `Volume (${this.audio.volume * 100}%)`
-    this.domNodes.volume.setAttribute('class', icon)
-    this.domNodes.volume.setAttribute('title', title)
+    toast(bar.update(this.audio.volume, { message: '🎵' }), {
+      style: {
+        color: '#666',
+        fontFamily: 'serif'
+      }
+    })
   }
 
   async playAudio() {
@@ -467,16 +479,20 @@ class Player {
       }
     })
     this.audio.addEventListener('play', () => {
-      const list = this.domNodes.faMagic.className
+      let list = this.domNodes.faMagic.className
         .split(' ')
         .filter((val: string) => val !== 'fa-play')
       this.domNodes.faMagic.className = [...list, 'fa-pause'].join(' ')
+      this.domNodes.playIcon.setAttribute('class', 'fa fa-pause')
+      this.domNodes.playIcon.setAttribute('title', 'Pause')
     })
     this.audio.addEventListener('pause', () => {
       const list = this.domNodes.faMagic.className
         .split(' ')
         .filter((val: string) => val !== 'fa-pause')
       this.domNodes.faMagic.className = [...list, 'fa-play'].join(' ')
+      this.domNodes.playIcon.setAttribute('class', 'fa fa-play')
+      this.domNodes.playIcon.setAttribute('title', 'Play')
     })
     this.audio.addEventListener('ended', () => {
       // HTML5 video/audio doesn't become paused after playback ends on IE
@@ -562,6 +578,10 @@ class Player {
       this.autoSkip = false
       this.prevTrack()
     })
+
+    this.domNodes.play.addEventListener('click', () =>
+      this.audio.paused ? this.playAudio() : this.pauseAudio()
+    )
 
     this.domNodes.over.addEventListener('click', () => {
       this.autoSkip = false
