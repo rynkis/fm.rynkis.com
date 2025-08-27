@@ -20,7 +20,7 @@ const makePlaylistCache = async (json: string) => {
     fp.map('playlist.tracks')
   )(playlists)
 
-  const description = fp.getOr('0.playlist.description')('')(playlists).split('\n')
+  const description = fp.getOr('')('0.playlist.description')(playlists).split('\n')
   const msgs: string[] = []
   description.forEach((msg: string) => {
     if (msg.startsWith('r')) {
