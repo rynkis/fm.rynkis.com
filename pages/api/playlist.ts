@@ -12,7 +12,7 @@ const makePlaylistCache = async (json: string) => {
   const meting = new Meting(process.env.SERVER_NAME)
   const list = JSON.parse(json)
   const promises = list.map((id: string) => meting.format(false).playlist(id))
-  const playlists = await Promise.all(promises)
+  const playlists: any = await Promise.all(promises)
 
   const ids = fp.compose(
     fp.map('id'),
@@ -20,7 +20,7 @@ const makePlaylistCache = async (json: string) => {
     fp.map('playlist.tracks')
   )(playlists)
 
-  const description = fp.get('0.playlist.description')(playlists).split('\n')
+  const description = fp.getOr('0.playlist.description')('')(playlists).split('\n')
   const msgs: string[] = []
   description.forEach((msg: string) => {
     if (msg.startsWith('r')) {
