@@ -34,19 +34,22 @@ const makeDatCache = async (pid: string) => {
 
 const makeUrlCache = async (picId: string, pid: string) => {
   if (pid.startsWith('r')) {
-    const baseUrl = `${process.env.SERVER_PRIVATE}/${pid.replace(/^r/, '')}`
+    const filename = pid.replace(/^r/, '')
     return {
-      url: baseUrl + '.mp3',
-      cover: baseUrl + '.jpg',
+      url: `${process.env.SERVER_PRIVATE}/sources/${filename}.mp3`,
+      cover: `${process.env.SERVER_PRIVATE}/covers/${filename}.jpg`,
     }
   }
 
   const meting = new Meting(process.env.SERVER_NAME)
   const covInfo: any = await meting.format(true).pic(picId)
   const urlInfo = await meting.format(true).url(pid)
+  const url = urlInfo.url
+    ? urlInfo.url.replace(/https:/, 'http:')
+    : `${process.env.SERVER_PRIVATE}/sources/${pid}.mp3`
   const urlCache = {
     ...urlInfo,
-    url: urlInfo.url.replace(/https:/, 'http:'),
+    url,
     cover: covInfo.url
   }
   return urlCache
