@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { isPlainObject } from 'lodash/fp'
 import { toast } from 'sonner'
+import ColorThief from 'colorthief/dist/color-thief.mjs'
 import mobile from 'is-mobile'
 import setTitle from './setTitle'
 import speech from './speech'
@@ -16,6 +17,8 @@ const bar = new ProgressBar(':message :bar :percent', {
   completedChar: '▒',
   incompletedChar: '░'
 })
+
+const colorThief = new ColorThief()
 
 interface Song {
   id: string
@@ -107,6 +110,7 @@ class Player {
       lyric: document.querySelector('#lyric .lrc'),
       tLyric: document.querySelector('#lyric .tlrc'),
       backdrop: document.querySelector('#backdrop'),
+      backdropMask: document.querySelector('#backdrop .color'),
       fullscreenMask: document.querySelector('.fullscreen-mask'),
       fullscreenMaskMobile: document.querySelector('.fullscreen-mask-mobile')
     }
@@ -142,6 +146,7 @@ class Player {
 
   private addAlbumEvents() {
     this.image.addEventListener('load', () => {
+      const primaryColor = colorThief.getColor(this.image)
       const ONE_TURN = Math.PI * 2
       const MAX_LENGTH = Math.max(this.image.width, this.image.height)
       const HALF_LENGTH = MAX_LENGTH / 2
@@ -165,6 +170,9 @@ class Player {
       this.domNodes.backdrop.style[
         'background-image'
       ] = `url(${this.image.src})`
+      const primaryColorRgba = `rgba(${primaryColor.join(',')}, .4)`
+      this.domNodes.surface.style['background-color'] = primaryColorRgba
+      // this.domNodes.backdropMask.style['background-color'] = primaryColorRgba
     })
     this.image.addEventListener('error', () => {
       if (this.image.src !== LOCAL_ALBUM) {
