@@ -154,11 +154,8 @@ template {
   }
 
   .fa-button-prime {
-    // font-size: 1.6rem;
     color: #444;
-    // background-color: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(8px);
-    // box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.3);
   }
 }
 
@@ -226,7 +223,6 @@ template {
   margin-left: auto;
   margin-right: auto;
   .progress {
-    margin-left: 18px;
     width: 20em;
     height: 3px;
     background-color: #e5e9ef;
@@ -246,11 +242,6 @@ template {
       transition: all ease 0.5s;
       border-radius: 4px;
     }
-  }
-  .volume {
-    width: 14px;
-    font-size: 10px;
-    color: #e5e9ef;
   }
 }
 
