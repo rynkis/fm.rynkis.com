@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import 'font-awesome/css/font-awesome.css'
+// import 'font-awesome/css/font-awesome.css'
 import { Toaster } from 'sonner'
 
 import Player from '../lib/player'
@@ -65,11 +65,11 @@ const Home: NextPage = () => {
         <div id='controller' data-id='fa-over'>
           <div
             className='item'
-            data-id='fa-home'
+            data-id='fa-github'
           >
             <a className='fa-button'>
               <i
-                className='fa fa-home'
+                className='fa fa-github'
                 title='Home'
               />
             </a>
@@ -80,7 +80,7 @@ const Home: NextPage = () => {
           >
             <a className='fa-button'>
               <i
-                className='fa fa-step-backward'
+                className='fa fa-skip-back'
                 title='Prev'
               />
             </a>
@@ -102,7 +102,7 @@ const Home: NextPage = () => {
           >
             <a className='fa-button'>
               <i
-                className='fa fa-step-forward'
+                className='fa fa-skip-forward'
                 title='Next'
               />
             </a>
@@ -113,7 +113,7 @@ const Home: NextPage = () => {
           >
             <a className='fa-button'>
               <i
-                className='fa fa-align-justify'
+                className='fa fa-list'
                 title='List'
               />
             </a>

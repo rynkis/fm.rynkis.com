@@ -1,0 +1,52 @@
+@font-face {
+  font-family: 'icomoon';
+  src:  url('fonts/icomoon.eot?9eqoj1');
+  src:  url('fonts/icomoon.eot?9eqoj1#iefix') format('embedded-opentype'),
+    url('fonts/icomoon.ttf?9eqoj1') format('truetype'),
+    url('fonts/icomoon.woff?9eqoj1') format('woff'),
+    url('fonts/icomoon.svg?9eqoj1#icomoon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+.fa {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'icomoon' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  font-size: 1.4em;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.fa-github:before {
+  content: "\e908";
+}
+.fa-shuffle:before {
+  content: "\e900";
+}
+.fa-list:before {
+  content: "\e901";
+}
+.fa-pause:before {
+  content: "\e902";
+}
+.fa-play:before {
+  content: "\e903";
+}
+.fa-skip-forward:before {
+  content: "\e904";
+}
+.fa-skip-back:before {
+  content: "\e905";
+}
+.fa-repeat:before {
+  content: "\e906";
+}

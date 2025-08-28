@@ -38,9 +38,6 @@ importers:
       decimal.js:
         specifier: ^10.3.1
         version: 10.4.3
-      font-awesome:
-        specifier: ^4.7.0
-        version: 4.7.0
       is-mobile:
         specifier: ^4.0.0
         version: 4.0.0
@@ -651,10 +648,6 @@ packages:
     peerDependenciesMeta:
       debug:
         optional: true
-
-  font-awesome@4.7.0:
-    resolution: {integrity: sha512-U6kGnykA/6bFmg1M/oT9EkFeIYv7JlX3bozwQJWiiLz6L0w3F5vBVPxHlwyX/vtNq1ckcpRKOB9f2Qal/VtFpg==}
-    engines: {node: '>=0.10.3'}
 
   for-each@0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
@@ -1964,8 +1957,6 @@ snapshots:
   flatted@3.2.7: {}
 
   follow-redirects@1.15.2: {}
-
-  font-awesome@4.7.0: {}
 
   for-each@0.3.3:
     dependencies:

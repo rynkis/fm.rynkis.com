@@ -5,6 +5,7 @@ import mobile from 'is-mobile'
 import setTitle from './setTitle'
 import speech from './speech'
 import { ProgressBar } from './ascii-progress'
+import globalInfo from '../package.json'
 
 const LOCAL_ALBUM = '/images/album.jpg'
 
@@ -78,7 +79,7 @@ class Player {
     }
     this.domNodes = {
       home: document.querySelector(
-        '#controller [data-id="fa-home"] .fa-button'
+        '#controller [data-id="fa-github"] .fa-button'
       ),
       back: document.querySelector(
         '#controller [data-id="fa-back"] .fa-button'
@@ -173,6 +174,7 @@ class Player {
   }
 
   private setLocalData() {
+    this.data.version = globalInfo.version
     this.data.lastHash = this.listHash
     this.data.lastID = this.playingIndex
     this.data.playMode = this.domNodes.mode.getAttribute('class')
@@ -209,9 +211,9 @@ class Player {
     if (this.data.playMode)
       this.domNodes.mode.setAttribute('class', this.data.playMode)
     switch (this.data.playMode) {
-      case 'fa fa-align-justify':
+      case 'fa fa-list':
         this.audio.loop = false
-        this.domNodes.mode.setAttribute('class', 'fa fa-align-justify')
+        this.domNodes.mode.setAttribute('class', 'fa fa-list')
         this.domNodes.mode.setAttribute('title', 'List')
         break
       case 'fa fa-repeat':
@@ -219,11 +221,15 @@ class Player {
         this.domNodes.mode.setAttribute('class', 'fa fa-repeat')
         this.domNodes.mode.setAttribute('title', 'Single')
         break
-      case 'fa fa-random':
+      case 'fa fa-shuffle':
         this.audio.loop = false
-        this.domNodes.mode.setAttribute('class', 'fa fa-random')
+        this.domNodes.mode.setAttribute('class', 'fa fa-shuffle')
         this.domNodes.mode.setAttribute('title', 'Random')
         break
+      default:
+        this.audio.loop = false
+        this.domNodes.mode.setAttribute('class', 'fa fa-list')
+        this.domNodes.mode.setAttribute('title', 'List')
     }
     if (this.data.volume || this.data.volume === 0) {
       this.audio.volume = this.data.volume
@@ -308,7 +314,7 @@ class Player {
 
   private async nextTrack() {
     this.pauseAudio()
-    if (this.domNodes.mode.getAttribute('class') === 'fa fa-random') {
+    if (this.domNodes.mode.getAttribute('class') === 'fa fa-shuffle') {
       while (true) {
         const idx = Math.floor(Math.random() * this.songNum)
         if (this.playingIndex !== idx) {
@@ -591,19 +597,19 @@ class Player {
 
     this.domNodes.mode.addEventListener('click', () => {
       switch (this.domNodes.mode.getAttribute('class')) {
-        case 'fa fa-align-justify':
+        case 'fa fa-list':
           this.audio.loop = true
           this.domNodes.mode.setAttribute('class', 'fa fa-repeat')
           this.domNodes.mode.setAttribute('title', 'Single')
           break
         case 'fa fa-repeat':
           this.audio.loop = false
-          this.domNodes.mode.setAttribute('class', 'fa fa-random')
+          this.domNodes.mode.setAttribute('class', 'fa fa-shuffle')
           this.domNodes.mode.setAttribute('title', 'Random')
           break
-        case 'fa fa-random':
+        case 'fa fa-shuffle':
           this.audio.loop = false
-          this.domNodes.mode.setAttribute('class', 'fa fa-align-justify')
+          this.domNodes.mode.setAttribute('class', 'fa fa-list')
           this.domNodes.mode.setAttribute('title', 'List')
           break
       }
