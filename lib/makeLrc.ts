@@ -6,8 +6,8 @@ const makeLrc = (lrcInfo: any) => {
   }
 
   const ly: any = {
-    lyric: ['lrc', 'no lyrics'],
-    tlyric: ['tlrc', '']
+    lyric: ['lrc', '  '],
+    tlyric: ['tlrc', '  ']
   }
   Object.keys(ly).forEach(keyName => {
     const value = ly[keyName]
@@ -23,9 +23,9 @@ const makeLrc = (lrcInfo: any) => {
           break
         } else {
           const colText = rows.replace(/\[[^\[\]]*\]/g, '')
-          times.every((key: string) => {
-            const arr = key.split(':')
-            const time = parseInt(arr[0]) * 60 + parseInt(arr[1])
+          times.forEach((key: string) => {
+            const [m, s] = key.split(':')
+            const time = parseInt(m) * 60 + parseInt(s)
             if (!Number.isNaN(time)) result[value[0]][time] = colText
           })
         }
