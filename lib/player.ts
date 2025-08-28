@@ -269,7 +269,9 @@ class Player {
       style: {
         color: '#666',
         fontFamily: 'monospace',
-        whiteSpace: 'nowrap'
+        whiteSpace: 'nowrap',
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        backdropFilter: 'blur(8px)',
       }
     })
   }
