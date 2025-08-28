@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@types/base-64": "^1.0.0",
-    "@types/colorthief": "^2.6.0",
     "@types/lodash": "^4.14.182",
     "@types/md5": "^2.3.2",
     "@types/qs": "^6.9.7",

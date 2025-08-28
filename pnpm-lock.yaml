@@ -11,9 +11,6 @@ importers:
       '@types/base-64':
         specifier: ^1.0.0
         version: 1.0.0
-      '@types/colorthief':
-        specifier: ^2.6.0
-        version: 2.6.0
       '@types/lodash':
         specifier: ^4.14.182
         version: 4.14.191
@@ -342,9 +339,6 @@ packages:
 
   '@types/base-64@1.0.0':
     resolution: {integrity: sha512-AvCJx/HrfYHmOQRFdVvgKMplXfzTUizmh0tz9GFTpDePWgCY4uoKll84zKlaRoeiYiCr7c9ZnqSTzkl0BUVD6g==}
-
-  '@types/colorthief@2.6.0':
-    resolution: {integrity: sha512-GZBHPzkgEsyZqO7a9rhqkcW2BJZW+UpRlIUorY8vfOk7BVFVZMuDvZRPyaExv7ML0DaeB/t78PUOTkGo/THDpQ==}
 
   '@types/json5@0.0.29':
     resolution: {integrity: sha1-7ihweulOEdK4J7y+UnC86n8+ce4=}
@@ -1709,8 +1703,6 @@ snapshots:
   '@tokenizer/token@0.3.0': {}
 
   '@types/base-64@1.0.0': {}
-
-  '@types/colorthief@2.6.0': {}
 
   '@types/json5@0.0.29': {}
 

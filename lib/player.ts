@@ -1,11 +1,11 @@
 import axios from 'axios'
 import { isPlainObject } from 'lodash/fp'
 import { toast } from 'sonner'
-import ColorThief from 'colorthief/dist/color-thief.mjs'
 import mobile from 'is-mobile'
 import setTitle from './setTitle'
 import speech from './speech'
 import { ProgressBar } from './ascii-progress'
+import ColorThief from './color-thief'
 import globalInfo from '../package.json'
 
 const LOCAL_ALBUM = '/images/album.jpg'
