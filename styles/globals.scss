@@ -134,7 +134,9 @@ template {
   display: flex;
   flex-direction: column;
   gap: 1em;
-  height: 90vh;
+  height: calc(
+    100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+  );
   #player-container {
     display: flex;
     align-items: center;
@@ -200,8 +202,8 @@ template {
 
 #player-panel {
   margin: 0 auto 0 auto;
-  width: 18em;
-  padding: 1em;
+  width: 20em;
+  padding: 0 1em;
 
   #detail {
     text-align: center;
@@ -209,7 +211,7 @@ template {
     .title {
       margin-bottom: 0.1em;
       font-size: 1em;
-      font-weight: 600;
+      // font-weight: 600;
       color: rgba(0, 0, 0, 0.6);
       &::before {
         content: '「';
@@ -289,7 +291,7 @@ template {
 
 #lyric {
   margin-top: 1em;
-  min-height: 3em;
+  min-height: 5em;
   text-align: center;
   text-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
   .lrc {
@@ -357,31 +359,22 @@ template {
   }
 }
 
-@media (orientation: portrait) {
+@media (orientation: portrait) or ((orientation: landscape) and (min-height: 721px)) {
   #player-container {
     flex-direction: column;
     height: fit-content;
     margin-top: 4em;
-    // #player-panel {
-    //   background-color: rgba(255, 255, 255, 0.4);
-    //   backdrop-filter: blur(8px);
-    //   border-radius: 1em;
-    //   box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.1);
-    // }
-  }
-}
-
-@media (orientation: landscape) and (min-height: 721px) {
-  #player-container {
-    flex-direction: column;
-    height: fit-content;
-    margin-top: 4em;
-    // #player-panel {
-    //   background-color: rgba(255, 255, 255, 0.4);
-    //   backdrop-filter: blur(8px);
-    //   border-radius: 1em;
-    //   box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.1);
-    // }
+    #player-panel {
+      //   background-color: rgba(255, 255, 255, 0.4);
+      //   backdrop-filter: blur(8px);
+      //   border-radius: 1em;
+      //   box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.1);
+      width: 80%;
+      #detail {
+        width: 100%;
+        min-height: 4.5em;
+      }
+    }
   }
 }
 
@@ -407,17 +400,16 @@ template {
       height: calc(40vh - 2em);
       padding: 0 2em;
       // transform: translateX(-6.25vh);
+      #detail {
+        min-height: 4.5em;
+        text-align: left;
+        transition: all .4s;
+        .title {
+          &::before, &::after {
+            display: none;
+          }
+        }
+      }
     }
   }
-  // #main-container {
-  //   padding-top: 0.5em;
-  //   #detail {
-  //     margin-top: 0.5em;
-  //     margin-bottom: 0.5em;
-  //   }
-  // }
-  // #lyric {
-  //   position: fixed;
-  //   bottom: 0;
-  // }
 }
