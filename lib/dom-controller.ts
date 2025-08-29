@@ -77,7 +77,7 @@ class DOMController {
   private audioSource: MediaElementAudioSourceNode
   private analyser: AnalyserNode
   private bufferLength: number
-  private dataArray: Uint8Array<ArrayBuffer>
+  private dataArray: Uint8Array
   private waveformCtx: CanvasRenderingContext2D
 
   // 扩展Canvas元素类型以包含pattern属性
@@ -185,7 +185,7 @@ class DOMController {
     const drawWaveform = () => {
       requestAnimationFrame(drawWaveform)
 
-      this.analyser.getByteTimeDomainData(this.dataArray)
+      this.analyser.getByteTimeDomainData(this.dataArray as any)
 
       this.waveformCtx.clearRect(
         0,
