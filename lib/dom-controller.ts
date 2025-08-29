@@ -55,6 +55,7 @@ interface DOMNodes {
   lyric: HTMLElement
   tLyric: HTMLElement
   waveform: HTMLCanvasElement
+  frequency: HTMLCanvasElement
   backdrop: HTMLElement
   backdropMask: HTMLElement
   fullscreenMask: HTMLElement
@@ -79,6 +80,7 @@ class DOMController {
   private bufferLength: number
   private dataArray: Uint8Array
   private waveformCtx: CanvasRenderingContext2D
+  private frequencyCtx: CanvasRenderingContext2D
 
   // 扩展Canvas元素类型以包含pattern属性
   private albumCanvas: HTMLCanvasElement & { pattern?: CanvasPattern }
@@ -96,6 +98,7 @@ class DOMController {
     }
     this.albumCanvas = this.nodes.album
     this.waveformCtx = this.initializeWaveformContext()
+    this.frequencyCtx = this.initializeFrequencyContext()
     this.audioContext = new AudioContext()
     this.analyser = this.audioContext.createAnalyser()
     this.analyser.fftSize = 2048
@@ -142,6 +145,7 @@ class DOMController {
       lyric: getElement<HTMLElement>('#lyric .lrc'),
       tLyric: getElement<HTMLElement>('#lyric .tlrc'),
       waveform: getElement<HTMLCanvasElement>('#waveform'),
+      frequency: getElement<HTMLCanvasElement>('#frequency'),
       backdrop: getElement<HTMLElement>('#backdrop'),
       backdropMask: getElement<HTMLElement>('#backdrop .mask'),
       fullscreenMask: getElement<HTMLElement>('.fullscreen-mask'),
@@ -163,10 +167,17 @@ class DOMController {
     const resizeCanvases = () => {
       this.nodes.waveform.width = this.nodes.waveform.offsetWidth
       this.nodes.waveform.height = this.nodes.waveform.offsetHeight
+      this.nodes.frequency.width = this.nodes.frequency.offsetWidth
+      this.nodes.frequency.height = this.nodes.frequency.offsetHeight
     }
     window.addEventListener('resize', resizeCanvases)
     resizeCanvases()
 
+    return ctx
+  }
+
+  private initializeFrequencyContext(): CanvasRenderingContext2D {
+    const ctx = this.nodes.frequency.getContext('2d') as CanvasRenderingContext2D
     return ctx
   }
 
@@ -221,7 +232,45 @@ class DOMController {
       this.waveformCtx.stroke()
     }
 
+    // 绘制频率
+    const drawFrequency = () => {
+      requestAnimationFrame(drawFrequency)
+
+      this.analyser.getByteFrequencyData(this.dataArray as any)
+
+      this.frequencyCtx.clearRect(0, 0, this.nodes.frequency.width, this.nodes.frequency.height)
+
+      const barWidth = (this.nodes.frequency.width / this.bufferLength) * 5
+      let barHeight
+      let x = 0
+
+      for (let i = 0; i < this.bufferLength; i++) {
+        barHeight = this.dataArray[i] / 4
+
+        // 使用渐变色
+        const gradient = this.frequencyCtx.createLinearGradient(
+          0,
+          0,
+          0,
+          this.nodes.frequency.height
+        )
+        gradient.addColorStop(0, `rgba(${this.darkerColor.join(',')}, .1)`)
+        gradient.addColorStop(1, `rgba(${this.darkerColor.join(',')}, 1)`)
+
+        this.frequencyCtx.fillStyle = gradient
+        this.frequencyCtx.fillRect(
+          x,
+          this.nodes.frequency.height - barHeight,
+          barWidth,
+          barHeight
+        )
+
+        x += barWidth + 1
+      }
+    }
+
     drawWaveform()
+    drawFrequency()
   }
 
   // 创建图片元素

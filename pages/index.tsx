@@ -96,6 +96,7 @@ const Home: NextPage = () => {
           <div className='lrc' />
           <div className='tlrc' />
         </div>
+        <canvas id="frequency" />
         <canvas id="waveform" />
       </div>
       <div className='fullscreen-mask'>

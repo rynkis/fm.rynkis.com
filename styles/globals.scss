@@ -319,6 +319,15 @@ template {
   z-index: -1;
 }
 
+#frequency {
+  position: fixed;
+  bottom: 0;
+  width: 100vw;
+  height: 10em;
+  opacity: .4;
+  z-index: -1;
+}
+
 .fullscreen-mask {
   position: fixed;
   left: 0;
@@ -374,16 +383,24 @@ template {
   }
 }
 
+@media (orientation: portrait) {
+  #frequency {
+    opacity: 0;
+  }
+}
+
+@media (orientation: landscape) {
+  #waveform {
+    opacity: 0;
+  }
+}
+
 @media (orientation: portrait) or ((orientation: landscape) and (min-height: 721px)) {
   #player-container {
     flex-direction: column;
     height: fit-content;
     margin-top: 4em;
     #player-panel {
-      //   background-color: rgba(255, 255, 255, 0.4);
-      //   backdrop-filter: blur(8px);
-      //   border-radius: 1em;
-      //   box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.1);
       width: 80%;
       #detail {
         width: 100%;
