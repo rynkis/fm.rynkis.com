@@ -44,7 +44,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<any>) => {
     'no-cache, no-store, max-age=0, must-revalidate'
   )
   const playlistKey = req.query.list === 'pl' ? 'SERVER_PLAYLIST_PL' : 'SERVER_PLAYLIST'
-  const json = process.env[playlistKey] || '["10120837951"]'
+  let json = process.env[playlistKey] || '["10120837951"]'
+  if (req.query.id) json = `["${req.query.id}"]`
 
   const CACHE_KEY = 'PLAYLIST' + playlistKey
   let playlistCache = await KVCache.get(CACHE_KEY)

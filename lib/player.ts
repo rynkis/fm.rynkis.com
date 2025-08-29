@@ -2,303 +2,269 @@ import axios from 'axios'
 import { isPlainObject } from 'lodash/fp'
 import { toast } from 'sonner'
 import mobile from 'is-mobile'
-import setTitle from './setTitle'
-import speech from './speech'
-import { ProgressBar } from './ascii-progress'
-import ColorThief from './color-thief'
+import setTitle from './helper/setTitle'
+import { parseSpeech, speakMessage } from './helper/speech'
+import DOMController, { Song } from './dom-controller'
 import globalInfo from '../package.json'
 
-const LOCAL_ALBUM = '/images/album.jpg'
+// Constants
+const DEFAULT_EXPIRE_TIME = 1200
 
-const SIZES = [96, 128, 192, 256, 384, 512]
-
-const bar = new ProgressBar(':message :bar :percent', {
-  width: 20,
-  completedChar: '▒',
-  incompletedChar: '░'
-})
-
-const colorThief = new ColorThief()
-
-interface Song {
-  id: string
-  cover: string
-  title: string
-  album: string
-  url: string
-  artists: string
-  expire: number
-  timestamp: number
-  lrc: string[] | string
-  tlrc: string[] | string
+interface PlaylistResponse {
+  hash: string
+  ids: string[]
+  msgs: string
 }
 
-interface Audio extends HTMLAudioElement {
-  sourcePointer: Song
+interface RecursionState {
+  currentTime: number | null
 }
 
-interface Speech {
+interface SpeechState {
   speechPrimed: boolean
-  messages: any
-  allVoices: any[]
-  synth: SpeechSynthesis
+  messages: {} | null
+  allVoices?: SpeechSynthesisVoice[]
+  synth?: SpeechSynthesis
+}
+
+interface LocalData {
+  version?: string
+  lastHash?: string
+  lastID?: number
+  playMode?: string
+  volume?: number
+  spoken?: { [key: number]: boolean }
 }
 
 class Player {
-  data: any = {}
-  recursion: any
-  config: any
-  domNodes: any
-  audio: Audio
-  image: HTMLImageElement
-  playingIndex: number = 0
-  songNum: number = 0
-  listHash: string = ''
-  playList: string[] = []
-  autoSkip: boolean = false
-  prevFrameRadian: number = 0
-  lrcInterval: any = null
-  spoken: any = {}
-  speech: Speech = {
-    speechPrimed: false,
-    messages: null,
-    allVoices: [],
-    synth: speechSynthesis
-  }
+  private data: LocalData = {}
+  private recursion: RecursionState = { currentTime: null }
+  private config: ReturnType<typeof Player.prototype.initializeConfig>
+  private dom: DOMController
+  private audio: HTMLAudioElement & { sourcePointer?: Song }
+  private playingIndex: number = 0
+  private songNum: number = 0
+  private listHash: string = ''
+  private playList: string[] = []
+  private autoSkip: boolean = false
+  private lrcInterval: number | null = null
+  private spoken: { [key: number]: boolean } = {}
+  private speech: SpeechState
+
   constructor() {
-    this.recursion = {
-      currentTime: null,
-      requestID: null
-    }
-    this.config = {
+    this.config = this.initializeConfig()
+    this.dom = new DOMController(this.config)
+    this.audio = this.dom.audio
+    this.speech = this.initializeSpeech()
+
+    this.dom.setInitialContent()
+    this.start()
+  }
+
+  /**
+   * 初始化配置
+   */
+  private initializeConfig() {
+    return {
       siteTitle: "Rynkis' FM",
-      volume: mobile() ? 1: 0.5,
-      expire: 1200,
+      volume: mobile() ? 1 : 0.5,
+      expire: DEFAULT_EXPIRE_TIME,
       localName: 'Rynkis.FM.logger',
       source: 'https://github.com/Shy07/fm.rynkis.com',
       music: '/api/music',
       lyrics: '/api/lyrics',
-      playlist: '/api/playlist'
+      playlist: `/api/playlist${window.location.search}`
     }
-    this.domNodes = {
-      home: document.querySelector(
-        '#controller [data-id="fa-github"] .fa-button'
-      ),
-      back: document.querySelector(
-        '#controller [data-id="fa-back"] .fa-button'
-      ),
-      play: document.querySelector(
-        '#controller [data-id="fa-play"] .fa-button'
-      ),
-      playIcon: document.querySelector(
-        '#controller [data-id="fa-play"] .fa-button i'
-      ),
-      over: document.querySelector(
-        '#controller [data-id="fa-over"] .fa-button'
-      ),
-      mode: document.querySelector(
-        '#controller [data-id="fa-mode"] .fa-button i'
-      ),
-      title: document.querySelector('#detail .title'),
-      album: document.querySelector('#surface .album'),
-      magic: document.querySelector('#surface .magic'),
-      artists: document.querySelector('#detail .artists'),
-      buffered: document.querySelector('#thread .progress .buffered'),
-      elapsed: document.querySelector('#thread .progress .elapsed'),
-      surface: document.querySelector('#surface'),
-      faMagic: document.querySelector('#surface .magic .fa'),
-      lyric: document.querySelector('#lyric .lrc'),
-      tLyric: document.querySelector('#lyric .tlrc'),
-      backdrop: document.querySelector('#backdrop'),
-      backdropMask: document.querySelector('#backdrop .color'),
-      fullscreenMask: document.querySelector('.fullscreen-mask'),
-      fullscreenMaskMobile: document.querySelector('.fullscreen-mask-mobile')
+  }
+
+  /**
+   * 初始化语音配置
+   */
+  private initializeSpeech(): SpeechState {
+    return {
+      speechPrimed: false,
+      messages: null,
+      allVoices:
+        typeof speechSynthesis !== 'undefined'
+          ? speechSynthesis.getVoices()
+          : [],
+      synth:
+        typeof speechSynthesis !== 'undefined' ? speechSynthesis : undefined
     }
-    this.audio = window.document.createElement('audio') as Audio
-    this.audio.volume = this.config.volume
-    this.image = new Image()
-    this.image.crossOrigin = 'anonymous'
-    this.domNodes.title.textContent = 'Title'
-    this.domNodes.artists.textContent = 'Artists'
-    this.speech.allVoices = this.speech.synth.getVoices()
-    this.start()
   }
 
-  private async start() {
-    const { data } = await axios(this.config.playlist)
-    if (!data) return
-    this.speech.messages = speech.parseSpeech(data.msgs)
-    this.listHash = data.hash
-    this.playList = data.ids
-    this.songNum = this.playList.length
-    this.playingIndex = Math.floor(Math.random() * this.songNum)
-    this.createAlbum()
-    this.addAlbumEvents()
-    this.getLatestData()
-    this.loadMusicInfo('start')
-    this.addAudioEvents()
-    this.addOtherEvents()
+  /**
+   * 启动播放器
+   */
+  private async start(): Promise<void> {
+    try {
+      const { data } = await axios.get<PlaylistResponse>(this.config.playlist)
+      if (!data) return
+
+      this.speech.messages = parseSpeech(data.msgs)
+      this.listHash = data.hash
+      this.playList = data.ids
+      this.songNum = this.playList.length
+      this.playingIndex = Math.floor(Math.random() * this.songNum)
+
+      this.dom.createAlbum()
+      this.dom.addAlbumEvents()
+      this.getLatestData()
+      this.loadMusicInfo('start')
+      this.addAudioEvents()
+      this.addOtherEvents()
+    } catch (error) {
+      console.error('Failed to start player:', error)
+      toast.error('Failed to load playlist')
+    }
   }
 
-  private createAlbum(src: any = null) {
-    this.image.src = typeof src === 'string' ? src : LOCAL_ALBUM
-  }
-
-  private addAlbumEvents() {
-    this.image.addEventListener('load', () => {
-      const primaryColor = colorThief.getColor(this.image)
-      const ONE_TURN = Math.PI * 2
-      const MAX_LENGTH = Math.max(this.image.width, this.image.height)
-      const HALF_LENGTH = MAX_LENGTH / 2
-
-      this.prevFrameRadian = 0
-      this.domNodes.album.width = this.domNodes.album.height = MAX_LENGTH * 2
-      const context = this.domNodes.album.getContext('2d')
-      this.domNodes.album.pattern = context.createPattern(
-        this.image,
-        'no-repeat'
-      )
-
-      context.scale(2, 2)
-      context.clearRect(0, 0, MAX_LENGTH, MAX_LENGTH)
-      context.beginPath()
-      context.fillStyle = this.domNodes.album.pattern
-      context.arc(HALF_LENGTH, HALF_LENGTH, HALF_LENGTH, 0, ONE_TURN)
-      context.fill()
-      context.closePath()
-
-      this.domNodes.backdrop.style[
-        'background-image'
-      ] = `url(${this.image.src})`
-      const primaryColorRgba = `rgba(${primaryColor.join(',')}, .4)`
-      this.domNodes.surface.style['background-color'] = primaryColorRgba
-      // this.domNodes.backdropMask.style['background-color'] = primaryColorRgba
-    })
-    this.image.addEventListener('error', () => {
-      if (this.image.src !== LOCAL_ALBUM) {
-        this.createAlbum(LOCAL_ALBUM)
-      }
-    })
-  }
-
-  private setLocalData() {
+  /**
+   * 设置本地数据
+   */
+  private setLocalData(): void {
     this.data.version = globalInfo.version
     this.data.lastHash = this.listHash
     this.data.lastID = this.playingIndex
-    this.data.playMode = this.domNodes.mode.getAttribute('class')
+    this.data.playMode = this.dom.getPlayMode()
     this.data.volume = this.audio.volume
     this.data.spoken = this.spoken
+
     try {
       localStorage.setItem(this.config.localName, JSON.stringify(this.data))
-    } catch (e) {
-      console.warn(e)
+    } catch (error) {
+      console.warn('Failed to save data to localStorage:', error)
     }
   }
 
-  private getLocalData() {
+  /**
+   * 获取本地数据
+   */
+  private getLocalData(): LocalData | null {
     try {
-      return JSON.parse(localStorage.getItem(this.config.localName) as any)
-    } catch (e) {
-      console.warn(e)
+      const data = localStorage.getItem(this.config.localName)
+      return data ? JSON.parse(data) : null
+    } catch (error) {
+      console.warn('Failed to get data from localStorage:', error)
       return null
     }
   }
 
-  private getLatestData() {
+  /**
+   * 获取最新数据
+   */
+  private getLatestData(): void {
     const latestData = this.getLocalData()
+
     if (isPlainObject(latestData)) {
-      this.data = latestData
+      this.data = latestData as LocalData
     }
-    if (this.listHash === this.data.lastHash) {
+
+    if (
+      this.listHash === this.data.lastHash &&
+      this.data.lastID !== undefined
+    ) {
       if (this.data.lastID >= 0) this.playingIndex = this.data.lastID
       this.spoken = this.data.spoken || {}
     } else {
-      this.playingIndex = 0 // start from 0 if playlist changed
+      this.playingIndex = 0
       this.spoken = {}
     }
-    if (this.data.playMode)
-      this.domNodes.mode.setAttribute('class', this.data.playMode)
-    switch (this.data.playMode) {
-      case 'fa fa-list':
-        this.audio.loop = false
-        this.domNodes.mode.setAttribute('class', 'fa fa-list')
-        this.domNodes.mode.setAttribute('title', 'List')
-        break
-      case 'fa fa-repeat':
-        this.audio.loop = true
-        this.domNodes.mode.setAttribute('class', 'fa fa-repeat')
-        this.domNodes.mode.setAttribute('title', 'Single')
-        break
-      case 'fa fa-shuffle':
-        this.audio.loop = false
-        this.domNodes.mode.setAttribute('class', 'fa fa-shuffle')
-        this.domNodes.mode.setAttribute('title', 'Random')
-        break
-      default:
-        this.audio.loop = false
-        this.domNodes.mode.setAttribute('class', 'fa fa-list')
-        this.domNodes.mode.setAttribute('title', 'List')
-    }
-    if (this.data.volume || this.data.volume === 0) {
+
+    this.applyPlayMode()
+    this.setVolume()
+  }
+
+  /**
+   * 应用播放模式
+   */
+  private applyPlayMode(): void {
+    if (!this.data.playMode) return
+    this.dom.applyPlayMode(this.data.playMode)
+  }
+
+  /**
+   * 设置音量
+   */
+  private setVolume(): void {
+    if (this.data.volume !== undefined) {
       this.audio.volume = this.data.volume
     }
   }
 
-  private async loadMusicInfo(caller: any = null) {
+  /**
+   * 加载音乐信息
+   */
+  private async loadMusicInfo(caller: string | null = null): Promise<void> {
+    this.adjustPlayingIndex()
+
+    const sid = this.playList[this.playingIndex]
+    if (!sid) return
+
+    try {
+      const { data: result } = await axios.get<Song>(
+        `${this.config.music}/${sid}`
+      )
+      if (!result) return
+
+      let lyrics = null
+      if (typeof sid === 'string' && sid.startsWith('r')) {
+        lyrics = result.lyrics
+      } else {
+        const { data } = await axios.get(`${this.config.lyrics}/${sid}`)
+        lyrics = data
+      }
+
+      const song: Song = {
+        ...result,
+        ...lyrics
+      }
+
+      if (song.url === '' && this.autoSkip) {
+        await this.nextTrack()
+      } else {
+        await this.renderAudio(song)
+      }
+    } catch (error) {
+      console.error('Failed to load music info:', error)
+      toast.error('Failed to load song')
+    }
+  }
+
+  /**
+   * 调整播放索引
+   */
+  private adjustPlayingIndex(): void {
     if (this.playingIndex >= this.songNum) {
       this.playingIndex = 0
     }
     if (this.playingIndex < 0) {
       this.playingIndex = this.songNum - 1
     }
-    const sid = this.playList[this.playingIndex]
-    const { data: result } = await axios.get(`${this.config.music}/${sid}`)
-    if (!result) return
-    let lyrics: any = null
-    if (typeof sid === 'string' && sid.startsWith('r')) {
-      lyrics = result.lyrics
-    } else {
-      const { data } = await axios.get(`${this.config.lyrics}/${sid}`)
-      lyrics = data
-    }
-    const song: Song = {
-      ...result,
-      ...lyrics
-    }
-    if (song.url === '' && this.autoSkip) {
-      await this.nextTrack()
-    } else {
-      await this.renderAudio(song)
-    }
   }
 
-  private renderVolume () {
-    toast(bar.update(this.audio.volume, { message: '🎵' }), {
-      style: {
-        color: '#666',
-        fontFamily: 'monospace',
-        whiteSpace: 'nowrap',
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        backdropFilter: 'blur(8px)',
-      }
-    })
-  }
-
-  async playAudio() {
-    if (this.audio.sourcePointer.url === '') return
+  /**
+   * 播放音频
+   */
+  private async playAudio(): Promise<void> {
+    if (
+      !this.audio.sourcePointer ||
+      (this.audio.sourcePointer as Song).url === ''
+    )
+      return
 
     const time = Math.ceil(Date.now() / 1000)
-    const song = this.audio.sourcePointer
-    const rest = this.audio.duration - this.audio.currentTime // Maybe `NaN`
+    const song = this.audio.sourcePointer as Song
+    const rest = this.audio.duration - this.audio.currentTime
     const minExpire = this.audio.duration || 120
     const expire = song.expire < minExpire ? this.config.expire : song.expire
     const isExpire =
       Math.ceil(rest) < expire &&
       time - song.timestamp + Math.ceil(rest || 0) > expire
-    // NO risk of recursion
+
     if (isExpire) {
       this.recursion.currentTime = this.audio.currentTime
-      const { data: song } = await axios.get(
+      const { data: song } = await axios.get<Song>(
         `${this.config.music}/${this.playList[this.playingIndex]}`
       )
       this.audio.src = song.url
@@ -309,325 +275,280 @@ class Player {
         this.audio.currentTime = this.recursion.currentTime
         this.recursion.currentTime = null
       }
+
       setTitle([this.config.siteTitle, song.title].join(' | '))
+
       try {
-        this.audio.play()
-      } catch (e) {
-        console.error(e)
+        await this.dom.playAudio()
+      } catch (error) {
+        console.error('Failed to play audio:', error)
       }
     }
   }
 
-  pauseAudio() {
+  /**
+   * 暂停音频
+   */
+  private pauseAudio(): void {
     this.audio.pause()
   }
 
-  private async nextTrack() {
+  /**
+   * 下一首
+   */
+  private async nextTrack(): Promise<void> {
     this.pauseAudio()
-    if (this.domNodes.mode.getAttribute('class') === 'fa fa-shuffle') {
-      while (true) {
-        const idx = Math.floor(Math.random() * this.songNum)
-        if (this.playingIndex !== idx) {
-          this.playingIndex = idx
-          break
-        }
-      }
+
+    if (this.dom.isShuffle()) {
+      this.playingIndex = this.getRandomIndex()
     } else {
       this.playingIndex += 1
     }
+
     await this.loadMusicInfo('next')
   }
 
-  private prevTrack() {
+  /**
+   * 获取随机索引
+   */
+  private getRandomIndex(): number {
+    while (true) {
+      const idx = Math.floor(Math.random() * this.songNum)
+      if (this.playingIndex !== idx) {
+        return idx
+      }
+    }
+  }
+
+  /**
+   * 上一首
+   */
+  private prevTrack(): void {
     this.pauseAudio()
     this.playingIndex -= 1
     this.loadMusicInfo('prev')
   }
 
-  private async renderAudio(song: Song) {
-    const size = this.domNodes.album.clientWidth * 2
-    this.image.src = song.cover.replace(/\d+y\d+/, `${size}y${size}`)
-    this.domNodes.title.textContent = song.title
-    this.domNodes.artists.textContent = song.artists
-    this.domNodes.lyric.textContent = ''
-    this.domNodes.tLyric.textContent = ''
-    this.audio.sourcePointer = song
+  /**
+   * 渲染音频
+   */
+  private async renderAudio(song: Song): Promise<void> {
+    this.dom.renderAudio(song)
+
+    await this.handleMobileSpeechPriming()
+    await this.handleSpeechMessage()
+
+    this.spoken[this.playingIndex] = true
+    this.dom.updateMediaSession(song)
+
+    if (song.url !== '') this.playAudio()
+  }
+
+  /**
+   * 处理移动端语音提示
+   */
+  private async handleMobileSpeechPriming(): Promise<void> {
     if (!this.speech.speechPrimed && mobile()) {
-      this.domNodes.fullscreenMaskMobile.style.display = 'flex'
-      const promise = new Promise(resolve => {
-        this.domNodes.fullscreenMaskMobile.addEventListener('click', () => {
-          resolve(true)
-        })
-      })
-      await promise
-      this.domNodes.fullscreenMaskMobile.style.display = 'none'
+      await this.dom.handleMobileSpeechPriming()
       this.speech.speechPrimed = true
     }
-    const speechMessage = this.speech.messages[this.playingIndex]
+  }
+
+  /**
+   * 处理语音消息
+   */
+  private async handleSpeechMessage(): Promise<void> {
+    const speechMessage =
+      this.speech.messages && (this.speech.messages as any)[this.playingIndex]
+
     if (speechMessage && !this.spoken[this.playingIndex]) {
-      this.domNodes.fullscreenMask.style.display = 'flex'
-      const child = document.createElement('span')
-      speechMessage.split('\n').forEach((s: string) => {
-        const el = document.createElement('p')
-        el.textContent = s
-        child.appendChild(el)
-      })
-      const skipBtn = document.createElement('button')
-      skipBtn.textContent = '跳过'
-      skipBtn.addEventListener('click', () => {
-        this.speech.synth.cancel()
-        this.domNodes.fullscreenMask.style.display = 'none'
-      })
-      child.appendChild(skipBtn)
-      this.domNodes.fullscreenMask.replaceChild(
-        child,
-        this.domNodes.fullscreenMask.firstChild
+      this.dom.showFullscreenMaskMobile()
+      this.dom.createSpeechMessageElement(speechMessage, () =>
+        speechSynthesis.cancel()
       )
-      await this.speakMessage(speechMessage)
-      this.domNodes.fullscreenMask.style.display = 'none'
-    }
-    this.spoken[this.playingIndex] = true
-    this.updateMediaSession(song)
-    if (song.url === '') {
-      this.domNodes.lyric.textContent = "Can't be played because of Copyright"
-      this.domNodes.tLyric.textContent = '因版权原因暂时无法播放'
-    } else {
-      this.audio.src = song.url
-      this.playAudio()
+
+      await speakMessage(speechMessage)
+      this.dom.hideFullscreenMaskMobile()
     }
   }
 
-  private displayLrc() {
+  /**
+   * 显示歌词
+   */
+  private displayLrc(): void {
     const playTime = Math.floor(this.audio.currentTime)
-    if (typeof this.audio.sourcePointer.lrc[playTime] !== 'string') return
-    this.domNodes.lyric.textContent = this.audio.sourcePointer.lrc[playTime]
-    if (this.audio.sourcePointer.lrc[playTime] === '') {
-      return (this.domNodes.tLyric.textContent = '')
-    }
-    if (typeof this.audio.sourcePointer.tlrc[playTime] !== 'string') return
-    this.domNodes.tLyric.textContent = this.audio.sourcePointer.tlrc[playTime]
+    const lrc = (this.audio.sourcePointer as Song).lrc
+    const tlrc = (this.audio.sourcePointer as Song).tlrc
+
+    this.dom.displayLrc(playTime, lrc, tlrc)
   }
 
-  private requestAlbumRotate() {
-    const ANIMATION_FPS = 60
-    const ONE_TURN_TIME = 30
-    const ONE_TURN = 360 //Math.PI * 2
-    const MAX_EACH_FRAME_TIME = 1000 / 50
-    const EACH_FRAME_RADIAN = (1 / (ANIMATION_FPS * ONE_TURN_TIME)) * ONE_TURN
+  /**
+   * 添加音频事件
+   */
+  private addAudioEvents(): void {
+    this.audio.addEventListener('playing', () => this.handleAudioPlaying())
+    this.audio.addEventListener('waiting', () => this.handleAudioWaiting())
+    this.audio.addEventListener('play', () => this.dom.handleAudioPlay())
+    this.audio.addEventListener('pause', () => this.dom.handleAudioPause())
+    this.audio.addEventListener('ended', () => this.handleAudioEnded())
+    this.audio.addEventListener('timeupdate', () =>
+      this.dom.handleAudioTimeUpdate()
+    )
+    this.audio.addEventListener('error', () => this.handleAudioError())
 
-    let prevTimestamp = 0
-    const loopAnimation = (timestamp: any) => {
-      // prevTimestamp && timestamp - prevTimestamp > MAX_EACH_FRAME_TIME && console.warn(timestamp - prevTimestamp)
-      prevTimestamp = timestamp
-
-      this.prevFrameRadian += EACH_FRAME_RADIAN
-      this.prevFrameRadian >= ONE_TURN && (this.prevFrameRadian -= ONE_TURN)
-      this.updateAlbumRotateCSS(this.prevFrameRadian)
-
-      if (this.audio.paused) {
-        this.cancelAlbumRotate()
-      } else {
-        this.recursion.requestID = window.requestAnimationFrame(loopAnimation)
-      }
-    }
-
-    // In slow network, `this.requestAlbumRotate` will be trigger many times.
-    // So we should run `cancelAnimationFrame` firstly.
-    this.cancelAlbumRotate()
-    this.recursion.requestID = window.requestAnimationFrame(loopAnimation)
+    setInterval(() => this.dom.updateBufferedProgress(), 60)
   }
 
-  private updateAlbumRotateCSS(deg: number) {
-    const { album } = this.domNodes
-    const value = `rotate(${deg}deg)`
-    const prefixes = ['', '-ms-', '-moz-', '-webkit-', '-o-']
-    for (const prefix of prefixes) {
-      album.style[`${prefix}transform`] = value
+  /**
+   * 处理音频播放中事件
+   */
+  private handleAudioPlaying(): void {
+    this.dom.requestAlbumRotate()
+
+    if (this.lrcInterval !== null) {
+      clearInterval(this.lrcInterval)
+      this.lrcInterval = null
+    }
+
+    if ((this.audio.sourcePointer as Song).lrc !== '') {
+      this.lrcInterval = window.setInterval(() => this.displayLrc(), 500)
     }
   }
 
-  private cancelAlbumRotate() {
-    if (this.recursion.requestID) {
-      window.cancelAnimationFrame(this.recursion.requestID)
+  /**
+   * 处理音频等待事件
+   */
+  private handleAudioWaiting(): void {
+    this.dom.cancelAlbumRotate()
+
+    if (this.lrcInterval !== null) {
+      clearInterval(this.lrcInterval)
+      this.lrcInterval = null
     }
   }
 
-  private updateMediaSession(song: Song) {
-    if ('mediaSession' in navigator) {
-      const { title, artists: artist, album, cover } = song
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title,
-        artist,
-        album,
-        artwork: SIZES.map(x => ({
-          src: cover.replace(/\d+y\d+/, `${x}y${x}`),
-          sizes: `${x}x${x}`,
-          type: 'image/png'
-        }))
-      })
-
-      navigator.mediaSession.setActionHandler('play', () => this.playAudio())
-      navigator.mediaSession.setActionHandler('pause', () => this.pauseAudio())
-      navigator.mediaSession.setActionHandler('previoustrack', () =>
-        this.prevTrack()
-      )
-      navigator.mediaSession.setActionHandler('nexttrack', () =>
-        this.nextTrack()
-      )
-    }
+  /**
+   * 处理音频结束事件
+   */
+  private handleAudioEnded(): void {
+    this.autoSkip = true
+    this.nextTrack()
   }
 
-  private addAudioEvents() {
-    this.audio.addEventListener('playing', () => {
-      this.requestAlbumRotate()
-      if (this.lrcInterval !== null) {
-        clearInterval(this.lrcInterval)
-        this.lrcInterval = null
-      }
-      if (this.audio.sourcePointer.lrc !== '') {
-        this.lrcInterval = setInterval(() => this.displayLrc(), 500)
-      }
-    })
-    this.audio.addEventListener('waiting', () => {
-      this.cancelAlbumRotate()
-      if (this.lrcInterval !== null) {
-        clearInterval(this.lrcInterval)
-        this.lrcInterval = null
-      }
-    })
-    this.audio.addEventListener('play', () => {
-      let list = this.domNodes.faMagic.className
-        .split(' ')
-        .filter((val: string) => val !== 'fa-play')
-      this.domNodes.faMagic.className = [...list, 'fa-pause'].join(' ')
-      this.domNodes.playIcon.setAttribute('class', 'fa fa-pause')
-      this.domNodes.playIcon.setAttribute('title', 'Pause')
-    })
-    this.audio.addEventListener('pause', () => {
-      const list = this.domNodes.faMagic.className
-        .split(' ')
-        .filter((val: string) => val !== 'fa-pause')
-      this.domNodes.faMagic.className = [...list, 'fa-play'].join(' ')
-      this.domNodes.playIcon.setAttribute('class', 'fa fa-play')
-      this.domNodes.playIcon.setAttribute('title', 'Play')
-    })
-    this.audio.addEventListener('ended', () => {
-      // HTML5 video/audio doesn't become paused after playback ends on IE
-      // Bug: https://connect.microsoft.com/IE/feedback/details/810454/html5-video-audio-doesnt-become-paused-after-playback-ends
-      this.autoSkip = true
-      this.nextTrack()
-    })
-    this.audio.addEventListener('timeupdate', () => {
-      const val: any = this.audio.currentTime / this.audio.duration
-      this.domNodes.elapsed.style.width = `${val.toFixed(5) * 100}%`
-    })
-    this.audio.addEventListener('error', () => {
-      this.recursion.currentTime = this.audio.currentTime
-      this.pauseAudio()
-      this.audio.src = this.audio.sourcePointer.url
-      this.audio.load()
-      this.playAudio()
-    })
-
-    setInterval(() => {
-      this.domNodes.buffered.style.width = `${
-        this.audio.buffered.length > 0
-          ? (Math.round(this.audio.buffered.end(0)) /
-              Math.round(this.audio.duration)) *
-            100
-          : 0
-      }%`
-    }, 60)
+  /**
+   * 处理音频错误事件
+   */
+  private handleAudioError(): void {
+    this.recursion.currentTime = this.audio.currentTime
+    this.pauseAudio()
+    this.audio.src = (this.audio.sourcePointer as Song).url
+    this.audio.load()
+    this.playAudio()
   }
 
-  private speakMessage (message: string) {
-    if (typeof SpeechSynthesisUtterance !== undefined) {
-      const speechInstance = new SpeechSynthesisUtterance(message)
-      speechInstance.voice = this.speech.allVoices.find(x => x.lang === 'zh-CN')
-      speechInstance.lang = 'zh-CN'
-      this.speech.synth.speak(speechInstance)
-      return new Promise(resolve => {
-        speechInstance.onend = resolve
-        speechInstance.onerror = resolve
-      })
-    } else {
-      return false
-    }
-  }
+  /**
+   * 添加其他事件
+   */
+  private addOtherEvents(): void {
+    window.addEventListener('unload', e => this.handleWindowUnload(e))
+    document.addEventListener('keydown', e => this.handleKeyDown(e))
 
-  private addOtherEvents() {
-    window.addEventListener('unload', () => {
-      this.setLocalData()
-      this.speech.synth.cancel()
-    })
-
-    document.addEventListener('keydown', e => {
-      // `which` and `keyCode` maybe deprecated, so keep both here
-      if (e.keyCode === 32 || e.key === ' ') {
-        e.preventDefault()
-        this.audio.paused ? this.playAudio() : this.pauseAudio()
-      } else if (e.keyCode === 37 || e.key === 'ArrowLeft') {
-        e.preventDefault()
-        this.autoSkip = false
-        this.prevTrack()
-      } else if (e.keyCode === 39 || e.key === 'ArrowRight') {
-        e.preventDefault()
-        this.autoSkip = false
-        this.nextTrack()
-      } else if (e.keyCode === 38 || e.key === 'ArrowUp') {
-        e.preventDefault()
-        const volume = (this.audio.volume * 100 + 10) / 100
-        this.audio.volume = Math.min(1, volume)
-        this.renderVolume()
-      } else if (e.keyCode === 40 || e.key === 'ArrowDown') {
-        e.preventDefault()
-        const volume = (this.audio.volume * 100 - 10) / 100
-        this.audio.volume = Math.max(0, volume)
-        this.renderVolume()
-      }
-    })
-
-    this.domNodes.home.addEventListener('click', () =>
+    this.dom.nodes.home.addEventListener('click', () =>
       window.open(this.config.source)
     )
-
-    this.domNodes.back.addEventListener('click', () => {
-      this.autoSkip = false
-      this.prevTrack()
-    })
-
-    this.domNodes.play.addEventListener('click', () =>
-      this.audio.paused ? this.playAudio() : this.pauseAudio()
+    this.dom.nodes.back.addEventListener('click', (e: any) =>
+      this.handleBackClick(e)
     )
+    this.dom.nodes.play.addEventListener('click', (e: any) =>
+      this.handlePlayClick(e)
+    )
+    this.dom.nodes.over.addEventListener('click', (e: any) =>
+      this.handleOverClick(e)
+    )
+    this.dom.nodes.mode.addEventListener('click', () =>
+      this.dom.handleModeClick()
+    )
+    this.dom.nodes.magic.addEventListener('click', (e: any) =>
+      this.handleMagicClick(e)
+    )
+  }
 
-    this.domNodes.over.addEventListener('click', () => {
-      this.autoSkip = false
-      this.nextTrack()
-    })
+  /**
+   * 处理窗口卸载事件
+   */
+  private handleWindowUnload(e: BeforeUnloadEvent): void {
+    this.setLocalData()
+    speechSynthesis.cancel()
+  }
 
-    this.domNodes.mode.addEventListener('click', () => {
-      switch (this.domNodes.mode.getAttribute('class')) {
-        case 'fa fa-list':
-          this.audio.loop = true
-          this.domNodes.mode.setAttribute('class', 'fa fa-repeat')
-          this.domNodes.mode.setAttribute('title', 'Single')
-          break
-        case 'fa fa-repeat':
-          this.audio.loop = false
-          this.domNodes.mode.setAttribute('class', 'fa fa-shuffle')
-          this.domNodes.mode.setAttribute('title', 'Random')
-          break
-        case 'fa fa-shuffle':
-          this.audio.loop = false
-          this.domNodes.mode.setAttribute('class', 'fa fa-list')
-          this.domNodes.mode.setAttribute('title', 'List')
-          break
-      }
-    })
+  /**
+   * 处理键盘按下事件
+   */
+  private handleKeyDown(e: KeyboardEvent): void {
+    switch (e.key) {
+      case ' ':
+        e.preventDefault()
+        this.audio.paused ? this.playAudio() : this.pauseAudio()
+        break
+      case 'ArrowLeft':
+        e.preventDefault()
+        this.autoSkip = false
+        this.prevTrack()
+        break
+      case 'ArrowRight':
+        e.preventDefault()
+        this.autoSkip = false
+        this.nextTrack()
+        break
+      case 'ArrowUp':
+        e.preventDefault()
+        this.adjustVolume(0.1)
+        break
+      case 'ArrowDown':
+        e.preventDefault()
+        this.adjustVolume(-0.1)
+        break
+    }
+  }
 
-    this.domNodes.magic.addEventListener('click', () => {
-      this.audio.paused ? this.playAudio() : this.pauseAudio()
-    })
+  /**
+   * 调整音量
+   */
+  private adjustVolume(delta: number): void {
+    const volume = Math.max(0, Math.min(1, this.audio.volume + delta))
+    this.audio.volume = volume
+    this.dom.renderVolume()
+  }
+
+  /**
+   * 处理后退点击事件
+   */
+  private handleBackClick(e: MouseEvent): void {
+    this.autoSkip = false
+    this.prevTrack()
+  }
+
+  /**
+   * 处理播放点击事件
+   */
+  private handlePlayClick(e: MouseEvent): void {
+    this.audio.paused ? this.playAudio() : this.pauseAudio()
+  }
+
+  /**
+   * 处理跳过点击事件
+   */
+  private handleOverClick(e: MouseEvent): void {
+    this.autoSkip = false
+    this.nextTrack()
+  }
+
+  /**
+   * 处理Magic点击事件
+   */
+  private handleMagicClick(e: MouseEvent): void {
+    this.audio.paused ? this.playAudio() : this.pauseAudio()
   }
 }
 

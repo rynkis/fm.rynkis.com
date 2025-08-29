@@ -40,7 +40,7 @@ const Home: NextPage = () => {
       </Head>
       <GA gid='UA-33540710-3' aid='music-fm' />
       <div id='backdrop'>
-        <div className='color' />
+        <div className='mask' />
       </div>
       <div id='main-container'>
         <div id='player-container'>
@@ -96,12 +96,13 @@ const Home: NextPage = () => {
           <div className='lrc' />
           <div className='tlrc' />
         </div>
+        <canvas id="waveform" />
       </div>
       <div className='fullscreen-mask'>
         <span></span>
       </div>
       <div className='fullscreen-mask-mobile'>
-        <span>点触开始<br />touch to start</span>
+        {/* <span>点触开始<br />touch to start</span> */}
       </div>
       <Toaster position='top-center' />
     </div>

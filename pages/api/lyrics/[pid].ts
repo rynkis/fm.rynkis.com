@@ -5,7 +5,7 @@ import Meting from '../../../lib/meting'
 import allowCors from '../../../lib/allowCors'
 import KVCache from '../../../lib/kvCache'
 import { MS_24_HOURS } from '../../../lib/consts'
-import makeLrc from '../../../lib/makeLrc'
+import makeLrc from '../../../lib/helper/makeLrc'
 
 const makeLyricsCache = async (pid: string) => {
   const meting = new Meting(process.env.SERVER_NAME)

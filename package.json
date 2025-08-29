@@ -21,6 +21,7 @@
     "axios-retry": "^3.2.5",
     "base-64": "^1.0.0",
     "big-number": "^2.0.0",
+    "color": "^5.0.0",
     "colorthief": "^2.6.0",
     "decimal.js": "^10.3.1",
     "is-mobile": "^4.0.0",
