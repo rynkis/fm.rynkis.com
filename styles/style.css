@@ -1,16 +1,16 @@
 @font-face {
   font-family: 'icomoon';
-  src:  url('fonts/icomoon.eot?9eqoj1');
-  src:  url('fonts/icomoon.eot?9eqoj1#iefix') format('embedded-opentype'),
-    url('fonts/icomoon.ttf?9eqoj1') format('truetype'),
-    url('fonts/icomoon.woff?9eqoj1') format('woff'),
-    url('fonts/icomoon.svg?9eqoj1#icomoon') format('svg');
+  src:  url('fonts/icomoon.eot?h8rcee');
+  src:  url('fonts/icomoon.eot?h8rcee#iefix') format('embedded-opentype'),
+    url('fonts/icomoon.ttf?h8rcee') format('truetype'),
+    url('fonts/icomoon.woff?h8rcee') format('woff'),
+    url('fonts/icomoon.svg?h8rcee#icomoon') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
 }
 
-.fa {
+i {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'icomoon' !important;
   speak: never;
@@ -19,13 +19,15 @@
   font-variant: normal;
   text-transform: none;
   line-height: 1;
-  font-size: 1.4em;
 
   /* Better Font Rendering =========== */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+.fa-repeat:before {
+  content: "\e907";
+}
 .fa-github:before {
   content: "\e908";
 }
@@ -47,6 +49,6 @@
 .fa-skip-back:before {
   content: "\e905";
 }
-.fa-repeat:before {
+.fa-repeat-single:before {
   content: "\e906";
 }

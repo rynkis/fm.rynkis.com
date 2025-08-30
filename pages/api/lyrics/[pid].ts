@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 import Meting from '../../../lib/meting'
-import allowCors from '../../../lib/allowCors'
+import allowCors from '../../../lib/helper/allowCors'
 import KVCache from '../../../lib/kvCache'
 import { MS_24_HOURS } from '../../../lib/consts'
 import makeLrc from '../../../lib/helper/makeLrc'

@@ -7,7 +7,7 @@
 
 ## 功能特性
 
-- **语音合成**: 在歌单中生成语音轨道（通过歌单描述实现）
+- **语音合成**: 在歌单中生成 FM 语音（通过歌单描述实现）
 - **私有曲库**: 在无版权无 VIP 权限或未收入曲目时使用私有服务器资源
 - **灵活部署**: 可通过环境变量自定义配置在 Vercel 上一键部署
 - **体验优雅**: 支持多媒体控制中心（Chrome 右上角、Windows 11 右下角、iOS 等多平台）
@@ -97,7 +97,7 @@ Think of it as an enhanced, private version of Netease Cloud Music. (ง •̀_�
 
 ## Features
 
-- **Text-to-Speech**: Generate voice tracks in playlists (via playlist descriptions)
+- **Text-to-Speech**: Generate FM voice in playlists (via playlist descriptions)
 - **Private Music Library**: Use private server resources for songs without copyright, VIP restrictions, or unavailable tracks
 - **Flexible Deployment**: One-click deployment on Vercel with customizable environment variables
 - **Elegant Experience**: Supports multimedia control center (Chrome top-right, Windows 11 bottom-right, iOS, and multiple platforms)

@@ -4,7 +4,7 @@ import fp from 'lodash/fp'
 import md5 from 'md5'
 
 import Meting from '../../lib/meting'
-import allowCors from '../../lib/allowCors'
+import allowCors from '../../lib/helper/allowCors'
 import KVCache from '../../lib/kvCache'
 import { MS_1_HOUR } from '../../lib/consts'
 

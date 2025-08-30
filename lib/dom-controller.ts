@@ -9,8 +9,7 @@ const SIZES: number[] = [96, 128, 192, 256, 384, 512]
 const ANIMATION_FPS = 60
 const ONE_TURN_TIME = 30
 const ONE_TURN_DEGREES = 360
-const EACH_FRAME_RADIAN =
-  (1 / (ANIMATION_FPS * ONE_TURN_TIME)) * ONE_TURN_DEGREES
+const EACH_FRAME_RADIAN = (1 / (ANIMATION_FPS * ONE_TURN_TIME)) * ONE_TURN_DEGREES
 const PROGRESS_BAR_CONFIG = {
   width: 20,
   completedChar: '▒',
@@ -118,27 +117,13 @@ class DOMController {
     }
 
     return {
-      home: getElement<HTMLElement>(
-        '#controller [data-id="fa-github"] .fa-button'
-      ),
-      back: getElement<HTMLElement>(
-        '#controller [data-id="fa-back"] .fa-button'
-      ),
-      play: getElement<HTMLElement>(
-        '#controller [data-id="fa-play"] .fa-button'
-      ),
-      playIcon: getElement<HTMLElement>(
-        '#controller [data-id="fa-play"] .fa-button i'
-      ),
-      over: getElement<HTMLElement>(
-        '#controller [data-id="fa-over"] .fa-button'
-      ),
-      mode: getElement<HTMLElement>(
-        '#controller [data-id="fa-mode"] .fa-button'
-      ),
-      modeIcon: getElement<HTMLElement>(
-        '#controller [data-id="fa-mode"] .fa-button i'
-      ),
+      home: getElement<HTMLElement>('#controller [data-id="fa-github"] .fa-button'),
+      back: getElement<HTMLElement>('#controller [data-id="fa-back"] .fa-button'),
+      play: getElement<HTMLElement>('#controller [data-id="fa-play"] .fa-button'),
+      playIcon: getElement<HTMLElement>('#controller [data-id="fa-play"] .fa-button i'),
+      over: getElement<HTMLElement>('#controller [data-id="fa-over"] .fa-button'),
+      mode: getElement<HTMLElement>('#controller [data-id="fa-mode"] .fa-button'),
+      modeIcon: getElement<HTMLElement>('#controller [data-id="fa-mode"] .fa-button i'),
       title: getElement<HTMLElement>('#detail .title'),
       album: getElement<HTMLCanvasElement>('#surface .album'),
       magic: getElement<HTMLElement>('#surface .magic'),
@@ -204,12 +189,7 @@ class DOMController {
 
       this.analyser.getByteTimeDomainData(this.dataArray as any)
 
-      this.waveformCtx.clearRect(
-        0,
-        0,
-        this.nodes.waveform.width,
-        this.nodes.waveform.height
-      )
+      this.waveformCtx.clearRect(0, 0, this.nodes.waveform.width, this.nodes.waveform.height)
 
       this.waveformCtx.lineWidth = 2
       this.waveformCtx.strokeStyle = `rgb(${this.darkerColor.join(',')})`
@@ -231,10 +211,7 @@ class DOMController {
         x += sliceWidth
       }
 
-      this.waveformCtx.lineTo(
-        this.nodes.waveform.width,
-        this.nodes.waveform.height / 2
-      )
+      this.waveformCtx.lineTo(this.nodes.waveform.width, this.nodes.waveform.height / 2)
       this.waveformCtx.stroke()
     }
 
@@ -254,22 +231,12 @@ class DOMController {
         barHeight = this.dataArray[i] / 4
 
         // 使用渐变色
-        const gradient = this.frequencyCtx.createLinearGradient(
-          0,
-          0,
-          0,
-          this.nodes.frequency.height
-        )
+        const gradient = this.frequencyCtx.createLinearGradient(0, 0, 0, this.nodes.frequency.height)
         gradient.addColorStop(0, `rgba(${this.darkerColor.join(',')}, .1)`)
         gradient.addColorStop(1, `rgba(${this.darkerColor.join(',')}, 1)`)
 
         this.frequencyCtx.fillStyle = gradient
-        this.frequencyCtx.fillRect(
-          x,
-          this.nodes.frequency.height - barHeight,
-          barWidth,
-          barHeight
-        )
+        this.frequencyCtx.fillRect(x, this.nodes.frequency.height - barHeight, barWidth, barHeight)
 
         x += barWidth + 1
       }
@@ -316,10 +283,7 @@ class DOMController {
     this.darkerColor = darkerColor
 
     const root = document.documentElement
-    root.style.setProperty(
-      '--primary-color',
-      primaryColor.rgb().array().join(', ')
-    )
+    root.style.setProperty('--primary-color', primaryColor.rgb().array().join(', '))
     root.style.setProperty('--lighter-color', lighterColor.join(', '))
     root.style.setProperty('--darker-color', darkerColor.join(', '))
 
@@ -333,10 +297,7 @@ class DOMController {
     const context = this.nodes.album.getContext('2d')
     if (!context) return
 
-    this.albumCanvas.pattern = context.createPattern(
-      this.image,
-      'no-repeat'
-    ) as CanvasPattern
+    this.albumCanvas.pattern = context.createPattern(this.image, 'no-repeat') as CanvasPattern
     context.scale(2, 2)
     context.clearRect(0, 0, MAX_LENGTH, MAX_LENGTH)
 
@@ -369,11 +330,11 @@ class DOMController {
     this.nodes.modeIcon.setAttribute('class', playMode)
 
     switch (playMode) {
-      case 'fa fa-list':
+      case 'fa fa-repeat':
         this.audio.loop = false
         this.nodes.modeIcon.setAttribute('title', 'List')
         break
-      case 'fa fa-repeat':
+      case 'fa fa-repeat-single':
         this.audio.loop = true
         this.nodes.modeIcon.setAttribute('title', 'Single')
         break
@@ -383,7 +344,7 @@ class DOMController {
         break
       default:
         this.audio.loop = false
-        this.nodes.modeIcon.setAttribute('class', 'fa fa-list')
+        this.nodes.modeIcon.setAttribute('class', 'fa fa-repeat')
         this.nodes.modeIcon.setAttribute('title', 'List')
     }
   }
@@ -464,23 +425,16 @@ class DOMController {
     this.nodes.fullscreenMaskMobile.style.display = 'flex'
 
     await new Promise<void>(resolve => {
-      this.nodes.fullscreenMaskMobile.addEventListener(
-        'click',
-        () => resolve(),
-        {
-          once: true
-        }
-      )
+      this.nodes.fullscreenMaskMobile.addEventListener('click', () => resolve(), {
+        once: true
+      })
     })
 
     this.nodes.fullscreenMaskMobile.style.display = 'none'
   }
 
   // 创建语音消息元素
-  createSpeechMessageElement(
-    message: string,
-    onCancel: () => void
-  ): HTMLButtonElement {
+  createSpeechMessageElement(message: string, onCancel: () => void): HTMLButtonElement {
     const child = document.createElement('span')
 
     message.split('\n').forEach(s => {
@@ -497,10 +451,7 @@ class DOMController {
     })
 
     child.appendChild(skipBtn)
-    this.nodes.fullscreenMask.replaceChild(
-      child,
-      this.nodes.fullscreenMask.firstChild as ChildNode
-    )
+    this.nodes.fullscreenMask.replaceChild(child, this.nodes.fullscreenMask.firstChild as ChildNode)
 
     return skipBtn
   }
@@ -602,9 +553,7 @@ class DOMController {
   updateBufferedProgress(): void {
     const buffered =
       this.audio.buffered.length > 0
-        ? (Math.round(this.audio.buffered.end(0)) /
-            Math.round(this.audio.duration)) *
-          100
+        ? (Math.round(this.audio.buffered.end(0)) / Math.round(this.audio.duration)) * 100
         : 0
 
     this.nodes.buffered.style.width = `${buffered}%`
@@ -615,14 +564,14 @@ class DOMController {
     const currentMode = this.nodes.modeIcon.getAttribute('class')
 
     switch (currentMode) {
-      case 'fa fa-list':
-        this.setPlayMode('fa fa-repeat', 'Single', true)
-        break
       case 'fa fa-repeat':
-        this.setPlayMode('fa fa-shuffle', 'Random', false)
+        this.setPlayMode('fa fa-repeat-single', 'Single loop', true)
+        break
+      case 'fa fa-repeat-single':
+        this.setPlayMode('fa fa-shuffle', 'Shuffle', false)
         break
       case 'fa fa-shuffle':
-        this.setPlayMode('fa fa-list', 'List', false)
+        this.setPlayMode('fa fa-repeat', 'List loop', false)
         break
     }
   }
@@ -639,14 +588,8 @@ class DOMController {
       .split(' ')
       .filter(val => val !== (isPlaying ? 'fa-play' : 'fa-pause'))
 
-    this.nodes.faMagic.className = [
-      ...classList,
-      isPlaying ? 'fa-pause' : 'fa-play'
-    ].join(' ')
-    this.nodes.playIcon.setAttribute(
-      'class',
-      `fa fa-${isPlaying ? 'pause' : 'play'}`
-    )
+    this.nodes.faMagic.className = [...classList, isPlaying ? 'fa-pause' : 'fa-play'].join(' ')
+    this.nodes.playIcon.setAttribute('class', `fa fa-${isPlaying ? 'pause' : 'play'}`)
     this.nodes.playIcon.setAttribute('title', isPlaying ? 'Pause' : 'Play')
   }
 }

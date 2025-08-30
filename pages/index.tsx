@@ -86,7 +86,7 @@ const Home: NextPage = () => {
               </div>
               <div className='item' data-id='fa-mode'>
                 <a className='fa-button'>
-                  <i className='fa fa-list' title='List'/>
+                  <i className='fa fa-repeat' title='List loop'/>
                 </a>
               </div>
             </div>
