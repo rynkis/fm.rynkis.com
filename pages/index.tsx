@@ -103,7 +103,7 @@ const Home: NextPage = () => {
         <span></span>
       </div>
       <div className='fullscreen-mask-mobile'>
-        {/* <span>点触开始<br />touch to start</span> */}
+        <span>点触开始<br />touch to start</span>
       </div>
       <Toaster position='top-center' />
     </div>

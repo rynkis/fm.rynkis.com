@@ -1,5 +1,6 @@
 import Color from 'color'
 import { toast } from 'sonner'
+import mobile from 'is-mobile'
 import ColorThief from './helper/color-thief'
 import { ProgressBar } from './helper/ascii-progress'
 
@@ -75,7 +76,7 @@ class DOMController {
   private prevFrameRadian: number
   private recursion: { requestID: number | null }
   private audioContext: AudioContext
-  private audioSource: MediaElementAudioSourceNode
+  private audioSource: MediaElementAudioSourceNode | null
   private analyser: AnalyserNode
   private bufferLength: number
   private dataArray: Uint8Array
@@ -181,7 +182,8 @@ class DOMController {
     return ctx
   }
 
-  private createAudioSource(): MediaElementAudioSourceNode {
+  private createAudioSource(): MediaElementAudioSourceNode | null {
+    if (mobile()) return null
     const source = this.audioContext.createMediaElementSource(this.audio)
     source.connect(this.analyser)
     this.analyser.connect(this.audioContext.destination)
@@ -433,7 +435,7 @@ class DOMController {
       this.audio.pause()
       this.audio.src = song.url
       // 开始可视化
-      this.visualize()
+      if (!mobile()) this.visualize()
     }
   }
 

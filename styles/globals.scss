@@ -375,8 +375,8 @@ template {
   overflow: hidden;
   z-index: 9999;
   color: #fff;
-  // background-color: rgba(0, 0, 0, 0.1);
-  // backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, .4);
+  backdrop-filter: blur(8px);
   span {
     text-align: center;
     user-select: none;
