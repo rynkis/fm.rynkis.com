@@ -45,6 +45,7 @@ interface DOMNodes {
   playIcon: HTMLElement
   over: HTMLElement
   mode: HTMLElement
+  modeIcon: HTMLElement
   title: HTMLElement
   album: HTMLCanvasElement
   magic: HTMLElement
@@ -133,6 +134,9 @@ class DOMController {
         '#controller [data-id="fa-over"] .fa-button'
       ),
       mode: getElement<HTMLElement>(
+        '#controller [data-id="fa-mode"] .fa-button'
+      ),
+      modeIcon: getElement<HTMLElement>(
         '#controller [data-id="fa-mode"] .fa-button i'
       ),
       title: getElement<HTMLElement>('#detail .title'),
@@ -362,43 +366,43 @@ class DOMController {
 
   // 应用播放模式
   applyPlayMode(playMode: string): void {
-    this.nodes.mode.setAttribute('class', playMode)
+    this.nodes.modeIcon.setAttribute('class', playMode)
 
     switch (playMode) {
       case 'fa fa-list':
         this.audio.loop = false
-        this.nodes.mode.setAttribute('title', 'List')
+        this.nodes.modeIcon.setAttribute('title', 'List')
         break
       case 'fa fa-repeat':
         this.audio.loop = true
-        this.nodes.mode.setAttribute('title', 'Single')
+        this.nodes.modeIcon.setAttribute('title', 'Single')
         break
       case 'fa fa-shuffle':
         this.audio.loop = false
-        this.nodes.mode.setAttribute('title', 'Random')
+        this.nodes.modeIcon.setAttribute('title', 'Random')
         break
       default:
         this.audio.loop = false
-        this.nodes.mode.setAttribute('class', 'fa fa-list')
-        this.nodes.mode.setAttribute('title', 'List')
+        this.nodes.modeIcon.setAttribute('class', 'fa fa-list')
+        this.nodes.modeIcon.setAttribute('title', 'List')
     }
   }
 
   // 获取播放模式
   getPlayMode(): string {
-    return this.nodes.mode.getAttribute('class') || ''
+    return this.nodes.modeIcon.getAttribute('class') || ''
   }
 
   // 设置播放模式
   setPlayMode(modeClass: string, title: string, loop: boolean): void {
     this.audio.loop = loop
-    this.nodes.mode.setAttribute('class', modeClass)
-    this.nodes.mode.setAttribute('title', title)
+    this.nodes.modeIcon.setAttribute('class', modeClass)
+    this.nodes.modeIcon.setAttribute('title', title)
   }
 
   // 检查是否为随机播放模式
   isShuffle(): boolean {
-    return this.nodes.mode.getAttribute('class') === 'fa fa-shuffle'
+    return this.nodes.modeIcon.getAttribute('class') === 'fa fa-shuffle'
   }
 
   // 渲染音量显示
@@ -608,7 +612,7 @@ class DOMController {
 
   // 处理模式点击事件
   handleModeClick(): void {
-    const currentMode = this.nodes.mode.getAttribute('class')
+    const currentMode = this.nodes.modeIcon.getAttribute('class')
 
     switch (currentMode) {
       case 'fa fa-list':
