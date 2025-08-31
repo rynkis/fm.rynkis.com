@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Drawer } from 'vaul'
 import { toast } from 'sonner'
+import mobile from 'is-mobile'
 
 const DrawerListYours = (props: any) => {
   const { children } = props
@@ -21,16 +22,28 @@ const DrawerListYours = (props: any) => {
     setValue(e.target.value)
   }
 
+  const handleNumberInput = (val: number) => {
+    setValue(value + val)
+  }
+
+  const handleNumberDel = () => {
+    setValue(value.substring(0, value.length - 1))
+  }
+
   const handleClick = () => {
     if (!value) {
-      toast.error('未发现剪贴板内容')
+      toast.error('读取歌单失败')
       return
     }
     try {
-      const url = new URL(value)
-      const params = url.searchParams
-      const id = params.get('id')
-      ;(window as any).player.load({ id })
+      if (mobile()) {
+        ;(window as any).player.load({ id: value})
+      } else {
+        const url = new URL(value)
+        const params = url.searchParams
+        const id = params.get('id')
+        ;(window as any).player.load({ id })
+      }
     } catch (e) {
       console.error(e)
       toast.error('读取歌单失败')
@@ -53,17 +66,28 @@ const DrawerListYours = (props: any) => {
         <Drawer.Content className='drawer-content'>
           <div className='header-dash' />
           <Drawer.Title className='drawer-title'>自由歌单</Drawer.Title>
-          <div className='drawer-body'>
+          <div className={`drawer-body ${mobile() && 'mobile'}`}>
             <div className='drawer-text'>
               <p>想听听自己的歌单？</p>
-              <p>前往网易云音乐复制歌单链接，粘贴至下方输入框内后点击“播放歌单”按钮即可。</p>
+              <p className='pc-tips'>前往网易云音乐复制歌单链接，粘贴至下方输入框内后点击“播放歌单”按钮即可。</p>
+              <p className='mobile-tips'>前往网易云音乐复制歌单链接，找出列表 ID 输入后点击“播放歌单”按钮即可。</p>
             </div>
-            <textarea value={value} onChange={handleChange} />
-            <div
-              className='load-list-link'
-              onClick={handleClick}
-            >
-              播放歌单
+            <textarea disabled={mobile()} value={value} onChange={handleChange} />
+            <div className='button-group'>
+              {mobile() && (
+                <>
+                  {Array.from({length: 10}, (_, i) => i).map(val => (
+                    <div key={val} className='number-input-key' onClick={() => handleNumberInput(val)}>{val}</div>
+                  ))}
+                  <div className='number-input-key' onClick={handleNumberDel}>Del</div>
+                </>
+              )}
+              <div
+                className='load-list-link'
+                onClick={handleClick}
+              >
+                播放歌单
+              </div>
             </div>
           </div>
         </Drawer.Content>

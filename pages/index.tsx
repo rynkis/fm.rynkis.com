@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { Toaster } from 'sonner'
-import { Drawer } from 'vaul'
-import axios from 'axios'
 
 import Player from '../lib/player'
 import GA from '../components/GA'
@@ -43,7 +41,7 @@ const Home: NextPage = () => {
         />
         <meta
           name='viewport'
-          content='width=device-width, initial-scale=1, viewport-fit=cover'
+          content='width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no'
         />
         <link
           rel='icon'

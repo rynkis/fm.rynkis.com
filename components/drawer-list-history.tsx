@@ -57,7 +57,7 @@ const DrawerListHistory = (props: any) => {
           <Drawer.Title className='drawer-title'>历史歌单</Drawer.Title>
           <div className='drawer-body'>
             {listHistory.length && visible ? (
-              listHistory.reverse().map((val: any, idx) => (
+              listHistory.map((val: any, idx) => (
                 <div
                   key={idx}
                   className='item'
@@ -69,7 +69,7 @@ const DrawerListHistory = (props: any) => {
                   />
                   <span className='name'>{val.name}</span>
                 </div>
-              ))
+              )).reverse()
             ) : (
               loading ? (
                 <div className='loading'>Loading...</div>
