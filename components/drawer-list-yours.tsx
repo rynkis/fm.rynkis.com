@@ -37,12 +37,12 @@ const DrawerListYours = (props: any) => {
     }
     try {
       if (mobile()) {
-        ;(window as any).player.load({ id: value})
+        ;(window as any).player.load(value)
       } else {
         const url = new URL(value)
         const params = url.searchParams
         const id = params.get('id')
-        ;(window as any).player.load({ id })
+        ;(window as any).player.load(id)
       }
     } catch (e) {
       console.error(e)
@@ -68,18 +68,33 @@ const DrawerListYours = (props: any) => {
           <Drawer.Title className='drawer-title'>自由歌单</Drawer.Title>
           <div className={`drawer-body ${mobile() && 'mobile'}`}>
             <div className='drawer-text'>
-              <p>想听听自己的歌单？</p>
+              <p>想听听自己或其他人的歌单？</p>
               <p className='pc-tips'>前往网易云音乐复制歌单链接，粘贴至下方输入框内后点击“播放歌单”按钮即可。</p>
               <p className='mobile-tips'>前往网易云音乐复制歌单链接，找出列表 ID 输入后点击“播放歌单”按钮即可。</p>
             </div>
-            <textarea disabled={mobile()} value={value} onChange={handleChange} />
+            <textarea
+              disabled={mobile()}
+              value={value}
+              onChange={handleChange}
+            />
             <div className='button-group'>
               {mobile() && (
                 <>
-                  {Array.from({length: 10}, (_, i) => i).map(val => (
-                    <div key={val} className='number-input-key' onClick={() => handleNumberInput(val)}>{val}</div>
+                  {Array.from({ length: 10 }, (_, i) => i).map(val => (
+                    <div
+                      key={val}
+                      className='number-input-key'
+                      onClick={() => handleNumberInput(val)}
+                    >
+                      {val}
+                    </div>
                   ))}
-                  <div className='number-input-key' onClick={handleNumberDel}>Del</div>
+                  <div
+                    className='number-input-key'
+                    onClick={handleNumberDel}
+                  >
+                    <i className='fa fa-backspace' />
+                  </div>
                 </>
               )}
               <div

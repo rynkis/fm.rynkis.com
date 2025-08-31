@@ -9,9 +9,17 @@ import globalInfo from '../package.json'
 
 // Constants
 const DEFAULT_EXPIRE_TIME = 1200
+const LOCAL_STORAGE_KEY = 'Rynkis.FM.logger'
+const PLAY_MODES = {
+  NORMAL: 'normal',
+  SHUFFLE: 'shuffle',
+  LOOP: 'loop'
+} as const
 
-interface PlaylistResponse {
+export interface PlaylistResponse {
   hash: string
+  name: string
+  cover: string
   ids: string[]
   msgs: string
 }
@@ -22,9 +30,9 @@ interface RecursionState {
 
 interface SpeechState {
   speechPrimed: boolean
-  messages: {} | null
-  allVoices?: SpeechSynthesisVoice[]
-  synth?: SpeechSynthesis
+  messages: Record<string, any> | null
+  allVoices: SpeechSynthesisVoice[]
+  synth: SpeechSynthesis | null
 }
 
 interface LocalData {
@@ -33,22 +41,24 @@ interface LocalData {
   lastID?: number
   playMode?: string
   volume?: number
-  spoken?: { [key: number]: boolean }
+  spoken?: Record<number, boolean>
+  history?: PlaylistResponse[]
 }
 
 class Player {
   private data: LocalData = {}
   private recursion: RecursionState = { currentTime: null }
-  private config: ReturnType<typeof Player.prototype.initializeConfig>
-  private dom: DOMController
-  private audio: HTMLAudioElement & { sourcePointer?: Song }
-  private playingIndex: number = 0
-  private songNum: number = 0
-  private listHash: string = ''
-  private playList: string[] = []
-  private autoSkip: boolean = false
+  private readonly config: ReturnType<typeof Player.prototype.initializeConfig>
+  private readonly dom: DOMController
+  private readonly audio: HTMLAudioElement & { sourcePointer?: Song }
+  private playingIndex = 0
+  private songNum = 0
+  public listHash = ''
+  private playlist: string[] = []
+  private playlistData: PlaylistResponse | null = null
+  private autoSkip = false
   private lrcInterval: number | null = null
-  private spoken: { [key: number]: boolean } = {}
+  private spoken: Record<number, boolean> = {}
   private speech: SpeechState
 
   constructor() {
@@ -58,18 +68,15 @@ class Player {
     this.speech = this.initializeSpeech()
 
     this.dom.setInitialContent()
-    this.start()
+    this.initializePlayer()
   }
 
-  /**
-   * 初始化配置
-   */
   private initializeConfig() {
     return {
       siteTitle: "Rynkis' FM",
       volume: mobile() ? 1 : 0.5,
       expire: DEFAULT_EXPIRE_TIME,
-      localName: 'Rynkis.FM.logger',
+      localName: LOCAL_STORAGE_KEY,
       source: 'https://github.com/Shy07/fm.rynkis.com',
       music: '/api/music',
       lyrics: '/api/lyrics',
@@ -77,111 +84,54 @@ class Player {
     }
   }
 
-  /**
-   * 初始化语音配置
-   */
   private initializeSpeech(): SpeechState {
     return {
       speechPrimed: false,
       messages: null,
-      allVoices:
-        typeof speechSynthesis !== 'undefined'
-          ? speechSynthesis.getVoices()
-          : [],
-      synth:
-        typeof speechSynthesis !== 'undefined' ? speechSynthesis : undefined
+      allVoices: typeof speechSynthesis !== 'undefined' ? speechSynthesis.getVoices() : [],
+      synth: typeof speechSynthesis !== 'undefined' ? speechSynthesis : null
     }
   }
 
-  /**
-   * 启动播放器
-   */
-  private async start(): Promise<void> {
+  private async initializePlayer(): Promise<void> {
     try {
-      const { data } = await axios.get<PlaylistResponse>(this.config.playlist + window.location.search)
-      if (!data) return
-
-      this.speech.messages = parseSpeech(data.msgs)
-      this.listHash = data.hash
-      this.playList = data.ids
-      this.songNum = this.playList.length
-      this.playingIndex = Math.floor(Math.random() * this.songNum)
-
-      this.dom.createAlbum()
-      this.dom.addAlbumEvents()
-      this.getLatestData()
-      this.loadMusicInfo('start')
-      this.addAudioEvents()
-      this.addOtherEvents()
+      await this.loadPlaylist()
+      this.setupPlayer()
     } catch (error) {
-      console.error('Failed to start player:', error)
-      toast.error('Failed to load playlist')
+      this.handleError('Failed to initialize player', error)
     }
   }
 
-  async load({ id, hid }: any): Promise<void> {
-    try {
-      const { data } = await axios.get<PlaylistResponse>(`${this.config.playlist}?id=${id || ''}&hid=${hid || ''}`)
-      if (!data) return
+  private async loadPlaylist(): Promise<void> {
+    const { data } = await axios.get<PlaylistResponse>(`${this.config.playlist}${window.location.search}`)
 
-      this.listHash = data.hash
-      this.playList = data.ids
-      this.songNum = this.playList.length
-      this.playingIndex = Math.floor(Math.random() * this.songNum)
+    if (!data) throw new Error('No playlist data received')
 
-      this.getLatestData()
-      this.loadMusicInfo('load')
-    } catch (error) {
-      console.error('Failed to start player:', error)
-      toast.error('Failed to load playlist')
-    }
+    this.speech.messages = parseSpeech(data.msgs)
+    this.playlistData = data
+    this.listHash = data.hash
+    this.playlist = data.ids
+    this.songNum = this.playlist.length
+    this.playingIndex = Math.floor(Math.random() * this.songNum)
   }
 
-  /**
-   * 设置本地数据
-   */
-  private setLocalData(): void {
-    this.data.version = globalInfo.version
-    this.data.lastHash = this.listHash
-    this.data.lastID = this.playingIndex
-    this.data.playMode = this.dom.getPlayMode()
-    this.data.volume = this.audio.volume
-    this.data.spoken = this.spoken
-
-    try {
-      localStorage.setItem(this.config.localName, JSON.stringify(this.data))
-    } catch (error) {
-      console.warn('Failed to save data to localStorage:', error)
-    }
+  private setupPlayer(): void {
+    this.dom.createAlbum()
+    this.dom.addAlbumEvents()
+    this.loadUserData()
+    this.loadMusicInfo('start')
+    this.setupAudioEvents()
+    this.setupUIEvents()
   }
 
-  /**
-   * 获取本地数据
-   */
-  private getLocalData(): LocalData | null {
-    try {
-      const data = localStorage.getItem(this.config.localName)
-      return data ? JSON.parse(data) : null
-    } catch (error) {
-      console.warn('Failed to get data from localStorage:', error)
-      return null
-    }
-  }
-
-  /**
-   * 获取最新数据
-   */
-  private getLatestData(): void {
+  private loadUserData(): void {
     const latestData = this.getLocalData()
 
     if (isPlainObject(latestData)) {
       this.data = latestData as LocalData
     }
 
-    if (
-      this.listHash === this.data.lastHash &&
-      this.data.lastID !== undefined
-    ) {
+    if (this.listHash === this.data.lastHash && this.data.lastID !== undefined) {
       if (this.data.lastID >= 0) this.playingIndex = this.data.lastID
       this.spoken = this.data.spoken || {}
     } else {
@@ -193,50 +143,26 @@ class Player {
     this.setVolume()
   }
 
-  /**
-   * 应用播放模式
-   */
   private applyPlayMode(): void {
-    if (!this.data.playMode) return
-    this.dom.applyPlayMode(this.data.playMode)
+    if (this.data.playMode) {
+      this.dom.applyPlayMode(this.data.playMode)
+    }
   }
 
-  /**
-   * 设置音量
-   */
   private setVolume(): void {
     if (this.data.volume !== undefined) {
       this.audio.volume = this.data.volume
     }
   }
 
-  /**
-   * 加载音乐信息
-   */
   private async loadMusicInfo(caller: string | null = null): Promise<void> {
     this.adjustPlayingIndex()
 
-    const sid = this.playList[this.playingIndex]
+    const sid = this.playlist[this.playingIndex]
     if (!sid) return
 
     try {
-      const { data: result } = await axios.get<Song>(
-        `${this.config.music}/${sid}`
-      )
-      if (!result) return
-
-      let lyrics = null
-      if (typeof sid === 'string' && sid.startsWith('r')) {
-        lyrics = result.lyrics
-      } else {
-        const { data } = await axios.get(`${this.config.lyrics}/${sid}`)
-        lyrics = data
-      }
-
-      const song: Song = {
-        ...result,
-        ...lyrics
-      }
+      const song = await this.fetchSongData(sid)
 
       if (song.url === '' && this.autoSkip) {
         await this.nextTrack()
@@ -244,112 +170,88 @@ class Player {
         await this.renderAudio(song)
       }
     } catch (error) {
-      console.error('Failed to load music info:', error)
-      toast.error('Failed to load song')
+      this.handleError('Failed to load music info', error)
     }
   }
 
-  /**
-   * 调整播放索引
-   */
+  private async fetchSongData(sid: string | number): Promise<Song> {
+    const { data: result } = await axios.get<Song>(`${this.config.music}/${sid}`)
+
+    let lyrics = null
+    if (typeof sid === 'string' && sid.startsWith('r')) {
+      lyrics = result.lyrics
+    } else {
+      const { data } = await axios.get(`${this.config.lyrics}/${sid}`)
+      lyrics = data
+    }
+
+    return {
+      ...result,
+      ...lyrics
+    }
+  }
+
   private adjustPlayingIndex(): void {
-    if (this.playingIndex >= this.songNum) {
-      this.playingIndex = 0
-    }
-    if (this.playingIndex < 0) {
-      this.playingIndex = this.songNum - 1
-    }
+    if (this.playingIndex >= this.songNum) this.playingIndex = 0
+    if (this.playingIndex < 0) this.playingIndex = this.songNum - 1
   }
 
-  /**
-   * 播放音频
-   */
   private async playAudio(): Promise<void> {
-    if (
-      !this.audio.sourcePointer ||
-      (this.audio.sourcePointer as Song).url === ''
-    )
-      return
+    if (!this.audio.sourcePointer || this.audio.sourcePointer.url === '') return
 
     const time = Math.ceil(Date.now() / 1000)
-    const song = this.audio.sourcePointer as Song
+    const song = this.audio.sourcePointer
     const rest = this.audio.duration - this.audio.currentTime
     const minExpire = this.audio.duration || 120
     const expire = song.expire < minExpire ? this.config.expire : song.expire
-    const isExpire =
-      Math.ceil(rest) < expire &&
-      time - song.timestamp + Math.ceil(rest || 0) > expire
+    const isExpire = Math.ceil(rest) < expire && time - song.timestamp + Math.ceil(rest || 0) > expire
 
     if (isExpire) {
-      this.recursion.currentTime = this.audio.currentTime
-      const { data: song } = await axios.get<Song>(
-        `${this.config.music}/${this.playList[this.playingIndex]}`
-      )
-      this.audio.src = song.url
-      this.audio.sourcePointer = song
-      this.playAudio()
+      await this.refreshAudioSource()
     } else {
       if (this.recursion.currentTime) {
         this.audio.currentTime = this.recursion.currentTime
         this.recursion.currentTime = null
       }
 
-      setTitle([this.config.siteTitle, song.title].join(' | '))
-
-      try {
-        await this.dom.playAudio()
-      } catch (error) {
-        console.error('Failed to play audio:', error)
-      }
+      setTitle(`${this.config.siteTitle} | ${song.title}`)
+      await this.dom.playAudio()
     }
   }
 
-  /**
-   * 暂停音频
-   */
+  private async refreshAudioSource(): Promise<void> {
+    this.recursion.currentTime = this.audio.currentTime
+    const { data: song } = await axios.get<Song>(`${this.config.music}/${this.playlist[this.playingIndex]}`)
+    this.audio.src = song.url
+    this.audio.sourcePointer = song
+    this.playAudio()
+  }
+
   private pauseAudio(): void {
     this.audio.pause()
   }
 
-  /**
-   * 下一首
-   */
   private async nextTrack(): Promise<void> {
     this.pauseAudio()
-
-    if (this.dom.isShuffle()) {
-      this.playingIndex = this.getRandomIndex()
-    } else {
-      this.playingIndex += 1
-    }
-
+    this.playingIndex = this.dom.isShuffle() ? this.getRandomIndex() : this.playingIndex + 1
     await this.loadMusicInfo('next')
   }
 
-  /**
-   * 获取随机索引
-   */
   private getRandomIndex(): number {
-    while (true) {
-      const idx = Math.floor(Math.random() * this.songNum)
-      if (this.playingIndex !== idx) {
-        return idx
-      }
-    }
+    let newIndex
+    do {
+      newIndex = Math.floor(Math.random() * this.songNum)
+    } while (newIndex === this.playingIndex)
+
+    return newIndex
   }
 
-  /**
-   * 上一首
-   */
-  private prevTrack(): void {
+  private async prevTrack(): Promise<void> {
     this.pauseAudio()
     this.playingIndex -= 1
-    this.loadMusicInfo('prev')
+    await this.loadMusicInfo('prev')
   }
 
-  /**
-   * 渲染音频
-   */
   private async renderAudio(song: Song): Promise<void> {
     this.dom.renderAudio(song)
 
@@ -362,9 +264,6 @@ class Player {
     if (song.url !== '') this.playAudio()
   }
 
-  /**
-   * 处理移动端语音提示
-   */
   private async handleMobileSpeechPriming(): Promise<void> {
     if (!this.speech.speechPrimed && mobile()) {
       await this.dom.handleMobileSpeechPriming()
@@ -372,55 +271,38 @@ class Player {
     }
   }
 
-  /**
-   * 处理语音消息
-   */
   private async handleSpeechMessage(): Promise<void> {
-    const speechMessage =
-      this.speech.messages && (this.speech.messages as any)[this.playingIndex]
+    const speechMessage = this.speech.messages?.[this.playingIndex]
 
     if (speechMessage && !this.spoken[this.playingIndex]) {
       this.dom.showFullscreenMaskMobile()
-      this.dom.createSpeechMessageElement(speechMessage, () =>
-        speechSynthesis.cancel()
-      )
+      this.dom.createSpeechMessageElement(speechMessage, () => speechSynthesis.cancel())
 
       await speakMessage(speechMessage)
       this.dom.hideFullscreenMaskMobile()
     }
   }
 
-  /**
-   * 显示歌词
-   */
   private displayLrc(): void {
     const playTime = Math.floor(this.audio.currentTime)
-    const lrc = (this.audio.sourcePointer as Song).lrc
-    const tlrc = (this.audio.sourcePointer as Song).tlrc
+    const lrc = this.audio.sourcePointer?.lrc || ''
+    const tlrc = this.audio.sourcePointer?.tlrc || ''
 
     this.dom.displayLrc(playTime, lrc, tlrc)
   }
 
-  /**
-   * 添加音频事件
-   */
-  private addAudioEvents(): void {
+  private setupAudioEvents(): void {
     this.audio.addEventListener('playing', () => this.handleAudioPlaying())
     this.audio.addEventListener('waiting', () => this.handleAudioWaiting())
     this.audio.addEventListener('play', () => this.dom.handleAudioPlay())
     this.audio.addEventListener('pause', () => this.dom.handleAudioPause())
     this.audio.addEventListener('ended', () => this.handleAudioEnded())
-    this.audio.addEventListener('timeupdate', () =>
-      this.dom.handleAudioTimeUpdate()
-    )
+    this.audio.addEventListener('timeupdate', () => this.dom.handleAudioTimeUpdate())
     this.audio.addEventListener('error', () => this.handleAudioError())
 
     setInterval(() => this.dom.updateBufferedProgress(), 60)
   }
 
-  /**
-   * 处理音频播放中事件
-   */
   private handleAudioPlaying(): void {
     this.dom.requestAlbumRotate()
 
@@ -429,14 +311,11 @@ class Player {
       this.lrcInterval = null
     }
 
-    if ((this.audio.sourcePointer as Song).lrc !== '') {
+    if (this.audio.sourcePointer?.lrc) {
       this.lrcInterval = window.setInterval(() => this.displayLrc(), 500)
     }
   }
 
-  /**
-   * 处理音频等待事件
-   */
   private handleAudioWaiting(): void {
     this.dom.cancelAlbumRotate()
 
@@ -446,127 +325,178 @@ class Player {
     }
   }
 
-  /**
-   * 处理音频结束事件
-   */
   private handleAudioEnded(): void {
     this.autoSkip = true
     this.nextTrack()
   }
 
-  /**
-   * 处理音频错误事件
-   */
   private handleAudioError(): void {
     this.recursion.currentTime = this.audio.currentTime
     this.pauseAudio()
-    this.audio.src = (this.audio.sourcePointer as Song).url
+    this.audio.src = this.audio.sourcePointer?.url || ''
     this.audio.load()
     this.playAudio()
   }
 
-  /**
-   * 添加其他事件
-   */
-  private addOtherEvents(): void {
-    window.addEventListener('unload', e => this.handleWindowUnload(e))
+  private setupUIEvents(): void {
+    window.addEventListener('unload', () => this.handleWindowUnload())
     document.addEventListener('keydown', e => this.handleKeyDown(e))
 
-    this.dom.nodes.home.addEventListener('click', () =>
-      window.open(this.config.source)
-    )
-    this.dom.nodes.back.addEventListener('click', (e: any) =>
-      this.handleBackClick(e)
-    )
-    this.dom.nodes.play.addEventListener('click', (e: any) =>
-      this.handlePlayClick(e)
-    )
-    this.dom.nodes.over.addEventListener('click', (e: any) =>
-      this.handleOverClick(e)
-    )
-    this.dom.nodes.mode.addEventListener('click', () =>
-      this.dom.handleModeClick()
-    )
-    this.dom.nodes.magic.addEventListener('click', (e: any) =>
-      this.handleMagicClick(e)
-    )
+    this.dom.nodes.home.addEventListener('click', () => window.open(this.config.source))
+    this.dom.nodes.back.addEventListener('click', () => this.handleBackClick())
+    this.dom.nodes.play.addEventListener('click', () => this.handlePlayClick())
+    this.dom.nodes.over.addEventListener('click', () => this.handleOverClick())
+    this.dom.nodes.mode.addEventListener('click', () => this.dom.handleModeClick())
+    this.dom.nodes.magic.addEventListener('click', () => this.handleMagicClick())
   }
 
-  /**
-   * 处理窗口卸载事件
-   */
-  private handleWindowUnload(e: BeforeUnloadEvent): void {
+  private handleWindowUnload(): void {
     this.setLocalData()
     speechSynthesis.cancel()
   }
 
-  /**
-   * 处理键盘按下事件
-   */
   private handleKeyDown(e: KeyboardEvent): void {
-    switch (e.key) {
-      case ' ':
+    const keyHandlers: Record<string, () => void> = {
+      ' ': () => {
         e.preventDefault()
         this.audio.paused ? this.playAudio() : this.pauseAudio()
-        break
-      case 'ArrowLeft':
+      },
+      ArrowLeft: () => {
         e.preventDefault()
         this.autoSkip = false
         this.prevTrack()
-        break
-      case 'ArrowRight':
+      },
+      ArrowRight: () => {
         e.preventDefault()
         this.autoSkip = false
         this.nextTrack()
-        break
-      case 'ArrowUp':
+      },
+      ArrowUp: () => {
         e.preventDefault()
         this.adjustVolume(0.1)
-        break
-      case 'ArrowDown':
+      },
+      ArrowDown: () => {
         e.preventDefault()
         this.adjustVolume(-0.1)
-        break
+      }
+    }
+
+    if (keyHandlers[e.key]) {
+      keyHandlers[e.key]()
     }
   }
 
-  /**
-   * 调整音量
-   */
   private adjustVolume(delta: number): void {
     const volume = Math.max(0, Math.min(1, this.audio.volume + delta))
     this.audio.volume = volume
     this.dom.renderVolume()
   }
 
-  /**
-   * 处理后退点击事件
-   */
-  private handleBackClick(e: MouseEvent): void {
+  private handleBackClick(): void {
     this.autoSkip = false
     this.prevTrack()
   }
 
-  /**
-   * 处理播放点击事件
-   */
-  private handlePlayClick(e: MouseEvent): void {
+  private handlePlayClick(): void {
     this.audio.paused ? this.playAudio() : this.pauseAudio()
   }
 
-  /**
-   * 处理跳过点击事件
-   */
-  private handleOverClick(e: MouseEvent): void {
+  private handleOverClick(): void {
     this.autoSkip = false
     this.nextTrack()
   }
 
-  /**
-   * 处理Magic点击事件
-   */
-  private handleMagicClick(e: MouseEvent): void {
+  private handleMagicClick(): void {
     this.audio.paused ? this.playAudio() : this.pauseAudio()
+  }
+
+  private setLocalData(): void {
+    this.data.version = globalInfo.version
+    this.data.lastHash = this.listHash
+    this.data.lastID = this.playingIndex
+    this.data.playMode = this.dom.getPlayMode()
+    this.data.volume = this.audio.volume
+    this.data.spoken = this.spoken
+
+    if (!this.data.history) {
+      this.data.history = [this.playlistData!]
+    } else {
+      const idx = this.data.history.findIndex(x => x.hash === this.listHash)
+      if (idx >= 0) {
+        this.data.history[idx] = this.playlistData!
+      } else {
+        this.data.history.push(this.playlistData!)
+      }
+    }
+    if (this.data.history.length > 50) {
+      this.data.history = this.data.history.slice(-50)
+    }
+
+    try {
+      localStorage.setItem(this.config.localName, JSON.stringify(this.data))
+    } catch (error) {
+      console.warn('Failed to save data to localStorage:', error)
+    }
+  }
+
+  private getLocalData(): LocalData | null {
+    try {
+      const data = localStorage.getItem(this.config.localName)
+      return data ? JSON.parse(data) : null
+    } catch (error) {
+      console.warn('Failed to get data from localStorage:', error)
+      return null
+    }
+  }
+
+  private handleError(message: string, error: unknown): void {
+    console.error(`${message}:`, error)
+    toast.error(message)
+  }
+
+  // Public methods
+  public getHistory(): PlaylistResponse[] | undefined {
+    return this.data.history
+  }
+
+  public historyRemove(hash: string): void {
+    if (!this.data.history) {
+      this.data.history = [this.playlistData!]
+    } else {
+      this.data.history = this.data.history.filter(x => x.hash !== hash)
+      this.setLocalData()
+    }
+  }
+
+  public async play(hash: string): Promise<void> {
+    if (!this.data.history) this.data.history = [this.playlistData!]
+    const data = this.data.history.find(x => x.hash === hash)
+    if (!data) return
+
+    await this.setupPlaylistData(data)
+  }
+
+  public async load(id: string): Promise<void> {
+    try {
+      const { data } = await axios.get<PlaylistResponse>(`${this.config.playlist}?id=${id || ''}`)
+      if (!data) return
+
+      await this.setupPlaylistData(data)
+    } catch (error) {
+      this.handleError('Failed to load playlist', error)
+    }
+  }
+
+  private async setupPlaylistData(data: PlaylistResponse): Promise<void> {
+    this.speech.messages = parseSpeech(data.msgs)
+    this.listHash = data.hash
+    this.playlistData = data
+    this.playlist = data.ids
+    this.songNum = this.playlist.length
+    this.playingIndex = Math.floor(Math.random() * this.songNum)
+
+    this.loadUserData()
+    await this.loadMusicInfo('load')
   }
 }
 

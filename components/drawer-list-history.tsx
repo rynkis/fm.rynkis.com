@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Drawer } from 'vaul'
-import axios from 'axios'
 
 const DrawerListHistory = (props: any) => {
   const { children } = props
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [visible, setVisible] = useState(false)
+  const [playingList, setPlayingList] = useState('')
   const [listHistory, setListHistory] = useState([])
 
   const handleDrawerOpenChange = async (open: boolean) => {
@@ -19,11 +19,13 @@ const DrawerListHistory = (props: any) => {
     }
   }
 
-  const handleAnimationEnd = async (open: boolean) => {
+  const handleAnimationEnd = (open: boolean) => {
+    const hash = (window as any).player.listHash
+    setPlayingList(hash)
     if (!listHistory.length) {
       try {
         setLoading(true)
-        const { data } = await axios.get('/api/playlist-history')
+        const data = (window as any).player.getHistory()
         if (data) setListHistory(data)
       } catch (e) {
         console.error(e)
@@ -34,11 +36,18 @@ const DrawerListHistory = (props: any) => {
     setVisible(open)
   }
 
-  const handleClick = (hid: string) => () => {
-    ;(window as any).player.load({ hid })
+  const handleClick = (hash: string) => () => {
+    ;(window as any).player.play(hash)
     setOpen(false)
     const appContainer = document.querySelector('.app-container')
     if (appContainer) appContainer.classList.remove('app-container-drawer-open')
+  }
+
+  const handleDelete = (e: Event, hash: string) => {
+    e.stopPropagation()
+    ;(window as any).player.historyRemove(hash)
+    const data = (window as any).player.getHistory()
+    if (data) setListHistory(data)
   }
 
   return (
@@ -47,35 +56,41 @@ const DrawerListHistory = (props: any) => {
       onOpenChange={handleDrawerOpenChange}
       onAnimationEnd={handleAnimationEnd}
     >
-      <Drawer.Trigger className='drawer-trigger'>
-        {children}
-      </Drawer.Trigger>
+      <Drawer.Trigger className='drawer-trigger'>{children}</Drawer.Trigger>
       <Drawer.Portal>
         <Drawer.Overlay className='drawer-overlay' />
         <Drawer.Content className='drawer-content'>
           <div className='header-dash' />
           <Drawer.Title className='drawer-title'>历史歌单</Drawer.Title>
           <div className='drawer-body'>
+            <div className='drawer-text'>
+              <p style={{ marginBottom: '1rem' }}>这里可以回顾并播放最近 50 条历史歌单。</p>
+            </div>
             {listHistory.length && visible ? (
-              listHistory.map((val: any, idx) => (
-                <div
-                  key={idx}
-                  className='item'
-                  onClick={handleClick(val.id)}
-                >
+              listHistory
+                .map((val: any, idx) => (
                   <div
-                    className='cover'
-                    style={{ backgroundImage: `url(${val.cover})` }}
-                  />
-                  <span className='name'>{val.name}</span>
-                </div>
-              )).reverse()
+                    key={idx}
+                    className={`item ${val.hash === playingList && 'item-playing'}`}
+                    onClick={handleClick(val.hash)}
+                  >
+                    <div
+                      className='cover'
+                      style={{ backgroundImage: `url(${val.cover})` }}
+                    />
+                    <span className='name'>{val.name}</span>
+                    <i
+                      className='fa fa-x'
+                      onClick={(e: any) => handleDelete(e, val.hash)}
+                    />
+                    <i className='fa fa-music-notes' />
+                  </div>
+                ))
+                .reverse()
+            ) : loading ? (
+              <div className='loading'>Loading...</div>
             ) : (
-              loading ? (
-                <div className='loading'>Loading...</div>
-              ) : (
-                <div className='no-data'>暂无内容</div>
-              )
+              <div className='no-data'>暂无内容</div>
             )}
           </div>
         </Drawer.Content>

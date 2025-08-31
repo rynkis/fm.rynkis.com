@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'icomoon';
-  src:  url('fonts/icomoon.eot?pxv02d');
-  src:  url('fonts/icomoon.eot?pxv02d#iefix') format('embedded-opentype'),
-    url('fonts/icomoon.ttf?pxv02d') format('truetype'),
-    url('fonts/icomoon.woff?pxv02d') format('woff'),
-    url('fonts/icomoon.svg?pxv02d#icomoon') format('svg');
+  src:  url('fonts/icomoon.eot?mxw2ko');
+  src:  url('fonts/icomoon.eot?mxw2ko#iefix') format('embedded-opentype'),
+    url('fonts/icomoon.ttf?mxw2ko') format('truetype'),
+    url('fonts/icomoon.woff?mxw2ko') format('woff'),
+    url('fonts/icomoon.svg?mxw2ko#icomoon') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -25,6 +25,15 @@ i {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.fa-music-notes:before {
+  content: "\e90e";
+}
+.fa-x:before {
+  content: "\e90d";
+}
+.fa-backspace:before {
+  content: "\e90c";
+}
 .fa-music-plus:before {
   content: "\e90b";
 }

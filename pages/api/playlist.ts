@@ -14,11 +14,7 @@ const makePlaylistCache = async (json: string) => {
   const promises = list.map((id: string) => meting.format(false).playlist(id))
   const playlists: any = await Promise.all(promises)
 
-  const ids = fp.compose(
-    fp.map('id'),
-    fp.flatten,
-    fp.map('playlist.tracks')
-  )(playlists)
+  const ids = fp.compose(fp.map('id'), fp.flatten, fp.map('playlist.tracks'))(playlists)
 
   const description = (fp.get('0.playlist.description')(playlists) || '').split('\n')
   const msgs: string[] = []
@@ -30,19 +26,19 @@ const makePlaylistCache = async (json: string) => {
       msgs.push(msg)
     }
   })
+  const { coverImgUrl: cover, name } = fp.get('0.playlist')(playlists) || {}
 
   return {
     hash: md5(json),
+    name,
+    cover,
     ids,
     msgs: msgs.join('\n')
   }
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse<any>) => {
-  res.setHeader(
-    'Cache-Control',
-    'no-cache, no-store, max-age=0, must-revalidate'
-  )
+  res.setHeader('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate')
   let playlistKey = req.query.list === 'pl' ? 'SERVER_PLAYLIST_PL' : 'SERVER_PLAYLIST'
   let json = process.env[playlistKey] || '["10120837951"]'
   if (req.query.id) {

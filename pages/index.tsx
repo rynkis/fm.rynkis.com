@@ -154,17 +154,6 @@ const Home: NextPage = () => {
                       </a>
                     </div>
                   </DrawerListHistory>
-                  <div
-                    className='item'
-                    data-id='fa-mode'
-                  >
-                    <a className='fa-button'>
-                      <i
-                        className='fa fa-repeat'
-                        title='List loop'
-                      />
-                    </a>
-                  </div>
                   <DrawerListYours>
                     <div
                       className='item'
@@ -178,6 +167,17 @@ const Home: NextPage = () => {
                       </a>
                     </div>
                   </DrawerListYours>
+                  <div
+                    className='item'
+                    data-id='fa-mode'
+                  >
+                    <a className='fa-button'>
+                      <i
+                        className='fa fa-repeat'
+                        title='List loop'
+                      />
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
