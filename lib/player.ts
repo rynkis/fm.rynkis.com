@@ -73,7 +73,7 @@ class Player {
       source: 'https://github.com/Shy07/fm.rynkis.com',
       music: '/api/music',
       lyrics: '/api/lyrics',
-      playlist: `/api/playlist${window.location.search}`
+      playlist: '/api/playlist'
     }
   }
 
@@ -98,7 +98,7 @@ class Player {
    */
   private async start(): Promise<void> {
     try {
-      const { data } = await axios.get<PlaylistResponse>(this.config.playlist)
+      const { data } = await axios.get<PlaylistResponse>(this.config.playlist + window.location.search)
       if (!data) return
 
       this.speech.messages = parseSpeech(data.msgs)
@@ -113,6 +113,24 @@ class Player {
       this.loadMusicInfo('start')
       this.addAudioEvents()
       this.addOtherEvents()
+    } catch (error) {
+      console.error('Failed to start player:', error)
+      toast.error('Failed to load playlist')
+    }
+  }
+
+  async load({ id, hid }: any): Promise<void> {
+    try {
+      const { data } = await axios.get<PlaylistResponse>(`${this.config.playlist}?id=${id || ''}&hid=${hid || ''}`)
+      if (!data) return
+
+      this.listHash = data.hash
+      this.playList = data.ids
+      this.songNum = this.playList.length
+      this.playingIndex = Math.floor(Math.random() * this.songNum)
+
+      this.getLatestData()
+      this.loadMusicInfo('load')
     } catch (error) {
       console.error('Failed to start player:', error)
       toast.error('Failed to load playlist')

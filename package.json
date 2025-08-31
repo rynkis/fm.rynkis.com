@@ -35,7 +35,8 @@
     "react-dom": "18.1.0",
     "react-ga": "^3.3.0",
     "sass": "^1.77.8",
-    "sonner": "^2.0.7"
+    "sonner": "^2.0.7",
+    "vaul": "^1.1.2"
   },
   "devDependencies": {
     "@types/node": "17.0.35",
