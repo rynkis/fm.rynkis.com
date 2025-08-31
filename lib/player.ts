@@ -411,14 +411,7 @@ class Player {
     this.audio.paused ? this.playAudio() : this.pauseAudio()
   }
 
-  private setLocalData(): void {
-    this.data.version = globalInfo.version
-    this.data.lastHash = this.listHash
-    this.data.lastID = this.playingIndex
-    this.data.playMode = this.dom.getPlayMode()
-    this.data.volume = this.audio.volume
-    this.data.spoken = this.spoken
-
+  private updateListHistory (): void {
     if (!this.data.history) {
       this.data.history = [this.playlistData!]
     } else {
@@ -435,7 +428,17 @@ class Player {
       const list = [...nonLiked, ...liked]
       this.data.history = list.slice(-50)
     }
+  }
 
+  private setLocalData(): void {
+    this.data.version = globalInfo.version
+    this.data.lastHash = this.listHash
+    this.data.lastID = this.playingIndex
+    this.data.playMode = this.dom.getPlayMode()
+    this.data.volume = this.audio.volume
+    this.data.spoken = this.spoken
+
+    this.updateListHistory()
     try {
       localStorage.setItem(this.config.localName, JSON.stringify(this.data))
     } catch (error) {
@@ -514,6 +517,7 @@ class Player {
     this.playingIndex = Math.floor(Math.random() * this.songNum)
 
     this.loadUserData()
+    this.updateListHistory()
     await this.loadMusicInfo('load')
   }
 }

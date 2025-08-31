@@ -22,16 +22,14 @@ const DrawerListHistory = (props: any) => {
   const handleAnimationEnd = (open: boolean) => {
     const hash = (window as any).player.listHash
     setPlayingList(hash)
-    if (!listHistory.length) {
-      try {
-        setLoading(true)
-        const data = (window as any).player.getHistory()
-        if (data) setListHistory(data)
-      } catch (e) {
-        console.error(e)
-      } finally {
-        setLoading(false)
-      }
+    try {
+      setLoading(true)
+      const data = (window as any).player.getHistory()
+      if (data) setListHistory(data)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
     }
     setVisible(open)
   }
