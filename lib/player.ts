@@ -22,6 +22,7 @@ export interface PlaylistResponse {
   cover: string
   ids: string[]
   msgs: string
+  liked?: boolean
 }
 
 interface RecursionState {
@@ -429,7 +430,10 @@ class Player {
       }
     }
     if (this.data.history.length > 50) {
-      this.data.history = this.data.history.slice(-50)
+      const liked = this.data.history.filter(x => x.liked)
+      const nonLiked = this.data.history.filter(x => !x.liked)
+      const list = [...nonLiked, ...liked]
+      this.data.history = list.slice(-50)
     }
 
     try {
@@ -465,6 +469,20 @@ class Player {
     } else {
       this.data.history = this.data.history.filter(x => x.hash !== hash)
       this.setLocalData()
+    }
+  }
+
+  public toggleListLiked(hash: string): void {
+    if (!this.data.history) {
+      this.data.history = [this.playlistData!]
+    } else {
+      const list = this.data.history.find(x => x.hash === hash)
+      if (list) {
+        list.liked = !list.liked
+        this.data.history = this.data.history.filter(x => x.hash !== hash)
+        this.data.history.push(list)
+        this.setLocalData()
+      }
     }
   }
 

@@ -36,6 +36,13 @@ const DrawerListHistory = (props: any) => {
     setVisible(open)
   }
 
+  const handleLiked = (e: Event, hash: string) => {
+    e.stopPropagation()
+    ;(window as any).player.toggleListLiked(hash)
+    const data = (window as any).player.getHistory()
+    if (data) setListHistory(data)
+  }
+
   const handleClick = (hash: string) => () => {
     ;(window as any).player.play(hash)
     setOpen(false)
@@ -64,26 +71,31 @@ const DrawerListHistory = (props: any) => {
           <Drawer.Title className='drawer-title'>历史歌单</Drawer.Title>
           <div className='drawer-body'>
             <div className='drawer-text'>
-              <p style={{ marginBottom: '1rem' }}>这里可以回顾并播放最近 50 条历史歌单。</p>
+              <p style={{ marginBottom: '1rem' }}>这里可以回顾并播放最近 50 条历史歌单，点击封面可锁定。</p>
             </div>
             {listHistory.length && visible ? (
               listHistory
                 .map((val: any, idx) => (
                   <div
                     key={idx}
-                    className={`item ${val.hash === playingList && 'item-playing'}`}
-                    onClick={handleClick(val.hash)}
+                    className={`item ${val.hash === playingList && 'item-playing'} ${!!val.liked && 'item-liked'}`}
                   >
                     <div
                       className='cover'
                       style={{ backgroundImage: `url(${val.cover})` }}
-                    />
-                    <span className='name'>{val.name}</span>
+                      onClick={(e: any) => handleLiked(e, val.hash)}
+                    >
+                      <div className='mask'>
+                        <i className='fa fa-heart' />
+                      </div>
+                    </div>
+                    <span className='name' onClick={handleClick(val.hash)}>{val.name}</span>
                     <i
                       className='fa fa-x'
                       onClick={(e: any) => handleDelete(e, val.hash)}
                     />
                     <i className='fa fa-music-notes' />
+                    <i className='fa fa-heart liked' />
                   </div>
                 ))
                 .reverse()
