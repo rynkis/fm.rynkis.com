@@ -74,7 +74,11 @@ class DOMController {
   private darkerColor: number[] = [255, 255, 255]
   private bar: ProgressBar
   private prevFrameRadian: number
-  private recursion: { requestID: number | null }
+  private recursion: {
+    albumRequestID: number | null
+    waveformRequestID: number | null
+    frequencyRequestID: number | null
+  }
   private audioContext: AudioContext
   private audioSource: MediaElementAudioSourceNode | null
   private analyser: AnalyserNode
@@ -95,7 +99,9 @@ class DOMController {
     this.bar = new ProgressBar(':message :bar :percent', PROGRESS_BAR_CONFIG)
     this.prevFrameRadian = 0
     this.recursion = {
-      requestID: null
+      albumRequestID: null,
+      waveformRequestID: null,
+      frequencyRequestID: null
     }
     this.albumCanvas = this.nodes.album
     this.waveformCtx = this.initializeWaveformContext()
@@ -181,11 +187,19 @@ class DOMController {
 
   // 可视化函数
   visualize() {
+    if (this.recursion.waveformRequestID) {
+      window.cancelAnimationFrame(this.recursion.waveformRequestID)
+      this.recursion.waveformRequestID = null
+    }
+    if (this.recursion.frequencyRequestID) {
+      window.cancelAnimationFrame(this.recursion.frequencyRequestID)
+      this.recursion.frequencyRequestID = null
+    }
     if (!this.analyser) return
 
     // 绘制波形
     const drawWaveform = () => {
-      requestAnimationFrame(drawWaveform)
+      this.recursion.waveformRequestID = requestAnimationFrame(drawWaveform)
 
       this.analyser.getByteTimeDomainData(this.dataArray as any)
 
@@ -217,7 +231,7 @@ class DOMController {
 
     // 绘制频率
     const drawFrequency = () => {
-      requestAnimationFrame(drawFrequency)
+      this.recursion.frequencyRequestID = requestAnimationFrame(drawFrequency)
 
       this.analyser.getByteFrequencyData(this.dataArray as any)
 
@@ -488,12 +502,12 @@ class DOMController {
       if (this.audio.paused) {
         this.cancelAlbumRotate()
       } else {
-        this.recursion.requestID = window.requestAnimationFrame(loopAnimation)
+        this.recursion.albumRequestID = window.requestAnimationFrame(loopAnimation)
       }
     }
 
     this.cancelAlbumRotate()
-    this.recursion.requestID = window.requestAnimationFrame(loopAnimation)
+    this.recursion.albumRequestID = window.requestAnimationFrame(loopAnimation)
   }
 
   // 更新专辑旋转CSS
@@ -509,9 +523,9 @@ class DOMController {
 
   // 取消专辑旋转
   cancelAlbumRotate(): void {
-    if (this.recursion.requestID) {
-      window.cancelAnimationFrame(this.recursion.requestID)
-      this.recursion.requestID = null
+    if (this.recursion.albumRequestID) {
+      window.cancelAnimationFrame(this.recursion.albumRequestID)
+      this.recursion.albumRequestID = null
     }
   }
 

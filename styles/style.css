@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'icomoon';
-  src:  url('fonts/icomoon.eot?mxw2ko');
-  src:  url('fonts/icomoon.eot?mxw2ko#iefix') format('embedded-opentype'),
-    url('fonts/icomoon.ttf?mxw2ko') format('truetype'),
-    url('fonts/icomoon.woff?mxw2ko') format('woff'),
-    url('fonts/icomoon.svg?mxw2ko#icomoon') format('svg');
+  src:  url('fonts/icomoon.eot?ey7hyr');
+  src:  url('fonts/icomoon.eot?ey7hyr#iefix') format('embedded-opentype'),
+    url('fonts/icomoon.ttf?ey7hyr') format('truetype'),
+    url('fonts/icomoon.woff?ey7hyr') format('woff'),
+    url('fonts/icomoon.svg?ey7hyr#icomoon') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -25,6 +25,12 @@ i {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.fa-lock:before {
+  content: "\e910";
+}
+.fa-heart:before {
+  content: "\e90b";
+}
 .fa-music-notes:before {
   content: "\e90e";
 }
@@ -35,13 +41,7 @@ i {
   content: "\e90c";
 }
 .fa-music-plus:before {
-  content: "\e90b";
-}
-.fa-lightning:before {
-  content: "\e90a";
-}
-.fa-heart:before {
-  content: "\e909";
+  content: "\e90f";
 }
 .fa-repeat:before {
   content: "\e907";

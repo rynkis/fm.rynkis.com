@@ -69,7 +69,7 @@ const DrawerListHistory = (props: any) => {
           <Drawer.Title className='drawer-title'>历史歌单</Drawer.Title>
           <div className='drawer-body'>
             <div className='drawer-text'>
-              <p style={{ marginBottom: '1rem' }}>这里可以回顾并播放最近 50 条历史歌单，点击封面可锁定。</p>
+              <p style={{ marginBottom: '1rem' }}>这里可以回顾并播放最近 50 条历史歌单，点击封面可收藏锁定。</p>
             </div>
             {listHistory.length && visible ? (
               listHistory
@@ -93,7 +93,7 @@ const DrawerListHistory = (props: any) => {
                       onClick={(e: any) => handleDelete(e, val.hash)}
                     />
                     <i className='fa fa-music-notes' />
-                    <i className='fa fa-heart liked' />
+                    <i className='fa fa-lock liked' />
                   </div>
                 ))
                 .reverse()

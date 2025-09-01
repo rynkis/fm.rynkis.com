@@ -152,7 +152,7 @@ template {
   }
   #main-container {
     margin-top: 1rem;
-    transform: scale(0.9);
+    transform: scale(0.99);
   }
 }
 
@@ -424,7 +424,7 @@ template {
     #player-container {
       flex-direction: column;
       justify-content: space-between;
-      height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 1em);
+      height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 2em);
       padding: 1em 0;
       #player-panel {
         width: 80%;
