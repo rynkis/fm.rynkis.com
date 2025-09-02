@@ -161,10 +161,11 @@ class DOMController {
     const ctx = this.nodes.waveform.getContext('2d') as CanvasRenderingContext2D
     // // 设置Canvas尺寸
     const resizeCanvases = () => {
-      this.nodes.waveform.width = this.nodes.waveform.offsetWidth
-      this.nodes.waveform.height = this.nodes.waveform.offsetHeight
-      this.nodes.frequency.width = this.nodes.frequency.offsetWidth
-      this.nodes.frequency.height = this.nodes.frequency.offsetHeight
+      const dpr = window.devicePixelRatio || 1
+      this.nodes.waveform.width = this.nodes.waveform.offsetWidth * dpr
+      this.nodes.waveform.height = this.nodes.waveform.offsetHeight * dpr
+      this.nodes.frequency.width = this.nodes.frequency.offsetWidth * dpr
+      this.nodes.frequency.height = this.nodes.frequency.offsetHeight * dpr
     }
     window.addEventListener('resize', resizeCanvases)
     resizeCanvases()

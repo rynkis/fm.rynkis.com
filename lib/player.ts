@@ -123,6 +123,7 @@ class Player {
     this.loadMusicInfo('start')
     this.setupAudioEvents()
     this.setupUIEvents()
+    this.setupMediaSessionEvent()
   }
 
   private loadUserData(): void {
@@ -351,6 +352,13 @@ class Player {
     this.dom.nodes.magic.addEventListener('click', () => this.handleMagicClick())
   }
 
+  private setupMediaSessionEvent(): void {
+    navigator.mediaSession.setActionHandler('play', () => this.playAudio())
+    navigator.mediaSession.setActionHandler('pause', () => this.pauseAudio())
+    navigator.mediaSession.setActionHandler('previoustrack', () => this.prevTrack())
+    navigator.mediaSession.setActionHandler('nexttrack', () => this.nextTrack())
+  }
+
   private handleWindowUnload(): void {
     this.setLocalData()
     speechSynthesis.cancel()
@@ -411,7 +419,7 @@ class Player {
     this.audio.paused ? this.playAudio() : this.pauseAudio()
   }
 
-  private updateListHistory (): void {
+  private updateListHistory(): void {
     if (!this.data.history) {
       this.data.history = [this.playlistData!]
     } else {

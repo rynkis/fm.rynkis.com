@@ -435,7 +435,7 @@ template {
       }
     }
     #frequency {
-      opacity: 0;
+      display: none;
     }
   }
 }
@@ -455,7 +455,7 @@ template {
     #waveform {
       position: fixed;
       bottom: 0;
-      opacity: 0;
+      display: none;
     }
     #player-container {
       #surface {
@@ -513,7 +513,7 @@ template {
   flex-direction: column;
   align-items: center;
   padding: 1em 0;
-  height: calc(100vh - env(safe-area-inset-top) - 5rem);
+  height: calc(100dvh - env(safe-area-inset-top) - 5rem);
   border-radius: 1em 1em 0 0;
   background: #fff;
   .header-dash {
