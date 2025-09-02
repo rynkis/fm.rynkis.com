@@ -42,6 +42,7 @@ const DrawerListHistory = (props: any) => {
   }
 
   const handleClick = (hash: string) => () => {
+    if (hash === playingList) return
     ;(window as any).player.play(hash)
     setOpen(false)
     const appContainer = document.querySelector('.app-container')

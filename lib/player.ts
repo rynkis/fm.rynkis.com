@@ -332,12 +332,9 @@ class Player {
     this.nextTrack()
   }
 
-  private handleAudioError(): void {
-    this.recursion.currentTime = this.audio.currentTime
-    this.pauseAudio()
-    this.audio.src = this.audio.sourcePointer?.url || ''
-    this.audio.load()
-    this.playAudio()
+  private async handleAudioError(): Promise<void> {
+    this.autoSkip = true
+    this.nextTrack()
   }
 
   private setupUIEvents(): void {
