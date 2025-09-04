@@ -113,7 +113,8 @@ class Player {
     this.listHash = data.hash
     this.playlist = data.ids
     this.songNum = this.playlist.length
-    this.playingIndex = Math.floor(Math.random() * this.songNum)
+    this.playingIndex = 0
+    this.updateListHistory()
   }
 
   private setupPlayer(): void {
@@ -330,6 +331,7 @@ class Player {
   private handleAudioEnded(): void {
     this.autoSkip = true
     this.nextTrack()
+    this.setLocalData()
   }
 
   private async handleAudioError(): Promise<void> {
@@ -357,6 +359,7 @@ class Player {
   }
 
   private handleWindowUnload(): void {
+    this.updateListHistory()
     this.setLocalData()
     speechSynthesis.cancel()
   }
@@ -442,8 +445,6 @@ class Player {
     this.data.playMode = this.dom.getPlayMode()
     this.data.volume = this.audio.volume
     this.data.spoken = this.spoken
-
-    this.updateListHistory()
     try {
       localStorage.setItem(this.config.localName, JSON.stringify(this.data))
     } catch (error) {
@@ -476,6 +477,7 @@ class Player {
       this.data.history = [this.playlistData!]
     } else {
       this.data.history = this.data.history.filter(x => x.hash !== hash)
+      this.updateListHistory()
       this.setLocalData()
     }
   }
@@ -489,6 +491,7 @@ class Player {
         list.liked = !list.liked
         this.data.history = this.data.history.filter(x => x.hash !== hash)
         this.data.history.push(list)
+        this.updateListHistory()
         this.setLocalData()
       }
     }

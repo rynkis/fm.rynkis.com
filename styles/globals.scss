@@ -117,6 +117,7 @@ template {
     background: url('/images/album.jpg') no-repeat center;
     background-size: cover;
     filter: blur(16px);
+    transition: all .4s;
     transform: scale(1.2);
     z-index: -1;
     .mask {
@@ -151,8 +152,7 @@ template {
     opacity: 0;
   }
   #main-container {
-    margin-top: 1rem;
-    transform: scale(0.99);
+    transform: scale(0.95);
   }
 }
 
@@ -450,7 +450,7 @@ template {
   #main-container {
     flex-direction: row;
     justify-content: center;
-    width: calc(100vw - env(safe-area-inset-left) - env(safe-area-inset-right));
+    // width: calc(100vw - env(safe-area-inset-left) - env(safe-area-inset-right));
     height: calc(100vh - 4em);
     #waveform {
       position: fixed;
