@@ -149,7 +149,7 @@ const Home: NextPage = () => {
                       <a className='fa-button'>
                         <i
                           className='fa fa-list'
-                          title='List'
+                          title='List history'
                         />
                       </a>
                     </div>
@@ -162,7 +162,7 @@ const Home: NextPage = () => {
                       <a className='fa-button'>
                         <i
                           className='fa fa-music-plus'
-                          title='My list'
+                          title='Customize list'
                         />
                       </a>
                     </div>
