@@ -247,7 +247,7 @@ template {
 
   .fa-button-prime {
     padding: .5rem;
-    font-size: 1.8rem;
+    font-size: 1.6rem;
   }
 
   .main-panel {
@@ -255,9 +255,9 @@ template {
     padding: 1rem;
     width: 20rem;
     // background-color: rgba(var(--darker-color), 0.1);
-    border: 1px solid rgba(var(--darker-color), 0.1);
+    border: 1px solid rgba(var(--darker-color), .05);
     border-radius: 1rem;
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(24px);
     box-shadow: 0 4px 10px rgba(var(--darker-color), 0.1);
     #detail {
       text-align: center;
@@ -443,10 +443,10 @@ template {
     height: 900px;
     .fa-button {
       &:hover {
-        backdrop-filter: blur(16px);
-        background-color: rgba(var(--darker-color), 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 4px 10px rgba(var(--darker-color), 0.1);
+        background-color: rgba(var(--darker-color), .1);
+        backdrop-filter: blur(24px);
+        border: 1px solid rgba(255, 255, 255, .05);
+        box-shadow: 0 4px 10px rgba(var(--darker-color), .1);
       }
     }
   }
@@ -495,10 +495,10 @@ template {
   #main-container {
     .fa-button {
       &:hover {
-        backdrop-filter: blur(16px);
-        background-color: rgba(var(--darker-color), 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 4px 10px rgba(var(--darker-color), 0.1);
+        background-color: rgba(var(--darker-color), .1);
+        backdrop-filter: blur(24px);
+        border: 1px solid rgba(255, 255, 255, .05);
+        box-shadow: 0 4px 10px rgba(var(--darker-color), .1);
       }
     }
   }
