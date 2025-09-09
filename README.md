@@ -53,8 +53,8 @@ r0: Spotlight (feat. Yui Mugino)
 
 使用 iOS 桌面书签功能可以从手机桌面点击图标全屏运行 Web 应用。
 
-![横屏](/screenshots/mobile01.png)
-![竖屏](/screenshots/mobile02.png)
+![横屏](/screenshots/mobile01.jpg)
+![竖屏](/screenshots/mobile02.jpg)
 
 ## 快速开始
 
@@ -91,7 +91,7 @@ yarn dev
 # Rynkis' FM
 
 A personalized music streaming service with text-to-speech integration and private music library support.  
-Think of it as an enhanced, private version of Netease Cloud Music. (ง •̀_•́)ง
+Think of it as an enhanced, private version of Netease Cloud Music. (ง๑ •̀_•́)ง
 
 ![UI](./screenshots/ui.jpg)
 
@@ -143,8 +143,8 @@ r0: Spotlight (feat. Yui Mugino)
 
 Use the iOS home screen bookmark feature to run the web application fullscreen directly from your phone's home screen.
 
-![Landscape](./screenshots/mobile01.png)
-![Portrait](./screenshots/mobile02.png)
+![Landscape](./screenshots/mobile01.jpg)
+![Portrait](./screenshots/mobile02.jpg)
 
 ## Quick Start
 
