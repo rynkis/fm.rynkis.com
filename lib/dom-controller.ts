@@ -123,13 +123,13 @@ class DOMController {
     }
 
     return {
-      home: getElement<HTMLElement>('#controller [data-id="fa-github"] .fa-button'),
-      back: getElement<HTMLElement>('#controller [data-id="fa-back"] .fa-button'),
-      play: getElement<HTMLElement>('#controller [data-id="fa-play"] .fa-button'),
-      playIcon: getElement<HTMLElement>('#controller [data-id="fa-play"] .fa-button i'),
-      over: getElement<HTMLElement>('#controller [data-id="fa-over"] .fa-button'),
-      mode: getElement<HTMLElement>('#controller [data-id="fa-mode"] .fa-button'),
-      modeIcon: getElement<HTMLElement>('#controller [data-id="fa-mode"] .fa-button i'),
+      back: getElement<HTMLElement>('.controller [data-id="fa-back"] .fa-button'),
+      play: getElement<HTMLElement>('.controller [data-id="fa-play"] .fa-button'),
+      playIcon: getElement<HTMLElement>('.controller [data-id="fa-play"] .fa-button i'),
+      over: getElement<HTMLElement>('.controller [data-id="fa-over"] .fa-button'),
+      home: getElement<HTMLElement>('.sharing-tools [data-id="fa-github"] .fa-button'),
+      mode: getElement<HTMLElement>('.sharing-tools [data-id="fa-mode"] .fa-button'),
+      modeIcon: getElement<HTMLElement>('.sharing-tools [data-id="fa-mode"] .fa-button i'),
       title: getElement<HTMLElement>('#detail .title'),
       album: getElement<HTMLCanvasElement>('#surface .album'),
       magic: getElement<HTMLElement>('#surface .magic'),
@@ -347,20 +347,20 @@ class DOMController {
     switch (playMode) {
       case 'fa fa-repeat':
         this.audio.loop = false
-        this.nodes.modeIcon.setAttribute('title', 'List')
+        this.nodes.modeIcon.setAttribute('title', 'List loop')
         break
       case 'fa fa-repeat-single':
         this.audio.loop = true
-        this.nodes.modeIcon.setAttribute('title', 'Single')
+        this.nodes.modeIcon.setAttribute('title', 'Single loop')
         break
       case 'fa fa-shuffle':
         this.audio.loop = false
-        this.nodes.modeIcon.setAttribute('title', 'Random')
+        this.nodes.modeIcon.setAttribute('title', 'Shuffle')
         break
       default:
         this.audio.loop = false
         this.nodes.modeIcon.setAttribute('class', 'fa fa-repeat')
-        this.nodes.modeIcon.setAttribute('title', 'List')
+        this.nodes.modeIcon.setAttribute('title', 'List loop')
     }
   }
 
@@ -402,7 +402,9 @@ class DOMController {
     this.image.src = song.cover.replace(/\d+y\d+/, `${size}y${size}`)
 
     this.nodes.title.textContent = song.title
+    this.nodes.title.setAttribute('title', song.title)
     this.nodes.artists.textContent = song.artists
+    this.nodes.artists.setAttribute('title', song.artists)
     this.nodes.lyric.textContent = ''
     this.nodes.tLyric.textContent = ''
 

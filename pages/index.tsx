@@ -80,21 +80,18 @@ const Home: NextPage = () => {
             </div>
             <canvas id='waveform' />
             <div id='player-panel'>
-              <div id='detail'>
-                <div className='title' />
-                <div className='artists' />
-              </div>
-              <div id='thread'>
-                <div className='progress'>
-                  <div className='buffered' />
-                  <div className='elapsed' />
+              <div className='main-panel'>
+                <div id='detail'>
+                  <div className='title' />
+                  <div className='artists' />
                 </div>
-              </div>
-              <div
-                id='controller'
-                data-id='fa-over'
-              >
-                <div className='player-controller'>
+                <div id='thread'>
+                  <div className='progress'>
+                    <div className='buffered' />
+                    <div className='elapsed' />
+                  </div>
+                </div>
+                <div className='controller'>
                   <div
                     className='item'
                     data-id='fa-back'
@@ -129,55 +126,55 @@ const Home: NextPage = () => {
                     </a>
                   </div>
                 </div>
-                <div className='sharing-tools'>
+              </div>
+              <div className='sharing-tools'>
+                <div
+                  className='item'
+                  data-id='fa-github'
+                >
+                  <a className='fa-button'>
+                    <i
+                      className='fa fa-github'
+                      title='Home'
+                    />
+                  </a>
+                </div>
+                <DrawerListHistory>
                   <div
                     className='item'
-                    data-id='fa-github'
+                    data-id='fa-list'
                   >
                     <a className='fa-button'>
                       <i
-                        className='fa fa-github'
-                        title='Home'
+                        className='fa fa-list'
+                        title='List history'
                       />
                     </a>
                   </div>
-                  <DrawerListHistory>
-                    <div
-                      className='item'
-                      data-id='fa-list'
-                    >
-                      <a className='fa-button'>
-                        <i
-                          className='fa fa-list'
-                          title='List history'
-                        />
-                      </a>
-                    </div>
-                  </DrawerListHistory>
-                  <DrawerListYours>
-                    <div
-                      className='item'
-                      data-id='fa-music-plus'
-                    >
-                      <a className='fa-button'>
-                        <i
-                          className='fa fa-music-plus'
-                          title='Customize list'
-                        />
-                      </a>
-                    </div>
-                  </DrawerListYours>
+                </DrawerListHistory>
+                <DrawerListYours>
                   <div
                     className='item'
-                    data-id='fa-mode'
+                    data-id='fa-music-plus'
                   >
                     <a className='fa-button'>
                       <i
-                        className='fa fa-repeat'
-                        title='List loop'
+                        className='fa fa-music-plus'
+                        title='Customize list'
                       />
                     </a>
                   </div>
+                </DrawerListYours>
+                <div
+                  className='item'
+                  data-id='fa-mode'
+                >
+                  <a className='fa-button'>
+                    <i
+                      className='fa fa-repeat'
+                      title='List loop'
+                    />
+                  </a>
                 </div>
               </div>
             </div>

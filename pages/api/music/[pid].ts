@@ -26,7 +26,7 @@ const makeDatCache = async (pid: string) => {
     id: pid,
     title: datInfo[0]['name'],
     album: datInfo[0]['album'],
-    artists: datInfo[0]['artist'].join(', '),
+    artists: datInfo[0]['artist'].join('/'),
     picId: datInfo[0]['pic_id']
   }
   return datCache
