@@ -254,7 +254,6 @@ template {
     margin: .5rem auto 2rem auto;
     padding: 1rem;
     width: 20rem;
-    // background-color: rgba(var(--darker-color), 0.1);
     border: 1px solid rgba(var(--darker-color), .05);
     border-radius: 1rem;
     backdrop-filter: blur(24px);
@@ -263,15 +262,14 @@ template {
       text-align: center;
       text-shadow: 0 0 5px rgba(var(--darker-color), 0.2);
       .title {
-        margin-bottom: 0.1rem;
         font-size: 1rem;
+        line-height: 2rem;
         color: rgba(var(--darker-color), 1);
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
       }
       .artists {
-        margin-bottom: 0.1rem;
         font-size: 0.75rem;
         color: rgba(var(--darker-color), 0.8);
         white-space: nowrap;
