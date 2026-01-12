@@ -334,11 +334,11 @@ template {
   text-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
   transition: all .4s;
   .lrc {
-    font-size: 1.15rem;
+    font-size: 1rem;
     color: rgba(var(--darker-color), 1);
   }
   .tlrc {
-    font-size: 1rem;
+    font-size: .85rem;
     color: rgba(var(--darker-color), 1);
   }
 }
@@ -504,7 +504,7 @@ template {
 
 @media (orientation: landscape) and (max-height: 720px) {
   #lyric {
-    height: 4rem;
+    height: 5rem;
   }
 }
 
